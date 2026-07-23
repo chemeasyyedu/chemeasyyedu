@@ -7,18 +7,55 @@
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Thư viện SheetJS để xuất/nhập Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- Thư viện Mammoth JS để đọc file Word -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+
     <style>
         :root {
-            --bg-color-main: #dcf7fa; /* Màu nền xanh ngọc nhạt */
-            --border-yellow: #f4d35e; /* Viền vàng */
-            --btn-blue: #0000cd; /* Nút đăng nhập xanh đậm */
-            --input-bg: #ccf3f6; /* Nền input xanh nhạt */
+            --bg-color-main: #dcf7fa;
+            --border-yellow: #f4d35e;
+            --btn-blue: #0000cd;
+            --input-bg: #ccf3f6;
         }
         
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-color-main);
+            overflow-x: hidden;
         }
+        
+        /* Hiệu ứng bong bóng cho Background */
+        .bg-animated {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background: linear-gradient(135deg, #dcf7fa 0%, #b4e8ed 100%);
+            overflow: hidden;
+        }
+        .bubbles {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; margin: 0; padding: 0;
+        }
+        .bubbles li {
+            position: absolute; list-style: none; display: block;
+            width: 20px; height: 20px; background: rgba(255, 255, 255, 0.4);
+            bottom: -150px; animation: bubble-rise 25s infinite linear; border-radius: 50%;
+        }
+        .bubbles li:nth-child(1){ left: 10%; width: 80px; height: 80px; animation-delay: 0s; }
+        .bubbles li:nth-child(2){ left: 20%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 17s; }
+        .bubbles li:nth-child(3){ left: 25%; width: 50px; height: 50px; animation-delay: 4s; }
+        .bubbles li:nth-child(4){ left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        .bubbles li:nth-child(5){ left: 70%; width: 30px; height: 30px; animation-delay: 3s; }
+        .bubbles li:nth-child(6){ left: 80%; width: 100px; height: 100px; animation-delay: 3s; background: rgba(255, 255, 255, 0.2); }
+        .bubbles li:nth-child(7){ left: 32%; width: 120px; height: 120px; animation-delay: 7s; }
+        .bubbles li:nth-child(8){ left: 55%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 30s; }
+        .bubbles li:nth-child(9){ left: 25%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
+        .bubbles li:nth-child(10){ left: 90%; width: 70px; height: 70px; animation-delay: 11s; }
+
+        @keyframes bubble-rise {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
         .screen {
             display: none;
             min-height: 100vh;
@@ -27,312 +64,141 @@
             display: flex;
         }
         
-        /* Custom styles for the new login layout */
+        /* Chỉnh sửa căn chỉnh Login Styles */
         .custom-login-container {
-            width: 100%;
-            max-width: 900px;
+            width: 100%; 
+            max-width: 900px; /* Làm khung vừa vặn hơn trên màn máy tính */
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1.5rem; 
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center; /* Căn giữa dọc */
+            min-height: 100vh;
+            z-index: 10;
         }
 
-        .login-header-text {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .login-header-text h1 {
-            color: #006b5e; /* Màu xanh đậm cho tiêu đề chính */
-            font-weight: 800;
-            font-size: 1.5rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .login-header-text h2 {
-            color: #333;
-            font-weight: 600;
-            font-size: 1.25rem;
-        }
+        .login-header-text { text-align: center; margin-bottom: 1.5rem; }
+        .login-header-text h1 { color: #006b5e; font-weight: 800; font-size: 1.5rem; margin-bottom: 0.25rem; }
+        .login-header-text h2 { color: #333; font-weight: 600; font-size: 1.25rem; }
 
         .login-card-wrapper {
-            background-color: white;
-            border-radius: 2rem;
-            border: 12px solid var(--border-yellow); /* Viền vàng dày */
-            width: 100%;
-            padding: 0;
-            overflow: hidden;
+            background-color: white; border-radius: 2rem;
+            border: 12px solid var(--border-yellow); 
+            width: 100%; padding: 0; overflow: hidden;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         .login-card-title {
-            background-color: #f8f9fa;
-            text-align: center;
-            padding: 1rem;
-            border-bottom: 1px solid #eee;
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: #004d40;
+            background-color: #f8f9fa; text-align: center; padding: 1rem;
+            border-bottom: 1px solid #eee; font-weight: 700; font-size: 1.25rem; color: #004d40;
         }
 
         .login-form-grid {
-            padding: 2rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* 2 cột */
-            gap: 1.5rem 3rem; /* Khoảng cách giữa các hàng và cột */
-            align-items: end; /* Căn chỉnh các phần tử xuống dưới cùng của ô lưới */
+            padding: 2rem; display: grid; grid-template-columns: 1fr 1fr; 
+            gap: 1.5rem 2rem; align-items: end; 
         }
 
-        .custom-input-group {
-            display: flex;
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .custom-input-group label {
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-            color: #333;
-            font-weight: 500;
-        }
-
+        .custom-input-group { display: flex; flex-direction: column; text-align: left; }
+        .custom-input-group label { margin-bottom: 0.5rem; font-size: 0.95rem; color: #333; font-weight: 600; }
         .custom-input, .custom-select {
-            background-color: var(--input-bg);
-            border: 1px solid #a0d8de;
-            padding: 0.75rem;
-            border-radius: 0; /* Input vuông vức như trong ảnh */
-            width: 100%;
-            outline: none;
-            text-align: left; /* Text bên trong căn trái hoặc có thể để center tùy ý */
+            background-color: var(--input-bg); border: 2px solid #a0d8de;
+            padding: 0.8rem 1rem; border-radius: 0.5rem; width: 100%; outline: none; transition: border-color 0.2s;
         }
+        .custom-input:focus, .custom-select:focus { border-color: #008080; box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.1); }
         
-        .custom-input:focus, .custom-select:focus {
-            border-color: #008080;
-        }
+        /* Tùy chỉnh icon lịch của type="date" */
+        input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; filter: invert(0.4) sepia(1) saturate(3) hue-rotate(130deg); }
 
         .custom-btn-login {
-            background-color: var(--btn-blue);
-            color: white;
-            font-weight: 900;
-            font-size: 1.5rem;
-            padding: 0.75rem 2rem;
-            border-radius: 0.5rem;
-            border: none;
-            width: 100%;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            transition: background-color 0.2s;
+            background-color: var(--btn-blue); color: white; font-weight: 900;
+            font-size: 1.3rem; padding: 0.8rem 2rem; border-radius: 0.5rem;
+            border: none; width: 100%; cursor: pointer; text-transform: uppercase;
+            letter-spacing: 1px; box-shadow: 0 6px 12px rgba(0,0,139,0.3); transition: all 0.2s;
         }
+        .custom-btn-login:hover { background-color: #00008b; transform: translateY(-2px); }
 
-        .custom-btn-login:hover {
-            background-color: #00008b;
-        }
+        .logo-top { width: 100%; max-width: 150px; height: auto; margin-bottom: 1rem; display: flex; justify-content: center; }
+        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .subject-card { width: 100%; max-width: 1100px; }
+        .exam-panel { max-height: calc(100vh - 8rem); overflow-y: auto; }
+        .question-nav-item { cursor: pointer; transition: all 0.2s; }
+        .question-nav-item.active { background-color: #3b82f6; color: white; font-weight: 700; }
+        .question-nav-item.answered { background-color: #10b981; color: white; }
+        
+        .btn-primary { background-color: #3b82f6; color: white; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600; transition: background-color 0.2s; cursor: pointer; }
+        .btn-primary:hover { background-color: #2563eb; }
+        .btn-secondary { background-color: #f3f4f6; color: #1f2937; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600; transition: background-color 0.2s; cursor: pointer;}
+        .btn-secondary:hover { background-color: #e5e7eb; }
+        
+        #question-nav::-webkit-scrollbar { display: none; }
+        #question-nav { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .question-option label { display: block; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; }
+        .question-option label:hover { background-color: #f3f4f6; }
+        .question-option input:checked + label { background-color: #dbeafe; border-color: #3b82f6; font-weight: 600; }
+        
+        .result-box { border: 2px solid #065f46; }
+        .section-title { background-color: #e0f2fe; color: #0c4a6e; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 700; margin-bottom: 1rem; }
+        
+        .modal { transition: opacity 0.3s ease-in-out; }
+        .modal-content { transform: translateY(-50px); transition: transform 0.3s ease-in-out; }
+        .modal.open .modal-content { transform: translateY(0); }
+        .question-item { border: 1px solid #e5e7eb; padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; background-color: #fafafa; }
+        .option-input-group { display: flex; align-items: center; margin-bottom: 0.5rem; }
+        .option-input-group input[type="radio"] { margin-right: 0.5rem; }
+        .numeric-input-cell { width: 50px; height: 50px; text-align: center; border: 2px solid #3b82f6; border-radius: 0.375rem; font-size: 1.25rem; font-weight: 700; outline: none; transition: border-color 0.2s; }
+        .numeric-input-cell:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); }
+        
+        /* Loading Spinner cho AI */
+        .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #3b82f6; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Logo placeholders */
-        .logo-top {
-            height: 190px;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: center;
-        }
-        
-        .logo-bottom {
-            margin-top: 2rem;
-            text-align: center;
-            color: #333;
-        }
-
-        .card {
-            background-color: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .subject-card {
-            width: 100%;
-            max-width: 1100px;
-        }
-        .exam-panel {
-            max-height: calc(100vh - 8rem);
-            overflow-y: auto;
-        }
-        .question-nav-item {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .question-nav-item.active {
-            background-color: #3b82f6;
-            color: white;
-            font-weight: 700;
-        }
-        .question-nav-item.answered {
-            background-color: #10b981;
-            color: white;
-        }
-        
-        .btn-primary {
-            background-color: #3b82f6;
-            color: white;
-            padding: 0.6rem 1.2rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-        .btn-primary:hover {
-            background-color: #2563eb;
-        }
-        .btn-secondary {
-            background-color: #f3f4f6;
-            color: #1f2937;
-            padding: 0.6rem 1.2rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-        .btn-secondary:hover {
-            background-color: #e5e7eb;
-        }
-        #question-nav::-webkit-scrollbar {
-            display: none;
-        }
-        #question-nav {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .question-option label {
-            display: block;
-            padding: 0.75rem 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .question-option label:hover {
-            background-color: #f3f4f6;
-        }
-        .question-option input:checked + label {
-            background-color: #dbeafe;
-            border-color: #3b82f6;
-            font-weight: 600;
-        }
-        .result-box {
-            border: 2px solid #065f46;
-        }
-        .section-title {
-            background-color: #e0f2fe;
-            color: #0c4a6e;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-        
-        .modal {
-            transition: opacity 0.3s ease-in-out;
-        }
-        .modal-content {
-            transform: translateY(-50px);
-            transition: transform 0.3s ease-in-out;
-        }
-        .modal.open .modal-content {
-            transform: translateY(0);
-        }
-        .question-item {
-            border: 1px solid #e5e7eb;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 0.5rem;
-            background-color: #fafafa;
-        }
-        .option-input-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        .option-input-group input[type="radio"] {
-            margin-right: 0.5rem;
-        }
-        .numeric-input-cell {
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            border: 2px solid #3b82f6;
-            border-radius: 0.375rem;
-            font-size: 1.25rem;
-            font-weight: 700;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .numeric-input-cell:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
-        }
+        /* Admin Tabs */
+        .admin-tab { padding: 0.75rem 1.5rem; cursor: pointer; font-weight: 600; border-bottom: 2px solid transparent; color: #4b5563; }
+        .admin-tab.active { border-bottom-color: #2563eb; color: #2563eb; background-color: #f3f4f6; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;}
+        .admin-content { display: none; }
+        .admin-content.active { display: block; }
 
         @media (max-width: 768px) {
-            .exam-layout {
-                flex-direction: column;
-            }
-            .question-content {
-                width: 100%;
-                padding-right: 0;
-            }
-            .question-navigation {
-                width: 100%;
-                border-left: none;
-                border-top: 1px solid #e5e7eb;
-                margin-top: 1rem;
-                padding-top: 1rem;
-            }
-            .question-nav-item {
-                width: 48px;
-                height: 48px;
-            }
-            
-            /* Responsive for custom login */
-            .login-form-grid {
-                grid-template-columns: 1fr; /* Chuyển thành 1 cột trên mobile */
-                gap: 1rem;
-                padding: 1rem;
-            }
-            .login-header-text h1 {
-                font-size: 1.2rem;
-            }
-            .login-card-wrapper {
-                border-width: 6px;
-            }
+            .exam-layout { flex-direction: column; }
+            .question-content { width: 100%; padding-right: 0; }
+            .question-navigation { width: 100%; border-left: none; border-top: 1px solid #e5e7eb; margin-top: 1rem; padding-top: 1rem; }
+            .question-nav-item { width: 48px; height: 48px; }
+            .login-form-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; }
+            .login-card-wrapper { border-width: 6px; }
         }
     </style>
 </head>
 <body>
 
+    <!-- Khung thông báo Toast -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2"></div>
+
+    <!-- Background động -->
+    <div class="bg-animated">
+        <ul class="bubbles">
+            <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+        </ul>
+    </div>
+
     <!-- 1. GIAO DIỆN ĐĂNG NHẬP -->
     <div id="login-screen" class="screen active-screen items-center justify-center">
         <div class="custom-login-container">
-            
-            <!-- Logo Header -->
             <div class="logo-top">
-                <img src="https://i.postimg.cc/wMs3Wv7Q/8-removebg-preview.png" alt="Logo Top" style="height: 100%;">
+                <img src="https://i.postimg.cc/wMs3Wv7Q/8-removebg-preview.png" alt="Logo" style="width: 100%; height: auto; object-fit: contain;">
             </div>
             <div class="login-header-text">
                 <h1>HỆ THỐNG BỒI DƯỠNG VÀ LUYỆN THI CHEMEASYY</h1>
                 <h2>BAN KHẢO THÍ VÀ ĐÁNH GIÁ CHẤT LƯỢNG</h2>
             </div>
-
             <div class="login-card-wrapper">
-                <div class="login-card-title">
-                    ĐĂNG NHẬP HỆ THỐNG
-                </div>
-                
+                <div class="login-card-title">ĐĂNG NHẬP HỆ THỐNG</div>
                 <form id="login-form" class="login-form-grid">
-                    <!-- Cột 1 (Trái) -->
                     <div class="custom-input-group">
                         <label for="ma_thi_sinh">Mã số Hệ thống/ Số báo danh</label>
                         <input type="text" id="ma_thi_sinh" name="ma_thi_sinh" class="custom-input" maxlength="8" inputmode="numeric">
                     </div>
-                    
-                    <!-- Cột 2 (Phải) -->
                     <div class="custom-input-group">
                         <label for="dot_thi">Đợt thi/ Kỳ thi</label>
                         <select id="dot_thi" name="dot_thi" class="custom-select">
@@ -341,98 +207,85 @@
                             <option>ĐÁNH GIÁ CHẤT LƯỢNG TƯ DUY HÓA HỌC</option>
                         </select>
                     </div>
-
-                    <!-- Cột 1 -->
                     <div class="custom-input-group">
                         <label for="ho_ten">Họ và tên thí sinh</label>
-                        <input type="text" id="ho_ten" name="ho_ten" class="custom-input">
+                        <input type="text" id="ho_ten" name="ho_ten" class="custom-input" placeholder="Nhập họ và tên...">
                     </div>
-
-                    <!-- Cột 2 -->
                     <div class="custom-input-group">
                         <label for="ngay_sinh">Ngày sinh</label>
-                        <input type="text" id="ngay_sinh" name="ngay_sinh" class="custom-input" placeholder="dd/mm/yyyy">
+                        <!-- Thay đổi ô ngày sinh thành chọn lịch -->
+                        <input type="date" id="ngay_sinh" name="ngay_sinh" class="custom-input">
                     </div>
-
-                    <!-- Cột 1 -->
                     <div class="custom-input-group">
                         <label for="mat_khau">Mật khẩu</label>
                         <input type="password" id="mat_khau" name="mat_khau" class="custom-input">
                     </div>
-
-                    <!-- Cột 2 (Nút Đăng nhập) -->
                     <div class="custom-input-group">
-                         <!-- Nút Login chiếm không gian của phần tử này -->
                         <button type="button" onclick="login()" class="custom-btn-login">ĐĂNG NHẬP</button>
                     </div>
-                    
-                    <!-- Dòng thông báo lỗi (spanning cả 2 cột nếu cần) -->
                     <div style="grid-column: 1 / -1; text-align: center;">
                         <p id="login-error" class="text-red-500 text-sm hidden font-medium bg-red-100 p-2 rounded">Thông tin đăng nhập không hợp lệ.</p>
                     </div>
                 </form>
             </div>
-
-            <!-- Logo Footer -->
-            <div class="logo-bottom">
-                <img src="https://i.postimg.cc/BbGtV3D7/9-removebg-preview.png" alt="Logo Bottom" style="height: 170px; margin: 0 auto;">
-            </div>
-
         </div>
     </div>
 
-    <!-- 2. GIAO DIỆN CHỌN ĐỀ THI (THÍ SINH) -->
+    <!-- 2. GIAO DIỆN CHỌN MÔN (THÍ SINH) -->
     <div id="subject-selection-screen" class="screen items-center justify-center p-4">
         <div class="card subject-card p-6">
             <h1 class="text-center text-3xl font-bold mb-8 text-gray-800">KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG</h1>
             
-            <!-- THÔNG TIN THÍ SINH & HỘI ĐỒNG THI (ĐỂ TRỐNG) -->
             <div class="grid md:grid-cols-2 gap-6 mb-6">
                 <div class="p-4 bg-blue-50 rounded-lg">
                     <h2 class="font-bold text-lg mb-2 text-blue-800">THÔNG TIN THÍ SINH</h2>
                     <p class="text-sm"><span class="font-medium">Họ và tên:</span> <span id="info-ho_ten">...</span></p>
                     <p class="text-sm"><span class="font-medium">SBD:</span> <span id="info-sbd">...</span></p>
-		<p class="text-sm"><span class="font-medium">Ngày sinh:</span> <input type="text" value="dd/mm/yy " class="w-full bg-transparent border-b border-green-200 focus:border-green-500 outline-none"></p>
-		<p class="text-sm"><span class="font-medium">Nơi sinh:</span> <input type="text" value="" class="w-full bg-transparent border-b border-green-200 focus:border-green-500 outline-none"></p>
-
+                    <p class="text-sm"><span class="font-medium">Ngày sinh:</span> <input type="text" value="dd/mm/yy" class="w-full bg-transparent border-b border-blue-200 focus:border-blue-500 outline-none"></p>
                 </div>
-                
                 <div class="p-4 bg-green-50 rounded-lg">
                     <h2 class="font-bold text-lg mb-2 text-green-800">HỘI ĐỒNG THI</h2>
-                    <p class="text-sm"><span class="font-medium">Hội đồng thi:</span> <input type="text" value="Sở GDĐT " class="w-full bg-transparent border-b border-green-200 focus:border-green-500 outline-none"></p>
-                    <p class="text-sm"><span class="font-medium">Điểm thi:</span> <input type="text" value="" class="w-full bg-transparent border-b border-green-200 focus:border-green-500 outline-none"></p>
+                    <p class="text-sm"><span class="font-medium">Điểm thi:</span> <input type="text" value="Sở GDĐT" class="w-full bg-transparent border-b border-green-200 focus:border-green-500 outline-none"></p>
                     <p class="text-sm"><span class="font-medium">Phòng thi:</span> <input type="text" value="Phòng " class="w-full bg-transparent border-b border-green-200 focus:border-green-500 outline-none"></p>
                 </div>
             </div>
 
-            <!-- DANH SÁCH MÔN THI -->
             <div class="p-6 bg-gray-50 rounded-lg">
                 <h2 class="font-bold text-xl mb-4 text-gray-800">DANH SÁCH MÔN THI</h2>
-                       <div id="subject-list" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <!-- Nội dung sẽ được tạo ra bằng JavaScript -->
+                <div id="subject-list" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <!-- JS sẽ render -->
                 </div>
             </div>
-            
             <div class="text-center mt-6">
-                <button onclick="changeScreen('login-screen')" class="btn-secondary px-6">Quay lại</button>
+                <button onclick="changeScreen('login-screen')" class="btn-secondary px-6">Đăng xuất</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal nhập Mã lớp và Mật khẩu -->
+    <!-- Modal chọn Sub-môn -->
+    <div id="subject-option-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 modal">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm modal-content">
+            <h3 class="text-xl font-bold mb-4" id="modal-subject-title">Chọn tùy chọn</h3>
+            <div id="modal-options-container" class="space-y-3"></div>
+            <div class="flex justify-end mt-6">
+                <button onclick="hideSubjectOptionsModal()" class="btn-secondary">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal nhập Mã lớp -->
     <div id="class-login-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 modal">
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm modal-content">
             <h3 class="text-xl font-bold mb-4">Vào Phòng Thi: <span id="modal-subject-name" class="text-blue-600"></span></h3>
-            <p class="text-sm text-gray-500 mb-4">Vui lòng nhập Mã lớp và Mật khẩu.</p>
             <form id="class-login-form">
                 <div class="mb-4">
-                    <label for="class_code_input" class="block text-sm font-medium text-gray-700">Mã lớp thi *</label>
-                    <input type="text" id="class_code_input" placeholder="Nhập Mã lớp (VD: L001)" class="w-full border border-gray-300 rounded-md p-1.5 focus:border-blue-500 outline-none">
+                    <label class="block text-sm font-medium text-gray-700">Mã lớp thi *</label>
+                    <input type="text" id="class_code_input" class="w-full border border-gray-300 rounded-md p-1.5 focus:border-blue-500 outline-none">
                 </div>
                 <div class="mb-6">
-                    <label for="class_password_input" class="block text-sm font-medium text-gray-700">Mật khẩu lớp thi *</label>
-                    <input type="password" id="class_password_input" placeholder="Nhập Mật khẩu lớp" class="w-full border border-gray-300 rounded-md p-1.5 focus:border-blue-500 outline-none">
-                    <p id="class-login-error" class="text-red-500 text-sm mt-1 hidden">Mã lớp hoặc Mật khẩu không đúng.</p>
+                    <label class="block text-sm font-medium text-gray-700">Mật khẩu lớp thi *</label>
+                    <input type="password" id="class_password_input" class="w-full border border-gray-300 rounded-md p-1.5 focus:border-blue-500 outline-none">
+                    <p id="class-login-error" class="text-red-500 text-sm mt-1 hidden">Lỗi.</p>
                 </div>
                 <div class="flex justify-end space-x-4">
                     <button type="button" onclick="hideClassLoginModal()" class="btn-secondary">Hủy</button>
@@ -441,311 +294,328 @@
             </form>
         </div>
     </div>
-    
-    <!-- Modal chọn Sub-môn (Đã phục hồi) -->
-    <div id="subject-option-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 modal">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm modal-content">
-            <h3 class="text-xl font-bold mb-4" id="modal-subject-title">Chọn tùy chọn</h3>
-            <div id="modal-options-container" class="space-y-3">
-                <!-- Options will be dynamically inserted here -->
+
+    <!-- 3. GIAO DIỆN ADMIN TỔNG HỢP -->
+    <div id="admin-dashboard-screen" class="screen flex-col bg-gray-100">
+        <div class="bg-white shadow">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-blue-800">HỆ THỐNG QUẢN TRỊ ADMIN</h1>
+                <button onclick="changeScreen('login-screen')" class="btn-secondary border border-gray-300 text-sm">Đăng xuất</button>
             </div>
-            <div class="flex justify-end space-x-4 mt-6">
-                <button onclick="hideSubjectOptionsModal()" class="btn-secondary">Hủy</button>
+            <!-- Tabs Navigation -->
+            <div class="max-w-7xl mx-auto px-4 flex space-x-2 border-b mt-4">
+                <button class="admin-tab active" onclick="switchAdminTab('tab-exams', this)">Quản lý Đề Thi</button>
+                <button class="admin-tab" onclick="switchAdminTab('tab-results', this)">Kết quả Thi</button>
+                <button class="admin-tab" onclick="switchAdminTab('tab-monitoring', this)">Giám sát Phòng Thi</button>
+                <button class="admin-tab" onclick="switchAdminTab('tab-accounts', this)">Tài khoản Thí sinh</button>
             </div>
         </div>
-    </div>
 
-    <!-- 2B. GIAO DIỆN ADMIN -->
-    <div id="admin-screen" class="screen flex-col p-4">
-        <div class="max-w-7xl mx-auto w-full">
-            <h1 class="text-3xl font-bold mb-4 text-blue-700">HỆ THỐNG QUẢN LÝ LỚP & ĐỀ THI</h1>
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-semibold">Chào mừng!</h2>
-                <div class="space-x-4">
-                    <button onclick="changeScreen('exam-editor-screen')" class="btn-primary py-2 bg-purple-600 hover:bg-purple-700">Tạo và Quản lý Đề thi</button>
-                    <button onclick="changeScreen('account-management-screen')" class="btn-primary py-2 bg-indigo-600 hover:bg-indigo-700">Quản lý Tài khoản Học viên</button>
-                    <button onclick="changeScreen('login-screen')" class="btn-secondary">Đăng xuất</button>
+        <div class="max-w-7xl mx-auto w-full p-4 flex-grow">
+            
+            <!-- TAB 1: QUẢN LÝ ĐỀ THI -->
+            <div id="tab-exams" class="admin-content active">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-700">Kho Đề Thi</h2>
+                    <button onclick="openExamEditor()" class="btn-primary bg-green-600 hover:bg-green-700">+ Tạo Đề Thi Mới</button>
                 </div>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-6">
-                <!-- 1. Tạo và Quản lý Đề thi -->
-                <div class="card p-4 bg-yellow-50">
-                    <h3 class="font-bold text-lg mb-2 text-yellow-800">1. Tạo/Quản lý Đề thi</h3>
-                    <p class="text-sm text-gray-700">Chỉnh sửa đề thi, Mã lớp và Mật khẩu lớp thi.</p>
-                    <button onclick="changeScreen('exam-editor-screen')" class="btn-primary mt-2 w-full py-2 bg-yellow-600 hover:bg-yellow-700">Chỉnh sửa Cấu hình</button>
-                </div>
-
-                <!-- 2. Reset Dữ liệu -->
-                <div class="card p-4 bg-red-50">
-                    <h3 class="font-bold text-lg mb-2 text-red-800">2. Reset Dữ liệu</h3>
-                    <p class="text-sm text-gray-700">Xóa toàn bộ dữ liệu thí sinh và điểm số.</p>
-                    <button class="btn-primary mt-2 w-full py-2 bg-red-600 hover:bg-red-700" onclick="resetTestData()">Reset Kết quả Thi</button>
-                </div>
-                
-                <!-- 3. Quản lý Tài khoản Học viên -->
-                <div class="card p-4 bg-blue-50">
-                    <h3 class="font-bold text-lg mb-2 text-blue-800">3. Tài khoản Học viên</h3>
-                    <p class="text-sm text-gray-700">Quản lý tài khoản Học viên đã được tạo.</p>
-                    <button onclick="changeScreen('account-management-screen')" class="btn-primary mt-2 w-full py-2 bg-blue-600 hover:bg-blue-700">Quản lý Tài khoản Học viên</button>
-                </div>
-            </div>
-
-            <!-- Danh sách thi & Điểm số -->
-            <div class="card p-6 mt-6">
-                <h3 class="font-bold text-xl mb-4 text-gray-800">DANH SÁCH THI & KẾT QUẢ THI</h3>
-                
-                <!-- Bộ lọc -->
-                <div class="mb-4 flex space-x-4">
-                    <select id="filter-subject" onchange="loadStudentResults()" class="border border-gray-300 rounded-md p-2">
-                        <option value="">-- Lọc theo Môn thi --</option>
-                    </select>
-                    <select id="filter-class" onchange="loadStudentResults()" class="border border-gray-300 rounded-md p-2">
-                        <option value="">-- Lọc theo Mã lớp --</option>
-                    </select>
-                </div>
-
-                <div class="overflow-x-auto">
+                <div class="card overflow-hidden">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ và tên</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số báo danh</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Môn thi</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã lớp</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã đề</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Điểm số </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian nộp</th>
-                            </tr>
-                        </thead>
-                        <tbody id="student-list" class="bg-white divide-y divide-gray-200">
-                            <!-- Dữ liệu thí sinh -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 2C. GIAO DIỆN TẠO ĐỀ THI (EXAM EDITOR) -->
-    <div id="exam-editor-screen" class="screen flex-col p-4">
-        <div class="max-w-7xl mx-auto w-full">
-            <h1 class="text-3xl font-bold mb-4 text-purple-700">ADMIN: CÔNG CỤ TẠO VÀ QUẢN LÝ ĐỀ THI</h1>
-            <div class="card p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-3">Cấu hình Đề thi & Lớp thi</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Môn học</label>
-                        <select id="editor-subject-select" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Mã Lớp Thi</label>
-                        <input type="text" id="editor-class-code" value="L001" placeholder="Mã lớp thi" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Mật khẩu Lớp Thi</label>
-                        <input type="text" id="editor-class-password" value="pass123" placeholder="Mật khẩu lớp thi" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Thời gian (phút)</label>
-                        <input type="number" id="editor-time-limit" value="50" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                    </div>
-                    <div class="md:col-span-1">
-                        <label class="block text-sm font-medium text-gray-700">Thang điểm (tổng)</label>
-                        <input type="number" id="editor-total-points" value="10" class="mt-1 block w-full border border-gray-300 rounded-md p-2 bg-gray-100" disabled>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Vùng Quản lý Mã đề (Shuffle Keys) -->
-            <div class="card p-6 mb-6 bg-blue-50">
-                <h2 class="text-xl font-semibold mb-3 text-blue-800">Quản lý Mã đề Đảo (Shuffle Keys - 4 chữ số)</h2>
-                <div class="flex space-x-4 items-center mb-4">
-                    <p class="text-sm font-medium">Mã đề gốc (Không đảo): <span class="font-bold text-blue-700">0000</span></p>
-                    <button onclick="generateRandomExamCode()" class="btn-primary py-1 px-3 bg-blue-600 hover:bg-blue-700">Tạo Mã đề ngẫu nhiên mới</button>
-                </div>
-                <div class="flex flex-wrap gap-2" id="exam_codes_list_editor">
-                </div>
-            </div>
-
-            <!-- Vùng chỉnh sửa câu hỏi -->
-            <div class="card p-6">
-                <h2 class="text-xl font-semibold mb-4">Danh sách Câu hỏi (<span id="editor-question-count">0</span> câu)</h2>
-                <div id="questions-editor-container">
-                </div>
-                <button onclick="addQuestionEditor()" class="btn-primary mt-4 py-2 px-4 w-full bg-green-500 hover:bg-green-600">
-                    + Thêm Câu hỏi Mới
-                </button>
-            </div>
-            
-            <div class="mt-6 flex justify-between">
-                <button onclick="changeScreen('admin-screen')" class="btn-secondary">Quay lại</button>
-                <button onclick="saveExamData()" class="btn-primary py-3 px-8 bg-blue-600 hover:bg-blue-700">LƯU CẤU HÌNH ĐỀ THI</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 2D. GIAO DIỆN QUẢN LÝ TÀI KHOẢN -->
-    <div id="account-management-screen" class="screen flex-col p-4">
-        <div class="max-w-7xl mx-auto w-full">
-            <h1 class="text-3xl font-bold mb-4 text-indigo-700">ADMIN: QUẢN LÝ TÀI KHOẢN </h1>
-            
-            <!-- Thêm Tài khoản -->
-            <div class="card p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-3">Thêm Tài khoản mới</h2>
-                <form id="add_account_form" class="grid md:grid-cols-4 gap-4">
-                    <input type="text" id="new_sbd" placeholder="Mã số/Số báo danh" required class="block border border-gray-300 rounded-md p-2" maxlength="8" inputmode="numeric">
-                    <input type="text" id="new_name" placeholder="Họ và tên" required class="block border border-gray-300 rounded-md p-2">
-                    <input type="password" id="new_password" placeholder="Mật khẩu" required class="block border border-gray-300 rounded-md p-2">
-                    <button type="submit" class="btn-primary bg-green-600 hover:bg-green-700">Tạo Tài khoản</button>
-                </form>
-            </div>
-            
-            <!-- Danh sách Tài khoản -->
-            <div class="card p-6">
-                <h2 class="text-xl font-semibold mb-4">Danh sách Tài khoản đã tạo (<span id="account_count">0</span>)</h2>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã số/SBD</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ và tên</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mật khẩu</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên đề thi</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Môn học</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Lớp</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số câu</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
                             </tr>
                         </thead>
-                        <tbody id="accounts_table" class="bg-white divide-y divide-gray-200">
+                        <tbody id="admin-exams-list" class="bg-white divide-y divide-gray-200">
+                            <!-- JS Render -->
                         </tbody>
                     </table>
                 </div>
             </div>
-            
-            <div class="mt-6">
-                <button onclick="changeScreen('admin-screen')" class="btn-secondary">Quay lại Admin</button>
+
+            <!-- TAB 2: KẾT QUẢ THI -->
+            <div id="tab-results" class="admin-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-700">Danh sách Thí sinh đã nộp bài</h2>
+                    <div class="space-x-2 flex">
+                        <button onclick="exportResultsToExcel()" class="btn-primary bg-blue-600 flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Xuất Excel
+                        </button>
+                        <button onclick="resetTestData()" class="btn-primary bg-red-600">Xóa dữ liệu</button>
+                    </div>
+                </div>
+                <div class="card p-4">
+                    <div class="mb-4 flex space-x-4">
+                        <select id="filter-exam-name" onchange="loadStudentResults()" class="border border-gray-300 rounded-md p-2 w-1/3">
+                            <option value="">-- Tất cả đề thi --</option>
+                        </select>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">STT</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Họ và tên</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SBD</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Đề thi</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã đề</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Điểm</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thời gian nộp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-list" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: GIÁM SÁT PHÒNG THI -->
+            <div id="tab-monitoring" class="admin-content">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-700">Hệ thống ngầm ghi nhận (Live)</h2>
+                        <p class="text-sm text-gray-500">Tự động cập nhật tiến độ làm bài của thí sinh đang online.</p>
+                    </div>
+                    <button onclick="loadMonitoringData()" class="btn-secondary text-sm">Làm mới dữ liệu</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="monitoring-grid">
+                    <!-- JS Render Active Sessions -->
+                </div>
+            </div>
+
+            <!-- TAB 4: TÀI KHOẢN THÍ SINH -->
+            <div id="tab-accounts" class="admin-content">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-1 space-y-6">
+                        <div class="card p-6">
+                            <h3 class="font-bold mb-4">Thêm 1 Tài khoản</h3>
+                            <form id="add_account_form" class="space-y-3">
+                                <input type="text" id="new_sbd" placeholder="Mã số/SBD (8 số)" required class="w-full border rounded p-2" maxlength="8">
+                                <input type="text" id="new_name" placeholder="Họ và tên" required class="w-full border rounded p-2">
+                                <input type="password" id="new_password" placeholder="Mật khẩu" required class="w-full border rounded p-2">
+                                <button type="submit" class="btn-primary w-full bg-green-600">Lưu</button>
+                            </form>
+                        </div>
+                        <div class="card p-6 bg-blue-50 border border-blue-200">
+                            <h3 class="font-bold mb-4 text-blue-800">Nhập từ File Excel</h3>
+                            <p class="text-xs mb-4 text-gray-600">File Excel cần có 3 cột theo thứ tự: <b>SBD</b> | <b>Họ Tên</b> | <b>Mật Khẩu</b> (Bỏ dòng tiêu đề).</p>
+                            <input type="file" id="excel-file-upload" accept=".xlsx, .xls, .csv" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 mb-4"/>
+                            <button onclick="importAccountsExcel()" class="btn-primary w-full bg-blue-800">Tiến hành Nhập</button>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 card p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold">Danh sách (<span id="account_count">0</span>)</h3>
+                            <button onclick="clearAllAccounts()" class="text-red-500 text-sm hover:underline">Xóa tất cả</button>
+                        </div>
+                        <div class="overflow-y-auto max-h-[500px]">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50 sticky top-0">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-gray-500">SBD</th>
+                                        <th class="px-4 py-2 text-left text-gray-500">Họ và tên</th>
+                                        <th class="px-4 py-2 text-left text-gray-500">Mật khẩu</th>
+                                        <th class="px-4 py-2"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="accounts_table" class="bg-white divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 3. GIAO DIỆN ĐỀ THI (THÍ SINH) -->
+    <!-- 4. GIAO DIỆN TẠO ĐỀ THI (EXAM EDITOR) -->
+    <div id="exam-editor-screen" class="screen flex-col p-4 bg-gray-50">
+        <div class="max-w-7xl mx-auto w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-2xl font-bold text-purple-700">CÔNG CỤ SOẠN THẢO ĐỀ THI</h1>
+                <button onclick="changeScreen('admin-dashboard-screen')" class="btn-secondary">Hủy & Quay lại</button>
+            </div>
+            
+            <div class="card p-6 mb-6">
+                <h2 class="text-lg font-semibold mb-3">Thông tin chung</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Tên Đề Thi (VD: Thi Thử Tháng 9)</label>
+                        <input type="text" id="editor-exam-name" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 outline-none">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Môn học áp dụng</label>
+                        <select id="editor-subject-select" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Mã Lớp Thi (Dùng để vào thi)</label>
+                        <input type="text" id="editor-class-code" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Mật khẩu Lớp Thi</label>
+                        <input type="text" id="editor-class-password" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Thời gian (phút)</label>
+                        <input type="number" id="editor-time-limit" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Thang điểm (tổng)</label>
+                        <input type="number" id="editor-total-points" value="10" disabled class="mt-1 block w-full border border-gray-300 rounded-md p-2 bg-gray-100">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-6 mb-6 bg-blue-50 border border-blue-200">
+                <h2 class="text-lg font-semibold mb-3 text-blue-800">Mã đề hoán vị (Shuffle Keys)</h2>
+                <div class="flex space-x-4 items-center mb-4">
+                    <p class="text-sm">Hệ thống sẽ dựa vào các mã này để đảo vị trí câu hỏi cho từng học sinh.</p>
+                    <button onclick="generateRandomExamCode()" class="btn-primary py-1 px-3 text-sm bg-blue-600">Thêm Mã Ngẫu Nhiên</button>
+                </div>
+                <div class="flex flex-wrap gap-2" id="exam_codes_list_editor"></div>
+            </div>
+
+            <div class="card p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Danh sách Câu hỏi (<span id="editor-question-count">0</span> câu)</h2>
+                    
+                    <!-- Tính năng Phân tích AI Word -->
+                    <div class="flex space-x-2 items-center">
+                        <span id="ai-loading" class="hidden flex items-center text-sm font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded">
+                            <div class="spinner mr-2"></div> Đang gọi AI...
+                        </span>
+                        <input type="file" id="word-upload" accept=".docx" class="hidden" onchange="handleAIWordImport(event)">
+                        <button onclick="document.getElementById('word-upload').click()" class="btn-primary bg-indigo-600 hover:bg-indigo-700 flex items-center">
+                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            Trích xuất bằng AI (Tải File Word)
+                        </button>
+                    </div>
+
+                </div>
+                <div id="questions-editor-container"></div>
+                <button onclick="addQuestionEditor()" class="btn-primary mt-4 py-3 px-4 w-full border-2 border-dashed border-gray-400 bg-white text-gray-700 hover:bg-gray-50">+ Thêm Câu hỏi Mới</button>
+            </div>
+            
+            <div class="mt-6 flex justify-end">
+                <button onclick="saveExamData()" class="btn-primary py-3 px-8 text-lg bg-green-600 hover:bg-green-700">LƯU ĐỀ THI</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. GIAO DIỆN LÀM BÀI (THÍ SINH) -->
     <div id="exam-screen" class="screen flex-col">
-        <!-- Header (Nav Bar) -->
         <header class="flex-shrink-0 bg-white shadow-md p-4">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <div class="text-sm font-medium text-gray-700">
-                    <p><span id="exam-ho_ten">...</span> | SBD: <span id="exam-sbd">...</span> | Lớp: <span id="exam-class-display" class="font-bold text-green-600">...</span></p>
-                    <p>Môn thi: <span class="font-bold text-blue-600" id="exam-subject-display">HÓA HỌC</span> | Mã đề: <span id="exam-code-display">...</span></p>
+                    <p><span id="exam-ho_ten">...</span> | SBD: <span id="exam-sbd">...</span></p>
+                    <p>Môn: <span class="font-bold text-blue-600" id="exam-subject-display">...</span> | Lớp: <span id="exam-class-display" class="font-bold text-green-600">...</span> | Mã đề: <span id="exam-code-display">...</span></p>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-2 text-xl font-bold text-red-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span id="timer">50:00</span>
+                    <div class="flex items-center space-x-2 text-2xl font-bold text-red-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span id="timer">00:00</span>
                     </div>
-                    <button onclick="confirmSubmission()" class="btn-primary py-2 px-4">NỘP BÀI</button>
+                    <button onclick="confirmSubmission()" class="btn-primary py-2 px-6 text-lg bg-red-600 hover:bg-red-700">NỘP BÀI</button>
                 </div>
             </div>
         </header>
 
-        <!-- Nội dung thi -->
         <main class="flex-grow p-4 overflow-hidden">
             <div class="max-w-7xl mx-auto h-full flex exam-layout">
-                <!-- Khu vực đề thi (trái) -->
                 <div id="exam-content" class="w-3/4 question-content pr-4 h-full exam-panel">
                     <div class="flex justify-between items-center mb-4">
                         <div class="space-x-2">
-                            <button onclick="prevQuestion()" class="btn-secondary px-4">Quay lại</button>
-                            <button onclick="nextQuestion()" class="btn-primary px-4">Tiếp theo</button>
+                            <button onclick="prevQuestion()" class="btn-secondary px-4">Câu trước</button>
+                            <button onclick="nextQuestion()" class="btn-primary px-4">Câu sau</button>
                         </div>
-                        <span class="text-lg font-semibold text-gray-700">Số câu đã trả lời: <span id="answered-count">0</span>/<span id="total-questions">0</span></span>
+                        <span class="text-lg font-semibold text-gray-700">Đã trả lời: <span id="answered-count">0</span>/<span id="total-questions">0</span></span>
                     </div>
-                    
-                    <div id="question-container" class="card p-6 min-h-[400px]">
-                        <div class="text-center text-gray-500">Đang tải đề thi...</div>
-                    </div>
+                    <div id="question-container" class="card p-8 min-h-[500px]"></div>
                 </div>
-
-                <!-- Thanh điều hướng câu hỏi (phải) -->
                 <div class="w-1/4 question-navigation flex-shrink-0 pl-4">
                     <div class="card p-4 h-full flex flex-col">
-                        <h3 class="font-bold text-lg mb-3">BẢNG ĐIỀU HƯỚNG</h3>
-                        <div id="question-nav" class="flex flex-col gap-4 overflow-y-auto exam-panel">
-                        </div>
+                        <h3 class="font-bold text-lg mb-3 text-center border-b pb-2">BẢNG ĐIỀU HƯỚNG</h3>
+                        <div id="question-nav" class="flex flex-col gap-4 overflow-y-auto exam-panel pb-10"></div>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Modal xác nhận nộp bài -->
-        <div id="submission-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 modal">
-            <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm modal-content">
-                <h3 class="text-xl font-bold mb-4">Xác nhận nộp bài</h3>
-                <p class="mb-6">Bạn có chắc chắn muốn nộp bài không? Thời gian còn lại sẽ bị hủy.</p>
-                <div class="flex justify-end space-x-4">
-                    <button onclick="hideSubmissionModal()" class="btn-secondary">Hủy</button>
-                    <button onclick="submitExam()" class="btn-primary">Nộp bài</button>
+        <div id="submission-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 modal">
+            <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm modal-content text-center">
+                <h3 class="text-xl font-bold mb-2 text-red-600">Xác nhận nộp bài</h3>
+                <p class="mb-6 text-gray-600">Bạn có chắc chắn muốn nộp bài? Hành động này không thể hoàn tác.</p>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="hideSubmissionModal()" class="btn-secondary px-6">Hủy</button>
+                    <button onclick="submitExam()" class="btn-primary px-6 bg-red-600">Xác nhận Nộp</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 4. GIAO DIỆN KẾT QUẢ -->
+    <!-- 6. GIAO DIỆN KẾT QUẢ -->
     <div id="result-screen" class="screen flex-col items-center justify-center p-4">
-        <h1 class="text-3xl font-bold mb-10 text-gray-800">GIAO DIỆN KẾT QUẢ THI</h1>
-        <div class="card result-box p-8 w-full max-w-lg text-center border-4 border-green-700">
-            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Kết quả thi</h2>
-            <div class="text-left space-y-3 text-lg">
-                <p class="font-bold text-green-700">Chúc mừng Bạn đã nộp bài thi thành công!</p>
-                <p><span class="font-medium">Tổng số câu trả lời:</span> <span id="result-answered"></span>/<span id="result-total"></span></p>
-                <p><span class="font-medium">Số câu đúng:</span> <span id="result-correct"></span></p>
-                <p class="text-2xl font-bold text-blue-700"><span class="font-medium">Số điểm đạt được:</span> <span id="result-score"></span>/10</p>
+        <div class="card result-box p-8 w-full max-w-md text-center border-4 border-green-600 rounded-xl">
+            <svg class="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">NỘP BÀI THÀNH CÔNG</h2>
+            <div class="text-left bg-gray-50 p-4 rounded-lg mt-6 space-y-2">
+                <p class="flex justify-between border-b pb-2"><span class="text-gray-600">Tổng số câu:</span> <span class="font-bold" id="result-total"></span></p>
+                <p class="flex justify-between border-b pb-2"><span class="text-gray-600">Đã trả lời:</span> <span class="font-bold" id="result-answered"></span></p>
+                <p class="flex justify-between border-b pb-2"><span class="text-gray-600">Số câu đúng:</span> <span class="font-bold text-green-600" id="result-correct"></span></p>
+                <p class="flex justify-between text-lg mt-4"><span class="font-bold text-gray-800">ĐIỂM SỐ:</span> <span class="font-bold text-blue-700 text-2xl"><span id="result-score"></span>/10</span></p>
             </div>
-            
-            <button onclick="changeScreen('login-screen')" class="btn-primary mt-8 px-8 py-3">Hoàn thành</button>
+            <button onclick="changeScreen('login-screen')" class="btn-primary w-full mt-6 py-3">Về Trang Đăng Nhập</button>
         </div>
     </div>
     
     <script>
-        // --- CÁC HẰNG SỐ VÀ BIẾN TOÀN CỤC ---
+        // --- CONSTANTS & CONFIG ---
         const ADMIN_CODE = '22122007';
-        const ADMIN_PASS = 'Huuhuy@2212_admin_chemistry';
+        const ADMIN_PASS = 'Huuhuy@2212_admin';
         const STUDENT_DEFAULT_PASS = 'HOAHOCVUIVE';
-        const STORAGE_KEY_RESULTS = 'exam_student_results_v4'; 
-        const STORAGE_KEY_CONFIG = 'exam_config_v4'; 
-        const STORAGE_KEY_ACCOUNTS = 'exam_student_accounts';
-        const SBD_LENGTH = 8; 
-        const EXAM_CODE_LENGTH = 4; 
         
-        let currentScreen = 'login-screen';
-        let currentQuestionIndex = 0;
-        let timerInterval = null;
-        let userInfo = { ho_ten: '', ma_thi_sinh: '', exam_code: null, class_code: null, subject_name: null }; 
-        let timeLeft = 0; 
-        let activeExamConfig = null; 
+        // Storage Keys (New structures for V5)
+        const K_EXAMS = 'exam_configs_v5'; 
+        const K_ACCOUNTS = 'exam_accounts_v5';
+        const K_RESULTS = 'exam_results_v5'; 
+        const K_MONITOR = 'exam_active_sessions'; // Ghi nhận tiến độ ngầm
 
-        const DEFAULT_EXAM_DATA = {
-            subjectKey: "HOAHOC",
-            className: 'L001',
-            classPass: 'pass123',
-            timeLimit: 50 * 60, 
-            examCodes: ['0000', '0001', '0002'], 
-            points: {
-                "Phần I": { count: 18, total: 4.5, perQ: 4.5 / 18 },
-                "Phần II": { count: 4, total: 4.0, perQ: 1.0 },
-                "Phần III": { count: 6, total: 1.5, perQ: 1.5 / 6 },
-            },
-            questions: [
-                { id: 1, section: "Phần I", text: "Độ dinh dưỡng của phân lân được đánh giá bằng hàm lượng phần trăm nào tương ứng với lượng phosphorus có trong thành phần của nó?", options: ["P", "P2O", "P2O5", "PO2"], answer: "P2O5", selected: null, pointValue: 0.25, correctDetails: { type: 'MC', answerIndex: 2 } },
-                { id: 2, section: "Phần I", text: "Những tính chất vật lí chung của kim loại (dẫn điện, dẫn nhiệt, dẻo, ánh kim) gây nên bởi?", options: ["các electron tự do trong mạng tinh thể kim loại.", "kiểu cấu tạo mạng tinh thể kim loại.", "khối lượng riêng của kim loại.", "tính chất của kim loại."], answer: "các electron tự do trong mạng tinh thể kim loại.", selected: null, pointValue: 0.25, correctDetails: { type: 'MC', answerIndex: 0 } },
-                { id: 19, section: "Phần II", text: "Câu 1. Về Maltose: (a) CTPT C12H22O11. (b) Có phản ứng Tollens. (c) Nhóm –OH ở C1 và C4 là hemiacetal. (d) Giá trị m kết tủa thu được là 1555,2g.", options: ["(a) và (b)", "(a), (b), và (d)", "(a), (b), (c)", "Không có đáp án nào"], answer: "(a), (b), và (d)", selected: null, pointValue: 1.0, correctDetails: { type: 'TF', correctAnswers: [true, true, false, true], subOptions: ["(a) CTPT C12H22O11", "(b) Có phản ứng Tollens", "(c) Nhóm –OH ở C1 và C4 là hemiacetal", "(d) Giá trị m kết tủa thu được là 1555,2g"] } },
-                { id: 20, section: "Phần II", text: "Câu 2. Về phức chất nitơ (A2) của Ruteni(II): (a) Phương trình phản ứng đúng. (b) Số oxi hóa Ru trong A2 là 0. (c) Cấu hình Ru2+: [Kr]4d75s3. (d) Lai hóa sp3d2.", options: ["(a) và (d)", "(a), (b), và (d)", "Chỉ (a)", "Tất cả đều sai"], answer: "Chỉ (a)", selected: null, pointValue: 1.0, correctDetails: { type: 'TF', correctAnswers: [true, false, false, false], subOptions: ["(a) Phương trình phản ứng đúng", "(b) Số oxi hóa Ru trong A2 là 0", "(c) Cấu hình Ru2+: [Kr]4d75s3", "(d) Lai hóa sp3d2"] } }, 
-                { id: 23, section: "Phần III", text: "Sản xuất 3,6 triệu viên nén aspirin (100mg/viên, H=80%) cần m kg salicylic acid (C7H6O3). Giá trị của m bằng bao nhiêu? (làm tròn đến hàng đơn vị)", options: ["400", "500", "600", "700"], answer: "500", selected: null, pointValue: 0.25, correctDetails: { type: 'NUMERIC', answers: ["5", "0", "0", ""] } },
-                { id: 28, section: "Phần III", text: "Xác định số phối trí trong các phức sau, điền theo thứ tự (c), (b), (a):", options: ["664", "666", "466", "446"], answer: "664", selected: null, pointValue: 0.25, correctDetails: { type: 'NUMERIC', answers: ["6", "6", "4", ""] } }, 
-            ].map(q => ({
-                 ...q,
-                 correctIndex: q.options ? q.options.indexOf(q.answer) : -1
-            }))
-        };
+        // --- HÀM TOAST THÔNG BÁO THAY CHO ALERT ---
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded shadow-lg text-white font-bold transition-all duration-300 transform translate-x-10 opacity-0 flex items-center ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
+            toast.innerHTML = `<span class="mr-2">${type === 'error' ? '⚠️' : '✅'}</span> ${message}`;
+            
+            const container = document.getElementById('toast-container');
+            container.appendChild(toast);
+            
+            // Hiện ra
+            setTimeout(() => { toast.classList.remove('translate-x-10', 'opacity-0'); }, 10);
+            // Mất đi
+            setTimeout(() => {
+                toast.classList.add('translate-x-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        let currentScreen = 'login-screen';
+        let userInfo = { ho_ten: '', ma_thi_sinh: '', examId: null, exam_code: null, class_code: null, subject_name: null }; 
+        
+        // Exam state
+        let activeExamConfig = null; 
+        let currentQuestionIndex = 0;
+        let timeLeft = 0; 
+        let timerInterval = null;
+        let monitorInterval = null;
+
+        // Editor state
+        let editorExamId = null;
+        let editorQuestions = [];
+        let editorExamCodes = ['0000'];
 
         const ALL_SUBJECTS = [
             { name: 'Ngữ văn', status: 'disabled', key: 'NGUVAN' }, 
@@ -753,1139 +623,752 @@
             { name: 'Vật lý', status: 'disabled', key: 'VATLY' },
             { name: 'Hóa học', status: 'ready', key: 'HOAHOC' }, 
             { name: 'Sinh học', status: 'disabled', key: 'SINHHOC' }, 
-            { name: 'Lịch sử', status: 'disabled', key: 'LICHSU' }, 
-            { name: 'Địa lý', status: 'disabled', key: 'DIALY' }, 
-            { name: 'Giáo dục kinh tế và pháp luật', status: 'disabled', key: 'GDPL' }, 
-            { name: 'Tin học', status: 'disabled', key: 'TINHOC' },
-            { name: 'Công nghệ', status: 'options', key: 'CONGNGHE', options: [
-                { name: 'CN Công nghiệp', key: 'CN_CONGNGHIEP' },
-                { name: 'CN Nông nghiệp', key: 'CN_NONGNGHIEP' }
-            ]}, 
             { name: 'Ngoại ngữ', status: 'options', key: 'NGOAINGU', options: [
-                { name: 'Tiếng Anh', key: 'NN_TIENGANH' },
-                { name: 'Tiếng Nga', key: 'NN_TIENGNGA' },
-                { name: 'Tiếng Pháp', key: 'NN_TIENGFAP' },
-                { name: 'Tiếng Trung', key: 'NN_TIENGTRUNG' },
-                { name: 'Tiếng Đức', key: 'NN_TIENGDUC' },
-                { name: 'Tiếng Nhật', key: 'NN_TIENGNHAT' },
-                { name: 'Tiếng Hàn', key: 'NN_TIENGHAN' }
+                { name: 'Tiếng Anh', key: 'NN_TIENGANH' }
             ]} 
         ];
-        
-        function loadExamConfig() {
-            const storedData = localStorage.getItem(STORAGE_KEY_CONFIG);
-            let configData;
 
-            if (storedData) {
-                configData = JSON.parse(storedData);
-            } else {
-                configData = { configs: [DEFAULT_EXAM_DATA] };
-            }
-            
-            configData.configs.forEach(config => {
-                if (config.examCodes && config.examCodes.some(code => code.length < EXAM_CODE_LENGTH)) {
-                    config.examCodes = config.examCodes.map(code => code.padStart(EXAM_CODE_LENGTH, '0'));
-                }
-                 config.questions = config.questions.map(q => {
-                    const sectionKey = q.section.replace(/\s/g, '');
-                    const sectionData = config.points[sectionKey];
-                    const pointPerQ = sectionData ? sectionData.perQ : q.pointValue; 
-                    
-                    if (q.section === 'Phần III' && q.correctDetails && q.correctDetails.answers) {
-                        while (q.correctDetails.answers.length < 4) {
-                            q.correctDetails.answers.push(""); 
-                        }
-                        if (q.correctDetails.answers.length > 4) {
-                            q.correctDetails.answers = q.correctDetails.answers.slice(0, 4);
-                        }
-                    }
-                    
-                    return {
-                        ...q,
-                        correctIndex: q.options ? q.options.indexOf(q.answer) : -1,
-                        pointValue: pointPerQ,
-                    };
-                });
-            });
-            return configData;
-        }
-
-        function saveExamConfig(config) {
-            localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config));
-        }
-
-        function loadAccounts() {
-            const rawData = localStorage.getItem(STORAGE_KEY_ACCOUNTS);
-            return rawData ? JSON.parse(rawData) : [];
-        }
-
-        function saveAccounts(accounts) {
-            localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(accounts));
-        }
-        
-        function validateSBD(sbd) {
-            return /^\d{8}$/.test(sbd);
-        }
+        // --- UTILS ---
+        const generateUUID = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
+        const getLS = (key, def = []) => { const d = localStorage.getItem(key); return d ? JSON.parse(d) : def; };
+        const setLS = (key, val) => localStorage.setItem(key, JSON.stringify(val));
         
         function shuffleArray(array, seed) {
             let prng = mulberry32(seed);
             let currentIndex = array.length, randomIndex;
-            
+            let result = [...array];
             while (currentIndex !== 0) {
                 randomIndex = Math.floor(prng() * currentIndex);
                 currentIndex--;
-
-                [array[currentIndex], array[randomIndex]] = [
-                    array[randomIndex], array[currentIndex]];
+                [result[currentIndex], result[randomIndex]] = [result[randomIndex], result[currentIndex]];
             }
-            return array;
+            return result;
         }
 
         function mulberry32(a) {
             return function() {
-              a |= 0; a = a + 0x6D2B79F5 | 0;
-              let t = a;
-              t = Math.imul(t ^ t >>> 15, 1 | t);
-              t = t ^ t << 13;
-              t = t ^ t >>> 6;
-              t = Math.imul(t, 63 | t);
-              return ((t ^ t >>> 16) >>> 0) / 4294967296;
+              a |= 0; a = a + 0x6D2B79F5 | 0; let t = a;
+              t = Math.imul(t ^ t >>> 15, 1 | t); t = t ^ t << 13; t = t ^ t >>> 6;
+              t = Math.imul(t, 63 | t); return ((t ^ t >>> 16) >>> 0) / 4294967296;
             }
         }
-        
+
+        // --- NAVIGATION ---
         function changeScreen(newScreenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active-screen');
-                screen.style.display = 'none';
-            });
-            const newScreen = document.getElementById(newScreenId);
-            newScreen.classList.add('active-screen');
-            newScreen.style.display = 'flex';
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            document.getElementById(newScreenId).classList.add('active-screen');
             currentScreen = newScreenId;
 
-            if (newScreenId === 'exam-screen') {
-                if (activeExamConfig) {
-                    initializeExam();
-                    startTimer();
-                } else {
-                    changeScreen('subject-selection-screen');
-                }
-            } else if (newScreenId === 'subject-selection-screen') {
-                document.getElementById('info-ho_ten').textContent = userInfo.ho_ten || '...';
-                document.getElementById('info-sbd').textContent = userInfo.ma_thi_sinh || '...';
-                renderSubjectList(); 
-            } else if (newScreenId === 'admin-screen') {
-                loadStudentResults();
-            } else if (newScreenId === 'exam-editor-screen') {
-                loadEditorData();
-            } else if (newScreenId === 'account-management-screen') {
-                renderAccountManagementScreen();
+            // Xử lý background của đăng nhập
+            if (newScreenId === 'login-screen') {
+                document.querySelector('.bg-animated').style.display = 'block';
             } else {
-                stopTimer();
+                document.querySelector('.bg-animated').style.display = 'none';
+            }
+
+            if (newScreenId === 'admin-dashboard-screen') {
+                loadAdminExamsList();
+                loadStudentResults();
+                renderAccountsTable();
+                if(monitorInterval) clearInterval(monitorInterval);
+                monitorInterval = setInterval(loadMonitoringData, 3000); // Tự động load giám sát
+                loadMonitoringData();
+            } else {
+                if(monitorInterval) clearInterval(monitorInterval);
+            }
+
+            if (newScreenId === 'subject-selection-screen') {
+                document.getElementById('info-ho_ten').textContent = userInfo.ho_ten;
+                document.getElementById('info-sbd').textContent = userInfo.ma_thi_sinh;
+                renderSubjectList(); 
             }
         }
 
+        function switchAdminTab(tabId, btnContext) {
+            document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+            btnContext.classList.add('active');
+            document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // --- LOGIN LOGIC ---
         function login() {
             const maSo = document.getElementById('ma_thi_sinh').value.trim();
             const hoTen = document.getElementById('ho_ten').value.trim();
             const matKhau = document.getElementById('mat_khau').value;
-            const errorElement = document.getElementById('login-error');
-            errorElement.classList.add('hidden');
+            const err = document.getElementById('login-error');
+            err.classList.add('hidden');
 
             if (maSo === ADMIN_CODE && matKhau === ADMIN_PASS) {
-                changeScreen('admin-screen');
-                return;
-            }
-            
-            if (maSo !== ADMIN_CODE && !validateSBD(maSo)) {
-                errorElement.textContent = `Số báo danh (SBD) phải là ${SBD_LENGTH} chữ số.`;
-                errorElement.classList.remove('hidden');
-                return;
-            }
-            
-            const accounts = loadAccounts();
-            const studentAccount = accounts.find(acc => acc.sbd === maSo && acc.password === matKhau);
-
-            if (studentAccount) {
-                userInfo.ho_ten = studentAccount.name;
-                userInfo.ma_thi_sinh = studentAccount.sbd;
-                changeScreen('subject-selection-screen');
-                return;
-            }
-            
-            if (matKhau === STUDENT_DEFAULT_PASS && validateSBD(maSo)) {
-                userInfo.ho_ten = hoTen || 'Thí sinh ẩn danh';
-                userInfo.ma_thi_sinh = maSo; 
-                changeScreen('subject-selection-screen');
+                changeScreen('admin-dashboard-screen');
                 return;
             }
 
-            errorElement.textContent = "Thông tin đăng nhập không hợp lệ hoặc Mật khẩu không đúng.";
-            errorElement.classList.remove('hidden');
+            if (!/^\d{8}$/.test(maSo)) {
+                err.textContent = "SBD phải gồm 8 chữ số.";
+                err.classList.remove('hidden'); return;
+            }
+            
+            const accounts = getLS(K_ACCOUNTS);
+            const student = accounts.find(a => a.sbd === maSo && a.password === matKhau);
+
+            if (student) {
+                userInfo = { ho_ten: student.name, ma_thi_sinh: student.sbd };
+                changeScreen('subject-selection-screen'); return;
+            }
+            
+            if (matKhau === STUDENT_DEFAULT_PASS) {
+                userInfo = { ho_ten: hoTen || 'Thí sinh tự do', ma_thi_sinh: maSo };
+                changeScreen('subject-selection-screen'); return;
+            }
+
+            err.textContent = "SBD hoặc Mật khẩu không đúng.";
+            err.classList.remove('hidden');
         }
 
+        // --- STUDENT: SUBJECT SELECTION ---
         function renderSubjectList() {
             const container = document.getElementById('subject-list');
-            container.innerHTML = ALL_SUBJECTS
-                .map(subject => {
-                    const isReady = subject.status === 'ready';
-                    const isOptions = subject.status === 'options';
-
-                    let buttonHtml;
-                    if (isReady) {
-                        buttonHtml = `<button onclick="showClassLoginModal('${subject.key}', '${subject.name}')" class="btn-primary py-1 px-4 text-sm">Vào thi</button>`;
-                    } else if (isOptions) {
-                        buttonHtml = `<button onclick="showSubjectOptionsModal('${subject.key}', '${subject.name}', ${JSON.stringify(subject.options)})" class="btn-primary py-1 px-4 text-sm bg-purple-500 hover:bg-purple-600">Chọn môn</button>`;
-                    } else {
-                        buttonHtml = `<button class="btn-secondary py-1 px-4 text-sm cursor-not-allowed" disabled>Vào thi</button>`;
-                    }
-
-                    const cardClass = isReady ? 'bg-white border-blue-400' : 
-                                      isOptions ? 'bg-purple-100 border-purple-400' : 'bg-gray-200 border-gray-300 opacity-70';
-
-                    return `
-                        <div class="flex justify-between items-center p-3 border rounded-md ${cardClass}">
-                            <span class="font-medium text-gray-700">${subject.name}</span>
-                            ${buttonHtml}
-                        </div>
-                    `;
-                }).join('');
+            container.innerHTML = ALL_SUBJECTS.map(sub => {
+                let btn = sub.status === 'ready' ? `<button onclick="showClassLoginModal('${sub.key}', '${sub.name}')" class="btn-primary py-1 px-4 text-sm w-full mt-2">Vào thi</button>` :
+                          sub.status === 'options' ? `<button onclick="showSubjectOptionsModal('${sub.key}', '${sub.name}', ${JSON.stringify(sub.options)})" class="btn-primary py-1 px-4 text-sm w-full mt-2 bg-purple-500">Chọn môn</button>` :
+                          `<button class="btn-secondary py-1 px-4 text-sm w-full mt-2 opacity-50 cursor-not-allowed" disabled>Chưa mở</button>`;
+                
+                return `<div class="p-3 border rounded-md bg-white flex flex-col items-center text-center"><span class="font-bold text-gray-700">${sub.name}</span>${btn}</div>`;
+            }).join('');
         }
-        
-        function showSubjectOptionsModal(subjectKey, subjectName, options) {
-            const modal = document.getElementById('subject-option-modal');
-            document.getElementById('modal-subject-title').textContent = `Chọn môn ${subjectName}:`;
-            
-            document.getElementById('modal-options-container').innerHTML = options.map(option => `
-                <button onclick="showClassLoginModal('${option.key}', '${subjectName} (${option.name})')" 
-                        class="btn-primary w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-sm">
-                    ${option.name}
-                </button>
+
+        function showSubjectOptionsModal(key, name, opts) {
+            document.getElementById('modal-subject-title').textContent = `Chọn môn ${name}:`;
+            document.getElementById('modal-options-container').innerHTML = opts.map(o => `
+                <button onclick="showClassLoginModal('${o.key}', '${name} - ${o.name}')" class="btn-primary w-full bg-indigo-500 mb-2">${o.name}</button>
             `).join('');
-
-            modal.classList.remove('hidden');
-            modal.classList.add('open');
+            document.getElementById('subject-option-modal').classList.remove('hidden');
         }
+        function hideSubjectOptionsModal() { document.getElementById('subject-option-modal').classList.add('hidden'); }
 
-        function hideSubjectOptionsModal() {
-            const modal = document.getElementById('subject-option-modal');
-            modal.classList.remove('open');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
-
-        function showClassLoginModal(subjectKey, subjectDisplayName) {
-            const modal = document.getElementById('class-login-modal');
-            document.getElementById('modal-subject-name').textContent = subjectDisplayName;
+        function showClassLoginModal(subjectKey, subjectName) {
+            hideSubjectOptionsModal();
+            document.getElementById('modal-subject-name').textContent = subjectName;
             document.getElementById('class-login-error').classList.add('hidden');
+            document.getElementById('class_code_input').value = '';
+            document.getElementById('class_password_input').value = '';
             
             document.getElementById('class-login-form').onsubmit = (e) => {
-                e.preventDefault();
-                startExamAttempt(subjectKey, subjectDisplayName);
+                e.preventDefault(); startExamAttempt(subjectKey, subjectName);
             };
-
-            hideSubjectOptionsModal();
-            modal.classList.remove('hidden');
-            modal.classList.add('open');
+            document.getElementById('class-login-modal').classList.remove('hidden');
         }
+        function hideClassLoginModal() { document.getElementById('class-login-modal').classList.add('hidden'); }
 
-        function hideClassLoginModal() {
-            const modal = document.getElementById('class-login-modal');
-            modal.classList.remove('open');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-            document.getElementById('class-login-form').reset();
-        }
+        function startExamAttempt(subjectKey, subjectName) {
+            const code = document.getElementById('class_code_input').value.trim();
+            const pass = document.getElementById('class_password_input').value;
+            const err = document.getElementById('class-login-error');
+            
+            const exams = getLS(K_EXAMS);
+            // Tìm đúng đề có mã lớp, pass và môn học tương ứng
+            const exam = exams.find(e => e.subjectKey === subjectKey && e.className === code && e.classPass === pass);
 
-        function startExamAttempt(subjectKey, subjectDisplayName) {
-            const classCode = document.getElementById('class_code_input').value.trim();
-            const classPass = document.getElementById('class_password_input').value;
-            const errorElement = document.getElementById('class-login-error');
-            errorElement.classList.add('hidden');
-
-            const configData = loadExamConfig();
-            const config = configData.configs.find(c => 
-                c.subjectKey === subjectKey && 
-                c.className === classCode && 
-                c.classPass === classPass
-            );
-
-            if (!config) {
-                errorElement.textContent = `Không tìm thấy lớp thi hoặc Mã lớp/Mật khẩu không đúng cho môn ${subjectDisplayName}.`;
-                errorElement.classList.remove('hidden');
-                return;
+            if (!exam) {
+                err.textContent = "Mã lớp hoặc mật khẩu không đúng cho môn này.";
+                err.classList.remove('hidden'); return;
             }
-            
-            activeExamConfig = JSON.parse(JSON.stringify(config));
 
-            const availableCodes = activeExamConfig.examCodes || ['0000']; 
-            const randomCodes = availableCodes.filter(code => code !== '0000');
-            const examCodeToUse = randomCodes.length > 0 
-                ? randomCodes[Math.floor(Math.random() * randomCodes.length)]
-                : '0000'; 
-
-            const seed = parseInt(examCodeToUse, 10);
-            activeExamConfig.questions = shuffleArray(activeExamConfig.questions, seed);
+            // Gán dữ liệu đề thi
+            activeExamConfig = JSON.parse(JSON.stringify(exam));
             
+            // Random mã đề
+            const codes = activeExamConfig.examCodes || ['0000'];
+            const rCodes = codes.filter(c => c !== '0000');
+            const examCodeToUse = rCodes.length > 0 ? rCodes[Math.floor(Math.random() * rCodes.length)] : '0000';
+            
+            // Đảo câu hỏi dựa trên mã đề
+            activeExamConfig.questions = shuffleArray(activeExamConfig.questions, parseInt(examCodeToUse, 10));
+            
+            userInfo.examId = exam.id;
+            userInfo.examName = exam.name;
             userInfo.exam_code = examCodeToUse;
-            userInfo.class_code = classCode;
-            userInfo.subject_name = subjectDisplayName;
-            
+            userInfo.class_code = code;
+            userInfo.subject_name = subjectName;
+
             document.getElementById('exam-ho_ten').textContent = userInfo.ho_ten;
             document.getElementById('exam-sbd').textContent = userInfo.ma_thi_sinh;
-            document.getElementById('exam-subject-display').textContent = subjectDisplayName;
-            document.getElementById('exam-class-display').textContent = classCode;
-            document.getElementById('exam-code-display').textContent = examCodeToUse; 
+            document.getElementById('exam-subject-display').textContent = subjectName;
+            document.getElementById('exam-class-display').textContent = code;
+            document.getElementById('exam-code-display').textContent = examCodeToUse;
 
             hideClassLoginModal();
             changeScreen('exam-screen');
+            initExamEngine();
         }
-        
-        function loadStudentResults() {
-            const rawData = localStorage.getItem(STORAGE_KEY_RESULTS);
-            let results = rawData ? JSON.parse(rawData) : [];
-            const container = document.getElementById('student-list');
-            
-            const filterSubject = document.getElementById('filter-subject');
-            const filterClass = document.getElementById('filter-class');
-            
-            const availableSubjects = [...new Set(results.map(r => r.subject_name).filter(Boolean))];
-            filterSubject.innerHTML = `<option value="">-- Lọc theo Môn --</option>` + availableSubjects.map(s => `<option value="${s}">${s}</option>`).join('');
-            
-            const availableClasses = [...new Set(results.map(r => r.class_code).filter(Boolean))];
-            filterClass.innerHTML = `<option value="">-- Lọc theo Mã lớp --</option>` + availableClasses.map(c => `<option value="${c}">${c}</option>`).join('');
-            
-            const currentSubjectFilter = filterSubject.value;
-            const currentClassFilter = filterClass.value;
-            
-            if (currentSubjectFilter) {
-                results = results.filter(r => r.subject_name === currentSubjectFilter);
-            }
-            if (currentClassFilter) {
-                results = results.filter(r => r.class_code === currentClassFilter);
-            }
 
-            container.innerHTML = ''; 
-            if (results.length === 0) {
-                container.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">Chưa có thí sinh nào nộp bài hoặc không tìm thấy kết quả theo bộ lọc.</td></tr>`;
+        // --- ADMIN: EXAM MANAGEMENT ---
+        function loadAdminExamsList() {
+            const exams = getLS(K_EXAMS);
+            const tbody = document.getElementById('admin-exams-list');
+            if (exams.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">Chưa có đề thi nào được tạo.</td></tr>';
                 return;
             }
-
-            results.sort((a, b) => b.timestamp - a.timestamp).forEach((student, index) => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                row.innerHTML = `
-                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${student.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">${student.subject_name || '---'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">${student.class_code || '---'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.exam_code || '---'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-lg font-bold text-red-600">${parseFloat(student.score).toFixed(2)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(student.timestamp).toLocaleString('vi-VN')}</td>
-                `;
-                container.appendChild(row);
-            });
-        }
-        
-        function resetTestData() {
-            if (confirm("CẢNH BÁO: Hành động này sẽ XÓA TOÀN BỘ KẾT QUẢ THI và TÀI KHOẢN THÍ SINH đã lưu. Bạn có chắc chắn muốn tiếp tục?")) {
-                localStorage.removeItem(STORAGE_KEY_RESULTS);
-                localStorage.removeItem(STORAGE_KEY_ACCOUNTS);
-                loadStudentResults(); 
-                renderAccountManagementScreen();
-            }
-        }
-
-        function renderAccountManagementScreen() {
-            renderAccountsTable();
-            document.getElementById('add_account_form').onsubmit = (e) => {
-                e.preventDefault();
-                addAccount();
-            };
-        }
-        
-        function renderAccountsTable() {
-            const accounts = loadAccounts();
-            const tableBody = document.getElementById('accounts_table');
-            document.getElementById('account_count').textContent = accounts.length;
-            tableBody.innerHTML = '';
-            
-            accounts.forEach((acc) => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${acc.sbd}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${acc.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${acc.password}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        <button onclick="removeAccount('${acc.sbd}')" class="text-red-600 hover:text-red-900">Xóa</button>
+            tbody.innerHTML = exams.map((e, i) => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 font-bold text-blue-700">${e.name || 'Đề chưa đặt tên'}</td>
+                    <td class="px-6 py-4 text-sm">${ALL_SUBJECTS.flatMap(s=>s.options?s.options:s).find(s=>s.key===e.subjectKey)?.name || e.subjectKey}</td>
+                    <td class="px-6 py-4 font-mono text-green-600">${e.className}</td>
+                    <td class="px-6 py-4">${e.questions.length}</td>
+                    <td class="px-6 py-4 space-x-2">
+                        <button onclick="editExam('${e.id}')" class="text-blue-500 hover:underline">Sửa</button>
+                        <button onclick="deleteExam('${e.id}')" class="text-red-500 hover:underline">Xóa</button>
                     </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-        
-        function addAccount() {
-            const sbd = document.getElementById('new_sbd').value.trim();
-            const name = document.getElementById('new_name').value.trim();
-            const password = document.getElementById('new_password').value;
-            
-            if (!sbd || !name || !password) return;
-            if (!validateSBD(sbd)) return;
-
-            let accounts = loadAccounts();
-            if (accounts.some(acc => acc.sbd === sbd)) return;
-            
-            accounts.push({ sbd, name, password });
-            saveAccounts(accounts);
-            
-            document.getElementById('add_account_form').reset();
-            renderAccountsTable();
-        }
-        
-        function removeAccount(sbdToRemove) {
-            if (!confirm(`Bạn có chắc chắn muốn xóa tài khoản SBD: ${sbdToRemove} không?`)) return;
-            
-            let accounts = loadAccounts();
-            accounts = accounts.filter(acc => acc.sbd !== sbdToRemove);
-            saveAccounts(accounts);
-            renderAccountsTable();
+                </tr>
+            `).join('');
         }
 
-        let editorQuestions = [];
-        let editorExamConfig = null; 
-
-        function loadEditorData() {
-            const configData = loadExamConfig();
+        function openExamEditor(examId = null) {
+            changeScreen('exam-editor-screen');
+            const subjects = ALL_SUBJECTS.flatMap(s => s.options ? s.options.map(o => ({...o, p:s.name})) : s).filter(s => s.key);
+            document.getElementById('editor-subject-select').innerHTML = subjects.map(s => `<option value="${s.key}">${s.p ? s.p+' - '+s.name : s.name}</option>`).join('');
             
-            editorExamConfig = configData.configs.find(c => c.subjectKey === 'HOAHOC');
-            if (!editorExamConfig) {
-                 editorExamConfig = DEFAULT_EXAM_DATA;
-                 configData.configs.push(editorExamConfig);
-                 saveExamConfig(configData);
+            if (examId) {
+                const exams = getLS(K_EXAMS);
+                const ex = exams.find(e => e.id === examId);
+                editorExamId = ex.id;
+                document.getElementById('editor-exam-name').value = ex.name;
+                document.getElementById('editor-subject-select').value = ex.subjectKey;
+                document.getElementById('editor-class-code').value = ex.className;
+                document.getElementById('editor-class-password').value = ex.classPass;
+                document.getElementById('editor-time-limit').value = ex.timeLimit / 60;
+                editorQuestions = JSON.parse(JSON.stringify(ex.questions));
+                editorExamCodes = [...(ex.examCodes || ['0000'])];
+            } else {
+                editorExamId = null;
+                document.getElementById('editor-exam-name').value = 'Đề Thi Mới';
+                document.getElementById('editor-class-code').value = 'L001';
+                document.getElementById('editor-class-password').value = 'pass123';
+                document.getElementById('editor-time-limit').value = 50;
+                editorQuestions = [];
+                editorExamCodes = ['0000'];
             }
-
-            editorQuestions = JSON.parse(JSON.stringify(editorExamConfig.questions));
-            
-            const subjectSelect = document.getElementById('editor-subject-select');
-            const mainSubjects = ALL_SUBJECTS.filter(s => s.status !== 'options');
-            
-            const subOptions = ALL_SUBJECTS
-                .filter(s => s.status === 'options')
-                .flatMap(s => s.options.map(opt => ({ ...opt, parentName: s.name })));
-
-            const allEditableSubjects = [
-                ...mainSubjects,
-                ...subOptions
-            ].filter(s => s.key); 
-            
-            subjectSelect.innerHTML = allEditableSubjects
-                .map(s => {
-                    const displayName = s.parentName ? `${s.parentName} (${s.name})` : s.name;
-                    return `<option value="${s.key}" ${s.key === editorExamConfig.subjectKey ? 'selected' : ''}>${displayName}</option>`;
-                }).join('');
-                
-            document.getElementById('editor-class-code').value = editorExamConfig.className;
-            document.getElementById('editor-class-password').value = editorExamConfig.classPass;
-            document.getElementById('editor-time-limit').value = editorExamConfig.timeLimit / 60;
-
             renderEditorQuestions();
-            renderExamCodesListEditor();
+            renderExamCodesList();
         }
 
-        function renderExamCodesListEditor() {
-            const container = document.getElementById('exam_codes_list_editor');
-            container.innerHTML = '';
-            
-            const codes = editorExamConfig.examCodes || ['0000'];
-            
-            if (codes.length === 1 && codes[0] === '0000') {
-                container.innerHTML = `<span class="text-sm text-gray-500">Chưa có Mã đề ngẫu nhiên nào. Mã đề gốc (0000) sẽ được sử dụng.</span>`;
+        function editExam(id) { openExamEditor(id); }
+        function deleteExam(id) {
+            if(confirm('Xóa đề thi này?')) {
+                const ex = getLS(K_EXAMS).filter(e => e.id !== id);
+                setLS(K_EXAMS, ex); loadAdminExamsList();
             }
-
-            codes.filter(code => code !== '0000').forEach(code => {
-                const badge = document.createElement('span');
-                badge.className = 'bg-blue-200 text-blue-800 text-sm font-medium px-3 py-1 rounded-full flex items-center space-x-2';
-                badge.innerHTML = `
-                    <span>${code} (Shuffle Key)</span>
-                    <button onclick="removeExamCodeEditor('${code}')" class="text-red-600 hover:text-red-800 text-base leading-none ml-1">&times;</button>
-                `;
-                container.appendChild(badge);
-            });
         }
 
+        // --- EDITOR LOGIC ---
+        function renderExamCodesList() {
+            const c = document.getElementById('exam_codes_list_editor');
+            c.innerHTML = editorExamCodes.filter(code => code !== '0000').map(code => `
+                <span class="bg-indigo-100 text-indigo-800 text-sm px-3 py-1 rounded-full flex items-center">
+                    ${code} <button onclick="removeExamCode('${code}')" class="ml-2 text-red-500 font-bold">&times;</button>
+                </span>
+            `).join('');
+        }
         function generateRandomExamCode() {
-            let newCode;
-            const codes = editorExamConfig.examCodes || ['0000'];
-            
-            do {
-                newCode = Math.floor(Math.random() * 9000) + 1000; 
-                newCode = String(newCode).padStart(EXAM_CODE_LENGTH, '0');
-            } while (codes.includes(newCode) || newCode === '0000');
-            
-            if (!editorExamConfig.examCodes) editorExamConfig.examCodes = ['0000'];
-            editorExamConfig.examCodes.push(newCode);
-            renderExamCodesListEditor();
+            let code; do { code = String(Math.floor(Math.random()*9000)+1000).padStart(4,'0'); } while(editorExamCodes.includes(code));
+            editorExamCodes.push(code); renderExamCodesList();
         }
+        function removeExamCode(c) { editorExamCodes = editorExamCodes.filter(x => x !== c); renderExamCodesList(); }
 
-        function removeExamCodeEditor(codeToRemove) {
-            if (!confirm(`Bạn có chắc chắn muốn xóa Mã đề: ${codeToRemove} không?`)) return;
-            
-            editorExamConfig.examCodes = (editorExamConfig.examCodes || ['0000']).filter(code => code !== codeToRemove);
-            renderExamCodesListEditor();
-        }
-        
         function renderEditorQuestions() {
             const container = document.getElementById('questions-editor-container');
-            container.innerHTML = '';
             document.getElementById('editor-question-count').textContent = editorQuestions.length;
-
-            editorQuestions.forEach((q, index) => {
-                const qId = q.id || (index + 1);
-                const isMC = q.section === 'Phần I';
-                const isTF = q.section === 'Phần II';
-                const isNumeric = q.section === 'Phần III';
-                
-                let answerInputHtml = '';
-                
-                if (isMC) {
-                    const optionsHtml = (q.options || ["", "", "", ""]).map((opt, optIndex) => `
-                        <div class="option-input-group">
-                            <input type="radio" name="correct_answer_${qId}" value="${optIndex}" ${q.correctIndex === optIndex ? 'checked' : ''}>
-                            <input type="text" data-type="option" data-index="${optIndex}" value="${opt}" placeholder="Nội dung đáp án ${String.fromCharCode(65 + optIndex)}" class="flex-grow border border-gray-300 rounded-md p-1.5 text-sm">
-                        </div>
+            container.innerHTML = editorQuestions.map((q, i) => {
+                let html = '';
+                if(q.section === 'Phần I') {
+                    html = q.options.map((opt, oI) => `
+                        <div class="flex items-center mb-1"><input type="radio" name="ed_ans_${i}" ${q.correctIndex===oI?'checked':''} value="${oI}" class="mr-2">
+                        <input type="text" value="${opt}" onchange="updateQData(${i}, 'opt', ${oI}, this.value)" class="border p-1 w-full text-sm"></div>
                     `).join('');
-                    answerInputHtml = `<label class="block text-sm font-medium text-gray-700 mb-2">Đáp án (Chọn đúng A, B, C hoặc D)</label><div class="space-y-2">${optionsHtml}</div>`;
-                } else if (isTF) {
-                    const correctAnswers = q.correctDetails.correctAnswers || [false, false, false, false];
-                    const subOptions = q.correctDetails.subOptions || ["Ý a", "Ý b", "Ý c", "Ý d"];
-                    
-                    answerInputHtml = `
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Đáp án (Chọn ĐÚNG/SAI cho mỗi ý)</label>
-                        <div class="space-y-2">
-                        ${[0, 1, 2, 3].map(i => `
-                            <div class="option-input-group justify-between bg-white p-2 rounded-md border">
-                                <span class="font-medium text-sm w-12">Ý ${String.fromCharCode(97 + i)}:</span>
-                                
-                                <input type="text" data-type="suboption" data-index="${i}" value="${subOptions[i] || ''}" placeholder="Nội dung ý ${String.fromCharCode(97 + i)}" class="flex-grow border border-gray-300 rounded-md p-1.5 text-sm mr-4">
-                                
-                                <label class="flex items-center text-green-600 mr-2">
-                                    <input type="radio" name="tf_answer_${qId}_${i}" value="true" ${correctAnswers[i] ? 'checked' : ''} class="h-4 w-4">
-                                    <span class="ml-1 text-sm">Đúng</span>
-                                </label>
-                                <label class="flex items-center text-red-600">
-                                    <input type="radio" name="tf_answer_${qId}_${i}" value="false" ${!correctAnswers[i] ? 'checked' : ''} class="h-4 w-4">
-                                    <span class="ml-1 text-sm">Sai</span>
-                                </label>
-                            </div>
-                        `).join('')}
-                        </div>
-                    `;
-                } else if (isNumeric) {
-                    const answers = q.correctDetails.answers || ["", "", "", ""];
-                    answerInputHtml = `
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Đáp án (Nhập tối đa 4 giá trị số hoặc ký tự cho 4 ô)</label>
-                        <div class="grid grid-cols-4 gap-2">
-                            ${[0, 1, 2, 3].map(i => `
-                                <input type="text" data-type="numeric_answer" data-index="${i}" value="${answers[i] || ''}" placeholder="Ô ${i + 1}" class="block w-full border border-gray-300 rounded-md p-1.5 text-center font-mono">
-                            `).join('')}
-                        </div>
-                        <p class="text-xs text-gray-500 mt-2">Ghi chú: Thí sinh phải điền đúng giá trị vào các ô có Admin nhập đáp án.</p>
-                    `;
+                } else if(q.section === 'Phần III') {
+                    html = `<div class="flex gap-2">` + [0,1,2,3].map(subI => `
+                        <input type="text" value="${q.correctDetails.answers[subI]||''}" onchange="updateQData(${i}, 'num', ${subI}, this.value)" class="border p-2 w-16 text-center">
+                    `).join('') + `</div><p class="text-xs text-gray-500 mt-1">Đáp án điền khuyết (tối đa 4 ô, bỏ trống nếu ít hơn)</p>`;
                 }
-
-                const questionItem = document.createElement('div');
-                questionItem.className = 'question-item';
-                questionItem.setAttribute('data-index', index);
-                questionItem.innerHTML = `
-                    <div class="flex justify-between items-center mb-3 border-b pb-2">
-                        <h4 class="font-bold text-base text-gray-800">Câu ${qId}</h4>
-                        <button onclick="removeQuestionEditor(${index})" class="text-red-500 hover:text-red-700 text-sm">Xóa câu</button>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700">Phần thi</label>
-                        <select data-type="section-selector" onchange="updateQuestionType(${index}, this.value)" class="mt-1 block w-full border border-gray-300 rounded-md p-1.5">
-                            <option value="Phần I" ${q.section === 'Phần I' ? 'selected' : ''}>Phần I (Trắc nghiệm A, B, C, D)</option>
-                            <option value="Phần II" ${q.section === 'Phần II' ? 'selected' : ''}>Phần II (Trắc nghiệm Đúng/Sai cho 4 ý)</option>
-                            <option value="Phần III" ${q.section === 'Phần III' ? 'selected' : ''}>Phần III (Điền số/ký tự vào 4 ô)</option>
+                
+                return `
+                <div class="border p-4 bg-white mb-4 rounded relative">
+                    <button onclick="removeEditorQ(${i})" class="absolute top-2 right-2 text-red-500 text-sm font-bold">X</button>
+                    <div class="flex gap-4 mb-2">
+                        <h4 class="font-bold">Câu ${i+1}</h4>
+                        <select onchange="changeQType(${i}, this.value)" class="border text-sm p-1">
+                            <option value="Phần I" ${q.section==='Phần I'?'selected':''}>Trắc nghiệm (4 đáp án)</option>
+                            <option value="Phần III" ${q.section==='Phần III'?'selected':''}>Điền khuyết (4 ô)</option>
                         </select>
+                        <input type="number" step="0.1" value="${q.pointValue}" onchange="updateQData(${i}, 'pt', null, this.value)" class="border w-16 text-sm p-1" placeholder="Điểm">
                     </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700">Điểm cho câu này (VD: 0.25 hoặc 1.0)</label>
-                        <input type="number" step="0.01" data-type="point" value="${q.pointValue}" placeholder="Điểm" class="mt-1 block w-full border border-gray-300 rounded-md p-1.5">
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Nội dung Câu hỏi (Hỗ trợ Markdown cơ bản/LaTeX)</label>
-                        <textarea data-type="text" placeholder="Nội dung câu hỏi (sử dụng Enter để xuống dòng)" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md p-1.5">${q.text}</textarea>
-                    </div>
-                    
-                    ${answerInputHtml}
-                `;
-                container.appendChild(questionItem);
-            });
-        }
-        
-        function updateQuestionType(index, newSection) {
-            const q = editorQuestions[index];
-            q.section = newSection;
-            
-            if (newSection === 'Phần I') {
-                q.correctDetails = { type: 'MC', answerIndex: 0 };
-                q.options = q.options || ["", "", "", ""];
-                q.pointValue = q.pointValue || 0.25;
-            } else if (newSection === 'Phần II') {
-                q.correctDetails = { type: 'TF', correctAnswers: [true, false, false, false], subOptions: ["Ý a", "Ý b", "Ý c", "Ý d"] };
-                q.options = ["Đúng/Sai", "Đúng/Sai", "Đúng/Sai", "Đúng/Sai"]; 
-                q.pointValue = q.pointValue || 1.0;
-            } else if (newSection === 'Phần III') {
-                q.correctDetails = { type: 'NUMERIC', answers: ["", "", "", ""] };
-                q.options = ["Giá trị 1", "Giá trị 2", "Giá trị 3", "Giá trị 4"]; 
-                q.pointValue = q.pointValue || 0.25;
-            }
-            
-            renderEditorQuestions();
+                    <textarea onchange="updateQData(${i}, 'txt', null, this.value)" class="w-full border p-2 text-sm mb-2" rows="3" placeholder="Nội dung...">${q.text}</textarea>
+                    <div>${html}</div>
+                </div>`;
+            }).join('');
         }
 
         function addQuestionEditor() {
-            const newId = editorQuestions.length > 0 ? editorQuestions[editorQuestions.length - 1].id + 1 : 1;
-            const newQuestion = {
-                id: newId,
-                section: "Phần I",
-                text: "Nội dung câu hỏi mới...",
-                options: ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
-                answer: "Đáp án A",
-                correctIndex: 0,
-                pointValue: 0.25,
-                correctDetails: { type: 'MC', answerIndex: 0 }
-            };
-            editorQuestions.push(newQuestion);
+            editorQuestions.push({ id: editorQuestions.length+1, section: 'Phần I', text: '', options: ['A','B','C','D'], correctIndex: 0, pointValue: 0.25, correctDetails: {type: 'MC'} });
             renderEditorQuestions();
-            document.getElementById('questions-editor-container').lastChild.scrollIntoView({ behavior: 'smooth' });
+        }
+        function removeEditorQ(i) { editorQuestions.splice(i, 1); renderEditorQuestions(); }
+        function changeQType(i, type) {
+            editorQuestions[i].section = type;
+            if(type==='Phần I') { editorQuestions[i].options = ['','','','']; editorQuestions[i].correctIndex = 0; }
+            if(type==='Phần III') { editorQuestions[i].correctDetails = {type: 'NUMERIC', answers:['','','','']}; }
+            renderEditorQuestions();
+        }
+        function updateQData(i, field, sub, val) {
+            if(field==='txt') editorQuestions[i].text = val;
+            if(field==='pt') editorQuestions[i].pointValue = parseFloat(val)||0;
+            if(field==='opt') editorQuestions[i].options[sub] = val;
+            if(field==='num') editorQuestions[i].correctDetails.answers[sub] = val;
         }
 
-        function removeQuestionEditor(index) {
-            if (confirm(`Bạn có chắc chắn muốn xóa Câu ${editorQuestions[index].id} không?`)) {
-                editorQuestions.splice(index, 1);
-                renderEditorQuestions();
+        function saveExamData() {
+            // Lấy thông tin form
+            const name = document.getElementById('editor-exam-name').value;
+            const sub = document.getElementById('editor-subject-select').value;
+            const cls = document.getElementById('editor-class-code').value;
+            const pwd = document.getElementById('editor-class-password').value;
+            const time = parseInt(document.getElementById('editor-time-limit').value) * 60;
+
+            if(!name || !cls || !pwd) return showToast('Vui lòng điền đủ Tên, Mã lớp và Mật khẩu.', 'error');
+            if(editorQuestions.length===0) return showToast('Đề thi phải có ít nhất 1 câu hỏi.', 'error');
+
+            // Cập nhật đáp án trắc nghiệm từ UI (do radio button không trigger onchange tốt qua text input)
+            document.querySelectorAll('#questions-editor-container > div').forEach((div, i) => {
+                if(editorQuestions[i].section === 'Phần I') {
+                    const checked = div.querySelector('input[type="radio"]:checked');
+                    if(checked) editorQuestions[i].correctIndex = parseInt(checked.value);
+                }
+            });
+
+            const newExam = {
+                id: editorExamId || generateUUID(),
+                name, subjectKey: sub, className: cls, classPass: pwd, timeLimit: time,
+                examCodes: editorExamCodes, questions: editorQuestions, points: {}
+            };
+
+            const exams = getLS(K_EXAMS);
+            const idx = exams.findIndex(e => e.id === newExam.id);
+            if(idx > -1) exams[idx] = newExam; else exams.push(newExam);
+            
+            setLS(K_EXAMS, exams);
+            showToast('Lưu đề thi thành công!');
+            changeScreen('admin-dashboard-screen');
+        }
+
+        // --- TÍCH HỢP AI GEMINI PHÂN TÍCH FILE WORD ---
+        async function handleAIWordImport(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+
+            const loader = document.getElementById('ai-loading');
+            loader.classList.remove('hidden');
+
+            try {
+                // Đọc file Docx thành chữ thuần túy bằng Mammoth
+                const arrayBuffer = await file.arrayBuffer();
+                const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
+                const textContent = result.value;
+
+                if(!textContent || textContent.trim() === '') {
+                    showToast('Không đọc được nội dung từ file Word.', 'error');
+                    loader.classList.add('hidden');
+                    return;
+                }
+
+                // Cấu hình Prompt gọi AI Gemini
+                const prompt = `Đóng vai một chuyên gia làm đề thi. Trích xuất các câu hỏi từ văn bản dưới đây. 
+                Phân loại theo "Phần I" (Trắc nghiệm có 4 đáp án) hoặc "Phần III" (Điền khuyết, không có đáp án chọn). 
+                Tìm đáp án đúng nếu có. Văn bản:\n\n` + textContent;
+
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    "section": { "type": "STRING", "description": "Ghi đúng chữ: 'Phần I' (nếu là trắc nghiệm chọn 1), 'Phần III' (nếu là câu hỏi điền khuyết tự luận)" },
+                                    "text": { "type": "STRING", "description": "Nội dung đầy đủ của câu hỏi" },
+                                    "options": { "type": "ARRAY", "items": { "type": "STRING" }, "description": "Danh sách 4 đáp án (cho Phần I). Để mảng rỗng nếu là Phần III" },
+                                    "correctIndex": { "type": "INTEGER", "description": "Vị trí index của đáp án đúng (0,1,2 hoặc 3) cho Phần I. Trả về 0 nếu Phần III" },
+                                    "answers": { "type": "ARRAY", "items": { "type": "STRING" }, "description": "Mảng tối đa 4 đáp án điền khuyết cho Phần III. Để trống nếu là Phần I" }
+                                },
+                                "required": ["section", "text"]
+                            }
+                        }
+                    }
+                };
+
+                const apiKey = ""; // API Key rỗng như quy định
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                const jsonStr = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if(jsonStr) {
+                    const parsedQ = JSON.parse(jsonStr);
+                    parsedQ.forEach(q => {
+                        let sec = q.section === 'Phần III' ? 'Phần III' : 'Phần I';
+                        let newQ = {
+                            id: editorQuestions.length + 1,
+                            section: sec,
+                            text: q.text || '',
+                            pointValue: 0.25,
+                        };
+                        
+                        if(sec === 'Phần I') {
+                            newQ.options = q.options && q.options.length > 0 ? q.options : ['A', 'B', 'C', 'D'];
+                            newQ.correctIndex = q.correctIndex || 0;
+                            newQ.correctDetails = { type: 'MC' };
+                        } else {
+                            newQ.options = [];
+                            newQ.correctIndex = 0;
+                            let ansArray = q.answers || [];
+                            while(ansArray.length < 4) ansArray.push("");
+                            newQ.correctDetails = { type: 'NUMERIC', answers: ansArray.slice(0,4) };
+                        }
+                        
+                        editorQuestions.push(newQ);
+                    });
+                    
+                    renderEditorQuestions();
+                    showToast(`Đã tự động tạo ${parsedQ.length} câu hỏi từ File bằng AI!`, 'success');
+                } else {
+                    showToast('Không thể trích xuất cấu trúc câu hỏi.', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                showToast('Lỗi quá trình gọi AI: ' + error.message, 'error');
+            } finally {
+                loader.classList.add('hidden');
+                event.target.value = ''; // Reset input
             }
+        }
+
+
+        // --- ADMIN: ACCOUNTS (EXCEL) ---
+        function renderAccountsTable() {
+            const accs = getLS(K_ACCOUNTS);
+            document.getElementById('account_count').textContent = accs.length;
+            document.getElementById('accounts_table').innerHTML = accs.map(a => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-2 font-mono">${a.sbd}</td>
+                    <td class="px-4 py-2">${a.name}</td>
+                    <td class="px-4 py-2 text-gray-400">${a.password}</td>
+                    <td class="px-4 py-2"><button onclick="delAcc('${a.sbd}')" class="text-red-500">Xóa</button></td>
+                </tr>
+            `).join('');
         }
         
-        function saveExamData() {
-            const newExamData = {};
-            const timeLimitMin = parseInt(document.getElementById('editor-time-limit').value);
-            const totalPoints = parseFloat(document.getElementById('editor-total-points').value);
-            const subjectKey = document.getElementById('editor-subject-select').value;
-            const className = document.getElementById('editor-class-code').value.trim();
-            const classPass = document.getElementById('editor-class-password').value;
-            
-            newExamData.subjectKey = subjectKey;
-            newExamData.className = className;
-            newExamData.classPass = classPass;
-            newExamData.timeLimit = timeLimitMin * 60;
-            newExamData.points = {};
-            newExamData.questions = [];
-            
-            let tempPoints = {}; 
-            let totalActualPoints = 0;
-            let hasError = false;
+        document.getElementById('add_account_form').onsubmit = (e) => {
+            e.preventDefault();
+            const sbd = document.getElementById('new_sbd').value.trim();
+            const name = document.getElementById('new_name').value.trim();
+            const password = document.getElementById('new_password').value;
+            if(!/^\d{8}$/.test(sbd)) return showToast('SBD phải 8 số', 'error');
+            const accs = getLS(K_ACCOUNTS);
+            if(accs.find(a=>a.sbd===sbd)) return showToast('SBD đã tồn tại', 'error');
+            accs.push({sbd, name, password}); setLS(K_ACCOUNTS, accs); renderAccountsTable();
+            showToast('Thêm tài khoản thành công');
+            e.target.reset();
+        };
+        
+        function delAcc(sbd) {
+            setLS(K_ACCOUNTS, getLS(K_ACCOUNTS).filter(a=>a.sbd!==sbd)); renderAccountsTable();
+        }
+        function clearAllAccounts() {
+            if(confirm('Xóa TẤT CẢ tài khoản?')) { setLS(K_ACCOUNTS, []); renderAccountsTable(); }
+        }
 
-            document.querySelectorAll('.question-item').forEach((item, index) => {
-                if (hasError) return;
+        // Import Excel
+        function importAccountsExcel() {
+            const fileInput = document.getElementById('excel-file-upload');
+            if(!fileInput.files.length) return alert('Vui lòng chọn file Excel.');
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet, {header: 1}); // Header: 1 to get array of arrays
                 
-                const q = {};
-                const qId = index + 1; 
-                const pointValue = parseFloat(item.querySelector('[data-type="point"]').value) || 0;
-                const section = item.querySelector('[data-type="section-selector"]').value;
+                let accs = getLS(K_ACCOUNTS);
+                let count = 0;
                 
-                if (!className || !classPass) {
-                    hasError = true;
-                    return;
-                }
-
-                q.id = qId;
-                q.section = section;
-                q.text = item.querySelector('[data-type="text"]').value.trim();
-                q.pointValue = pointValue;
-                
-                q.options = [];
-                q.correctDetails = { type: (section === 'Phần I' ? 'MC' : section === 'Phần II' ? 'TF' : 'NUMERIC') };
-                
-                if (section === 'Phần I') {
-                    let correctIndex = -1;
-                    item.querySelectorAll('.option-input-group').forEach((group, optIndex) => {
-                        const optionText = group.querySelector('[data-type="option"]').value.trim();
-                        q.options.push(optionText);
-                        if (group.querySelector('input[type="radio"]').checked) {
-                            correctIndex = optIndex;
+                for(let i = 1; i < json.length; i++) { // Skip row 0 (headers)
+                    const row = json[i];
+                    if(row.length >= 3) {
+                        const sbd = String(row[0]).trim();
+                        if(/^\d{8}$/.test(sbd) && !accs.find(a=>a.sbd===sbd)) {
+                            accs.push({ sbd: sbd, name: String(row[1]).trim(), password: String(row[2]).trim() });
+                            count++;
                         }
-                    });
-
-                    if (correctIndex === -1) {
-                        hasError = true;
-                        return; 
                     }
-                    q.answer = q.options[correctIndex];
-                    q.correctIndex = correctIndex;
-                    q.correctDetails.answerIndex = correctIndex; 
-                } else if (section === 'Phần II') {
-                    q.options = ["Đúng/Sai", "Đúng/Sai", "Đúng/Sai", "Đúng/Sai"]; 
-                    q.correctDetails.correctAnswers = [];
-                    q.correctDetails.subOptions = [];
-                    
-                    let allSubOptionsValid = true;
-                    item.querySelectorAll('.option-input-group').forEach((group, i) => {
-                        const isCorrect = group.querySelector(`input[name="tf_answer_${qId}_${i}"][value="true"]`).checked;
-                        const subOptionText = group.querySelector('[data-type="suboption"]').value.trim();
-                        
-                        q.correctDetails.correctAnswers.push(isCorrect);
-                        q.correctDetails.subOptions.push(subOptionText);
-
-                        if (!subOptionText && allSubOptionsValid) {
-                             hasError = true;
-                             allSubOptionsValid = false;
-                        }
-                    });
-                    if (hasError) return;
-
-                    q.answer = q.correctDetails.correctAnswers.map(c => c ? 'Đ' : 'S').join('');
-                    q.correctIndex = 0; 
-                } else if (section === 'Phần III') {
-                    q.options = ["Giá trị 1", "Giá trị 2", "Giá trị 3", "Giá trị 4"]; 
-                    q.correctDetails.answers = Array.from(item.querySelectorAll('[data-type="numeric_answer"]')).map(input => input.value.trim());
-                    
-                    const answeredCells = q.correctDetails.answers.filter(a => a !== "");
-
-                    if (answeredCells.length === 0) {
-                        hasError = true;
-                        return;
-                    }
-                    q.answer = q.correctDetails.answers.join('|');
-                    q.correctIndex = 0; 
                 }
-                
-                q.selected = null;
-                newExamData.questions.push(q);
-                totalActualPoints += pointValue;
+                setLS(K_ACCOUNTS, accs);
+                renderAccountsTable();
+                showToast(`Đã nhập thành công ${count} tài khoản mới.`);
+                fileInput.value = '';
+            };
+            reader.readAsArrayBuffer(fileInput.files[0]);
+        }
 
-                const sectionKey = q.section.replace(/\s/g, '');
-                if (!tempPoints[sectionKey]) {
-                    tempPoints[sectionKey] = { count: 0, total: 0 };
-                }
-                tempPoints[sectionKey].count++;
-                tempPoints[sectionKey].total += pointValue;
-            });
+
+        // --- ADMIN: RESULTS & EXPORT ---
+        function loadStudentResults() {
+            const results = getLS(K_RESULTS);
+            const exams = [...new Set(results.map(r => r.examName))];
             
-            if (hasError) return;
-            
-            for (const key in tempPoints) {
-                newExamData.points[key] = {
-                    count: tempPoints[key].count,
-                    total: tempPoints[key].total,
-                    perQ: tempPoints[key].total / tempPoints[key].count
-                };
-                if (Math.abs(newExamData.points[key].perQ - newExamData.questions.find(q => q.section.replace(/\s/g, '') === key).pointValue) > 0.001) {
-                    hasError = true;
-                    return;
-                }
+            const filterSel = document.getElementById('filter-exam-name');
+            const currFilter = filterSel.value;
+            filterSel.innerHTML = `<option value="">-- Tất cả đề thi --</option>` + exams.map(e => `<option value="${e}">${e}</option>`).join('');
+            filterSel.value = currFilter;
+
+            let filtered = results;
+            if(currFilter) filtered = filtered.filter(r => r.examName === currFilter);
+
+            const tbody = document.getElementById('student-list');
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-gray-500">Chưa có kết quả.</td></tr>`; return;
             }
 
-            if (hasError) return;
+            tbody.innerHTML = filtered.sort((a,b)=>b.timestamp-a.timestamp).map((r, i) => `
+                <tr>
+                    <td class="px-3 py-4 text-sm">${i+1}</td>
+                    <td class="px-6 py-4 font-bold text-gray-800">${r.name}</td>
+                    <td class="px-6 py-4 text-sm">${r.sbd}</td>
+                    <td class="px-6 py-4 text-sm text-blue-700">${r.examName}</td>
+                    <td class="px-6 py-4 text-sm">${r.exam_code}</td>
+                    <td class="px-6 py-4 font-bold text-red-600">${r.score}</td>
+                    <td class="px-6 py-4 text-sm">${new Date(r.timestamp).toLocaleString('vi-VN')}</td>
+                </tr>
+            `).join('');
+        }
 
-            newExamData.totalQuestions = newExamData.questions.length;
+        function exportResultsToExcel() {
+            const results = getLS(K_RESULTS);
+            if(results.length===0) return showToast('Không có dữ liệu để xuất.', 'error');
+            
+            // Format data for excel
+            const data = results.map((r, i) => ({
+                'STT': i+1, 'Họ và tên': r.name, 'Số báo danh': r.sbd, 
+                'Kỳ thi / Tên đề': r.examName, 'Lớp': r.class_code, 'Mã đề': r.exam_code,
+                'Điểm số': r.score, 'Thời gian nộp': new Date(r.timestamp).toLocaleString('vi-VN')
+            }));
 
-            if (newExamData.questions.length === 0) {
-                 return;
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "KetQua");
+            XLSX.writeFile(wb, `KetQuaThi_${Date.now()}.xlsx`);
+        }
+
+        function resetTestData() {
+            if (confirm("XÓA TOÀN BỘ KẾT QUẢ THI VÀ LỊCH SỬ GIÁM SÁT?")) {
+                setLS(K_RESULTS, []); setLS(K_MONITOR, {}); loadStudentResults(); loadMonitoringData();
             }
+        }
 
-            if (Math.abs(totalActualPoints - totalPoints) > 0.01) {
+
+        // --- REAL-TIME MONITORING (Ngầm ghi nhận) ---
+        function updateMonitoringProgress() {
+            if(!activeExamConfig || !userInfo.ma_thi_sinh) return;
+            // Đếm số câu đã làm
+            let answered = activeExamConfig.questions.filter(q => 
+                (q.section==='Phần I' && q.selected!==null && q.selected!==undefined) || 
+                (q.section==='Phần III' && q.selected && q.selected.some(s=>s!==""))
+            ).length;
+
+            const monitorData = getLS(K_MONITOR, {});
+            monitorData[userInfo.ma_thi_sinh] = {
+                name: userInfo.ho_ten, sbd: userInfo.ma_thi_sinh,
+                examName: userInfo.examName,
+                answered: answered, total: activeExamConfig.questions.length,
+                lastActive: Date.now(), timeLeft: timeLeft
+            };
+            setLS(K_MONITOR, monitorData);
+        }
+
+        function clearMonitoringProgress() {
+            const monitorData = getLS(K_MONITOR, {});
+            delete monitorData[userInfo.ma_thi_sinh];
+            setLS(K_MONITOR, monitorData);
+        }
+
+        function loadMonitoringData() {
+            const grid = document.getElementById('monitoring-grid');
+            if(!grid) return;
+            const monitorData = getLS(K_MONITOR, {});
+            const sessions = Object.values(monitorData);
+            
+            if(sessions.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-gray-500">Không có thí sinh nào đang làm bài.</p>`;
                 return;
             }
 
-            editorExamConfig.subjectKey = newExamData.subjectKey;
-            editorExamConfig.className = newExamData.className;
-            editorExamConfig.classPass = newExamData.classPass;
-            editorExamConfig.timeLimit = newExamData.timeLimit;
-            editorExamConfig.questions = newExamData.questions;
-            editorExamConfig.points = newExamData.points;
-            
-            const allConfigs = loadExamConfig();
-            const configIndex = allConfigs.configs.findIndex(c => c.subjectKey === editorExamConfig.subjectKey);
-            
-            if (configIndex > -1) {
-                allConfigs.configs[configIndex] = editorExamConfig;
-            } else {
-                allConfigs.configs.push(editorExamConfig);
-            }
+            const now = Date.now();
+            grid.innerHTML = sessions.map(s => {
+                const isOnline = (now - s.lastActive) < 10000; // Cập nhật < 10s là online
+                const statusColor = isOnline ? 'bg-green-500' : 'bg-yellow-500';
+                const statusText = isOnline ? 'Đang hoạt động' : 'Tạm thoát / Mất mạng';
+                const percent = Math.round((s.answered / s.total) * 100);
 
-            saveExamConfig(allConfigs);
-            changeScreen('admin-screen');
+                return `
+                <div class="border rounded-lg p-4 bg-white shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 class="font-bold text-gray-800">${s.name}</h4>
+                            <p class="text-sm text-gray-500">SBD: ${s.sbd}</p>
+                        </div>
+                        <span class="flex items-center text-xs">
+                            <span class="w-2 h-2 rounded-full ${statusColor} mr-1"></span> ${statusText}
+                        </span>
+                    </div>
+                    <p class="text-xs text-blue-600 font-bold mb-2 truncate">${s.examName}</p>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+                        <div class="bg-blue-600 h-2 rounded-full transition-all" style="width: ${percent}%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span>Đã làm: ${s.answered}/${s.total}</span>
+                        <span>Còn lại: ${Math.floor(s.timeLeft/60)} phút</span>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
-        function initializeExam() {
-            currentQuestionIndex = 0;
-            timeLeft = activeExamConfig.timeLimit;
+
+        // --- STUDENT EXAM ENGINE ---
+        function initExamEngine() {
+            currentQuestionIndex = 0; timeLeft = activeExamConfig.timeLimit;
             activeExamConfig.questions.forEach(q => {
-                if (q.section === 'Phần I') q.selected = null;
-                if (q.section === 'Phần II') q.selected = Array(4).fill(null); 
-                if (q.section === 'Phần III') {
-                    q.selected = activeExamConfig.questions.find(eq => eq.id === q.id).correctDetails.answers.map(() => ""); 
-                }
+                if(q.section === 'Phần I') q.selected = null;
+                if(q.section === 'Phần III') q.selected = ["","","",""];
             });
 
             document.getElementById('total-questions').textContent = activeExamConfig.questions.length;
-            document.getElementById('answered-count').textContent = '0';
-            updateQuestionNavigation();
-            renderQuestion(currentQuestionIndex);
-        }
-        
-        function updateTimer() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            document.getElementById('timer').textContent = 
-                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            updateQuestionNavigation(); renderQuestion(0);
             
-            if (timeLeft <= 0) {
-                stopTimer();
-                submitExam(true); 
-            } else {
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
                 timeLeft--;
-            }
+                const m = String(Math.floor(timeLeft/60)).padStart(2,'0');
+                const s = String(timeLeft%60).padStart(2,'0');
+                document.getElementById('timer').textContent = `${m}:${s}`;
+                updateMonitoringProgress(); // Log ngầm mỗi giây
+                if(timeLeft <= 0) submitExam();
+            }, 1000);
         }
 
-        function startTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-            updateTimer(); 
-            timerInterval = setInterval(updateTimer, 1000);
-        }
-
-        function stopTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-        }
-        
         function renderQuestion(index) {
-            const container = document.getElementById('question-container');
+            currentQuestionIndex = index;
             const q = activeExamConfig.questions[index];
-
-            if (!q) {
-                container.innerHTML = '<div class="text-center text-red-500">Không tìm thấy câu hỏi!</div>';
-                return;
-            }
+            const container = document.getElementById('question-container');
             
-            const isMC = q.section === 'Phần I';
-            const isTF = q.section === 'Phần II';
-            const isNumeric = q.section === 'Phần III';
-            
-            let questionInputHtml = '';
-            
-            if (isMC) {
-                 questionInputHtml = q.options.map((option, optIndex) => `
+            let ansHtml = '';
+            if (q.section === 'Phần I') {
+                ansHtml = q.options.map((opt, i) => `
                     <div class="mb-2 question-option">
-                        <input type="radio" id="q${q.id}_opt${optIndex}" name="question${q.id}" value="${optIndex}" 
-                            class="hidden" ${q.selected === optIndex ? 'checked' : ''}
-                            onchange="handleAnswerChange(${index}, ${optIndex})">
-                        <label for="q${q.id}_opt${optIndex}" class="flex items-start space-x-3">
-                            <span class="font-bold text-blue-600 w-6 flex-shrink-0">${String.fromCharCode(65 + optIndex)}.</span>
-                            <p>${option}</p>
-                        </label>
-                    </div>
-                `).join('');
-            } else if (isTF) {
-                 const subOptions = q.correctDetails.subOptions || ["Ý a", "Ý b", "Ý c", "Ý d"];
-                 questionInputHtml = subOptions.slice(0, 4).map((opt, i) => `
-                     <div class="mb-3 p-3 border rounded-md flex justify-between items-center bg-gray-50">
-                         <span class="font-medium text-gray-700 w-full md:w-1/2">${i + 1}. ${opt}</span>
-                         <div class="flex space-x-4 flex-shrink-0">
-                            <label class="flex items-center text-green-600">
-                                <input type="radio" name="tf_q${q.id}_${i}" value="true" class="h-4 w-4" ${q.selected && q.selected[i] === true ? 'checked' : ''} onchange="handleTFAnswerChange(${index}, ${i}, true)">
-                                <span class="ml-1 text-sm font-bold">ĐÚNG</span>
-                            </label>
-                            <label class="flex items-center text-red-600">
-                                <input type="radio" name="tf_q${q.id}_${i}" value="false" class="h-4 w-4" ${q.selected && q.selected[i] === false ? 'checked' : ''} onchange="handleTFAnswerChange(${index}, ${i}, false)">
-                                <span class="ml-1 text-sm font-bold">SAI</span>
-                            </label>
-                         </div>
-                     </div>
-                 `).join('');
-            } else if (isNumeric) {
-                 questionInputHtml = `
-                     <div class="flex justify-center space-x-3">
-                         ${[0, 1, 2, 3].map(i => `
-                            <input type="text" 
-                                data-numeric-index="${i}" 
-                                maxlength="1" 
-                                value="${q.selected && q.selected[i] !== undefined ? q.selected[i] : ''}" 
-                                oninput="handleNumericInput(event, ${index}, ${i})" 
-                                onkeyup="handleNumericKeyup(event, ${index}, ${i})" 
-                                placeholder="" 
-                                class="numeric-input-cell">
-                         `).join('')}
-                     </div>
-                     <p class="text-center text-sm text-gray-500 mt-4">Mỗi ô nhập tối đa 1 ký tự (số, dấu '.', ',' hoặc ký tự khác nếu đề bài yêu cầu).</p>
-                 `;
+                        <input type="radio" id="q${q.id}_o${i}" name="q${q.id}" class="hidden" ${q.selected === i ? 'checked' : ''} onchange="ansMC(${index}, ${i})">
+                        <label for="q${q.id}_o${i}" class="flex items-start"><span class="font-bold text-blue-600 w-6">${String.fromCharCode(65+i)}.</span> <p>${opt}</p></label>
+                    </div>`).join('');
+            } else if (q.section === 'Phần III') {
+                ansHtml = `<div class="flex justify-center space-x-3">` + [0,1,2,3].map(i => `
+                    <input type="text" maxlength="1" value="${q.selected[i]||''}" oninput="ansNum(event, ${index}, ${i})" class="numeric-input-cell">
+                `).join('') + `</div>`;
             }
 
             container.innerHTML = `
-                <p class="section-title text-sm">${q.section} (Điểm: ${q.pointValue.toFixed(2)})</p>
-                <h2 class="text-xl font-bold mb-4 text-gray-800">Câu ${index + 1}:</h2> 
+                <p class="section-title text-sm">${q.section} (Điểm: ${q.pointValue})</p>
+                <h2 class="text-xl font-bold mb-4">Câu ${index + 1}:</h2> 
                 <div class="mb-6 border-b pb-4 text-lg whitespace-pre-wrap">${q.text}</div>
-                <div class="space-y-3">
-                    ${questionInputHtml}
-                </div>
+                <div>${ansHtml}</div>
             `;
             
-            document.querySelectorAll('#question-nav button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.getElementById(`nav-q-${index + 1}`).classList.add('active'); 
+            document.querySelectorAll('.question-nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(`nav-q-${index}`).classList.add('active');
+        }
 
-            currentQuestionIndex = index;
-        }
-        
-        function handleAnswerChange(qIndex, selectedIndex) {
-            const q = activeExamConfig.questions[qIndex];
-            q.selected = selectedIndex;
-            updateQuestionNavigation();
-        }
-        
-        function handleTFAnswerChange(qIndex, subIndex, value) {
-            const q = activeExamConfig.questions[qIndex];
-            if (!q.selected) q.selected = Array(4).fill(null);
-            q.selected[subIndex] = (value === true); 
-            updateQuestionNavigation();
-        }
-        
-        function handleNumericInput(event, qIndex, subIndex) {
-            const input = event.target;
-            const q = activeExamConfig.questions[qIndex];
-            if (!q.selected) q.selected = Array(4).fill("");
-            
-            q.selected[subIndex] = input.value.slice(-1).toUpperCase(); 
-            input.value = q.selected[subIndex]; 
-            
+        function ansMC(qIdx, optIdx) { activeExamConfig.questions[qIdx].selected = optIdx; updateQuestionNavigation(); }
+        function ansNum(e, qIdx, subIdx) {
+            let val = e.target.value.slice(-1).toUpperCase();
+            e.target.value = val;
+            activeExamConfig.questions[qIdx].selected[subIdx] = val;
             updateQuestionNavigation();
         }
 
-        function handleNumericKeyup(event, qIndex, subIndex) {
-            if (event.key.length === 1 && event.target.value.length === 1) {
-                const nextInput = document.querySelector(`input[data-numeric-index="${subIndex + 1}"]`);
-                if (nextInput) {
-                    nextInput.focus();
-                }
-            } else if (event.key === 'Backspace' && event.target.value.length === 0) {
-                 const prevInput = document.querySelector(`input[data-numeric-index="${subIndex - 1}"]`);
-                if (prevInput) {
-                    prevInput.focus();
-                }
-            }
-        }
-        
-        function nextQuestion() {
-            const nextIndex = (currentQuestionIndex + 1) % activeExamConfig.questions.length;
-            renderQuestion(nextIndex);
-        }
-        
-        function prevQuestion() {
-            const prevIndex = (currentQuestionIndex - 1 + activeExamConfig.questions.length) % activeExamConfig.questions.length;
-            renderQuestion(prevIndex);
-        }
+        function nextQuestion() { renderQuestion((currentQuestionIndex + 1) % activeExamConfig.questions.length); }
+        function prevQuestion() { renderQuestion((currentQuestionIndex - 1 + activeExamConfig.questions.length) % activeExamConfig.questions.length); }
 
         function updateQuestionNavigation() {
-            const navContainer = document.getElementById('question-nav');
-            navContainer.innerHTML = '';
-            let answeredCount = 0;
-            
-            const sections = activeExamConfig.questions.reduce((acc, q) => {
-                if (!acc[q.section]) acc[q.section] = [];
-                acc[q.section].push(q);
-                return acc;
-            }, {});
-
-            activeExamConfig.questions.forEach(q => {
-                let isAnswered = false;
-                
-                if (q.section === 'Phần I') {
-                    isAnswered = q.selected !== null && q.selected !== undefined;
-                } else if (q.section === 'Phần II') {
-                    isAnswered = q.selected && q.selected.some(s => s !== null);
-                } else if (q.section === 'Phần III') {
-                    isAnswered = q.selected && q.selected.some(s => s !== "" && s !== undefined);
-                }
-                                   
-                if (isAnswered) answeredCount++;
-            });
-
-            let currentQIndex = 0;
-            
-            for (const section in sections) {
-                const sectionDiv = document.createElement('div');
-                sectionDiv.className = 'mb-4';
-                sectionDiv.innerHTML = `<h4 class="font-semibold text-gray-700 mb-2">${section} (${sections[section].length} câu)</h4>`;
-                
-                const buttonWrapper = document.createElement('div');
-                buttonWrapper.className = 'flex flex-wrap gap-2';
-                
-                sections[section].forEach((q) => {
-                    const displayIndex = currentQIndex + 1; 
-                    
-                    let isAnswered = false;
-                    
-                    if (q.section === 'Phần I') {
-                        isAnswered = q.selected !== null && q.selected !== undefined;
-                    } else if (q.section === 'Phần II') {
-                        isAnswered = q.selected && q.selected.some(s => s !== null);
-                    } else if (q.section === 'Phần III') {
-                        isAnswered = q.selected && q.selected.some(s => s !== "" && s !== undefined);
-                    }
-
-                    const button = document.createElement('button');
-                    button.id = `nav-q-${displayIndex}`;
-                    button.className = `question-nav-item w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-sm transition-colors ${isAnswered ? 'answered' : 'bg-white text-gray-700'}`;
-                    button.textContent = displayIndex;
-                    button.onclick = () => renderQuestion(displayIndex - 1); 
-                    buttonWrapper.appendChild(button);
-                    
-                    currentQIndex++;
-                });
-
-                sectionDiv.appendChild(buttonWrapper);
-                navContainer.appendChild(sectionDiv);
-            }
-
-            document.getElementById('answered-count').textContent = answeredCount;
-        }
-        
-        function saveResult(name, id, score, exam_code, class_code, subject_name) {
-             const rawData = localStorage.getItem(STORAGE_KEY_RESULTS);
-             const results = rawData ? JSON.parse(rawData) : [];
-             results.push({ name, id, score: parseFloat(score), exam_code, class_code, subject_name, timestamp: Date.now() });
-             localStorage.setItem(STORAGE_KEY_RESULTS, JSON.stringify(results));
+            const nav = document.getElementById('question-nav');
+            let answered = 0;
+            nav.innerHTML = activeExamConfig.questions.map((q, i) => {
+                let isAns = (q.section==='Phần I' && q.selected!==null) || (q.section==='Phần III' && q.selected && q.selected.some(s=>s!==""));
+                if(isAns) answered++;
+                return `<button id="nav-q-${i}" onclick="renderQuestion(${i})" class="question-nav-item w-10 h-10 rounded-full border ${isAns?'answered':'bg-white'}">${i+1}</button>`;
+            }).join('');
+            document.getElementById('answered-count').textContent = answered;
+            updateMonitoringProgress(); // Cập nhật progress khi click đáp án
         }
 
-        function confirmSubmission() {
-            document.getElementById('submission-modal').classList.remove('hidden');
-            document.getElementById('submission-modal').classList.add('open');
-        }
+        function confirmSubmission() { document.getElementById('submission-modal').classList.remove('hidden'); }
+        function hideSubmissionModal() { document.getElementById('submission-modal').classList.add('hidden'); }
 
-        function hideSubmissionModal() {
-            const modal = document.getElementById('submission-modal');
-            modal.classList.remove('open');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
-        
-        function submitExam(isAutoSubmit = false) {
-            hideSubmissionModal();
-            stopTimer();
-
-            let correctCount = 0;
-            let answeredCount = 0;
-            let finalScore = 0;
+        function submitExam() {
+            hideSubmissionModal(); clearInterval(timerInterval);
+            let score = 0, correct = 0, answered = 0;
             
             activeExamConfig.questions.forEach(q => {
-                const isMC = q.section === 'Phần I';
-                const isTF = q.section === 'Phần II';
-                const isNumeric = q.section === 'Phần III';
-                
-                let isQuestionAnswered = false;
-                let isCorrect = false;
-
-                if (isMC) {
-                    if (q.selected !== null && q.selected !== undefined) {
-                        isQuestionAnswered = true;
-                        if (q.selected === q.correctIndex) {
-                            isCorrect = true;
-                        }
-                    }
-                } else if (isTF) {
-                    const correctAnswers = q.correctDetails.correctAnswers || Array(4).fill(false);
-                    const userAnswers = q.selected || Array(4).fill(null);
-                    
-                    isQuestionAnswered = userAnswers.some(a => a !== null);
-                    
-                    if (isQuestionAnswered) {
-                        if (userAnswers.every((u, i) => u === correctAnswers[i])) {
-                             isCorrect = true;
-                        }
-                    }
-
-                } else if (isNumeric) {
-                    const correctAnswers = q.correctDetails.answers.slice(0, 4) || Array(4).fill(""); 
-                    const userAnswers = q.selected || Array(4).fill("");
-                    
-                    isQuestionAnswered = userAnswers.some(a => a !== "" && a !== undefined);
-
-                    if (isQuestionAnswered) {
-                        let matches = true;
-                        
-                        for (let i = 0; i < correctAnswers.length; i++) {
-                            const expected = correctAnswers[i].trim().toUpperCase(); 
-                            const actual = userAnswers[i].trim().toUpperCase();      
-
-                            if (expected) {
-                                if (actual === null || actual === "") {
-                                    matches = false;
-                                    break;
-                                }
-                                if (expected !== actual) {
-                                    matches = false;
-                                    break;
-                                }
-                            } else {
-                                if (actual !== "") {
-                                    matches = false;
-                                    break;
-                                }
-                            }
-                        }
-                        isCorrect = matches;
-                    }
+                let isAns = false, isCorr = false;
+                if(q.section === 'Phần I' && q.selected !== null) {
+                    isAns = true; if(q.selected === q.correctIndex) isCorr = true;
                 }
-                
-                if (isMC && q.selected !== null) { answeredCount++; }
-                else if (isTF && q.selected.some(s => s !== null)) { answeredCount++; }
-                else if (isNumeric && q.selected.some(s => s !== "")) { answeredCount++; }
-
-                if (isCorrect) {
-                    correctCount++;
-                    finalScore += q.pointValue;
+                if(q.section === 'Phần III' && q.selected.some(s=>s!=="")) {
+                    isAns = true;
+                    let match = true;
+                    for(let i=0; i<4; i++) {
+                        let ex = (q.correctDetails.answers[i]||'').trim().toUpperCase();
+                        let ac = (q.selected[i]||'').trim().toUpperCase();
+                        if(ex && ex !== ac) match = false;
+                        if(!ex && ac) match = false;
+                    }
+                    if(match) isCorr = true;
                 }
+                if(isAns) answered++;
+                if(isCorr) { correct++; score += q.pointValue; }
             });
 
-            const formattedScore = finalScore.toFixed(2); 
-
-            saveResult(
-                userInfo.ho_ten, 
-                userInfo.ma_thi_sinh, 
-                formattedScore, 
-                userInfo.exam_code, 
-                userInfo.class_code,
-                userInfo.subject_name
-            );
-
-            document.getElementById('result-answered').textContent = answeredCount;
+            const res = getLS(K_RESULTS);
+            res.push({
+                sbd: userInfo.ma_thi_sinh, name: userInfo.ho_ten,
+                examId: userInfo.examId, examName: userInfo.examName, exam_code: userInfo.exam_code, class_code: userInfo.class_code,
+                score: score.toFixed(2), timestamp: Date.now()
+            });
+            setLS(K_RESULTS, res);
+            
+            clearMonitoringProgress(); // Nộp xong xóa khỏi log giám sát
+            
             document.getElementById('result-total').textContent = activeExamConfig.questions.length;
-            document.getElementById('result-correct').textContent = correctCount;
-            document.getElementById('result-score').textContent = parseFloat(formattedScore).toFixed(1); 
-
+            document.getElementById('result-answered').textContent = answered;
+            document.getElementById('result-correct').textContent = correct;
+            document.getElementById('result-score').textContent = score.toFixed(2);
             changeScreen('result-screen');
         }
 
-        loadExamConfig();
-        changeScreen('login-screen');
-
-        document.addEventListener('keydown', (e) => {
-            if (currentScreen === 'exam-screen') {
-                if (e.key === 'ArrowRight') {
-                    nextQuestion();
-                } else if (e.key === 'ArrowLeft') {
-                    prevQuestion();
-                }
-            }
-        });
-        
     </script>
 </body>
 </html>
