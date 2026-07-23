@@ -196,6 +196,16 @@
         .pulse-text { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
 
+        /* Khung Camera Thí sinh */
+        #camera-preview-container {
+            position: fixed; bottom: 20px; right: 20px;
+            width: 200px; height: 150px; background-color: #000;
+            border-radius: 0.5rem; border: 3px solid #3b82f6;
+            overflow: hidden; z-index: 50; display: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        #local-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+
         @media (max-width: 768px) {
             .exam-layout { flex-direction: column; }
             .question-content { width: 100%; padding-right: 0; }
@@ -451,14 +461,20 @@
                     <div class="flex-grow overflow-y-auto mb-4" id="md-content">
                         <!-- Chi tiết các câu hỏi sẽ load ở đây -->
                     </div>
-                    <div class="border-t pt-4 flex justify-between bg-gray-50 p-3 rounded">
-                        <div class="font-medium text-gray-700">
-                            Trạng thái hiện tại: <span id="md-status" class="font-bold text-green-600">Bình thường</span>
+                    <div class="border-t pt-4 flex flex-col gap-3 bg-gray-50 p-3 rounded">
+                        <div class="flex justify-between items-center text-sm">
+                            <div class="font-medium text-gray-700">
+                                Trạng thái: <span id="md-status" class="font-bold text-green-600">Bình thường</span>
+                            </div>
+                            <div class="font-medium text-gray-700">
+                                Camera/Mic: <span id="md-camera-status" class="font-bold text-red-600">Đã tắt</span>
+                            </div>
                         </div>
-                        <div class="space-x-2">
-                            <button onclick="adminSendCmd('unpause')" class="btn-secondary bg-gray-200 hover:bg-gray-300">Gỡ khóa (Mở lại)</button>
-                            <button onclick="adminSendCmd('pause', 1)" class="btn-primary bg-yellow-500 hover:bg-yellow-600 text-gray-900 border-none">Tạm dừng 1p</button>
-                            <button onclick="adminSendCmd('pause', 5)" class="btn-primary bg-orange-500 hover:bg-orange-600 text-white border-none">Tạm dừng 5p</button>
+                        <div class="space-x-2 flex flex-wrap gap-y-2">
+                            <button onclick="adminSendCmd('unpause')" class="btn-secondary bg-gray-200 hover:bg-gray-300">Gỡ lệnh</button>
+                            <button onclick="adminSendCmd('request_camera')" class="btn-primary bg-indigo-500 hover:bg-indigo-600 border-none flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Yêu cầu Bật Camera</button>
+                            <button onclick="adminSendCmd('pause', 1)" class="btn-primary bg-yellow-500 hover:bg-yellow-600 text-gray-900 border-none">Dừng 1p</button>
+                            <button onclick="adminSendCmd('pause', 5)" class="btn-primary bg-orange-500 hover:bg-orange-600 text-white border-none">Dừng 5p</button>
                             <button onclick="adminSendCmd('ban')" class="btn-primary bg-red-600 hover:bg-red-700">ĐÌNH CHỈ THI</button>
                         </div>
                     </div>
@@ -602,6 +618,28 @@
 
     <!-- 5. GIAO DIỆN LÀM BÀI (THÍ SINH) -->
     <div id="exam-screen" class="screen flex-col relative">
+        <!-- Khu vực hiển thị Camera local (ẩn mặc định) -->
+        <div id="camera-preview-container">
+            <video id="local-video" autoplay muted playsinline></video>
+            <div class="absolute bottom-1 left-1 bg-black bg-opacity-60 text-white text-[10px] px-2 py-0.5 rounded font-bold flex items-center">
+                <span class="w-2 h-2 bg-red-500 rounded-full mr-1 animate-pulse"></span> Đang ghi hình
+            </div>
+        </div>
+
+        <!-- Modal Yêu cầu Camera -->
+        <div id="camera-request-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-[9999] modal">
+            <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm modal-content text-center border-t-4 border-blue-500">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">Giám thị yêu cầu bật Camera</h3>
+                <p class="mb-6 text-sm text-gray-600">Bạn cần cấp quyền truy cập Camera và Micro để tiếp tục bài thi. Hệ thống sẽ giám sát quá trình làm bài của bạn.</p>
+                <div class="flex justify-center">
+                    <button onclick="acceptCameraRequest()" class="btn-primary px-6 py-3 w-full bg-blue-600 hover:bg-blue-700 text-lg shadow-lg shadow-blue-500/30">Đồng ý & Bật Camera</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Lớp phủ khi bị tạm dừng -->
         <div id="student-pause-overlay" class="fixed inset-0 flex-col items-center justify-center text-white">
             <svg class="w-20 h-20 text-yellow-400 mb-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
@@ -731,6 +769,9 @@
         let timerInterval = null;
         let monitorInterval = null;
         let pendingScoreData = null; // Biến tạm lưu kết quả chờ nộp
+        
+        let isCameraActive = false;
+        let localStream = null;
 
         // Editor state
         let editorExamId = null;
@@ -1436,7 +1477,8 @@
                 answered: answered, total: activeExamConfig.questions.length,
                 lastActive: Date.now(), timeLeft: timeLeft,
                 currQ: currentQuestionIndex + 1,
-                details: detailedAnswers
+                details: detailedAnswers,
+                cameraActive: isCameraActive
             };
             setLS(K_MONITOR, monitorData);
         }
@@ -1517,6 +1559,16 @@
             }
             document.getElementById('md-status').innerHTML = statusText;
 
+            // Cập nhật trạng thái Camera UI
+            const camStatus = document.getElementById('md-camera-status');
+            if (s.cameraActive) {
+                camStatus.innerHTML = "<span class='flex items-center'><span class='w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse'></span> Đang ghi hình</span>";
+                camStatus.className = "font-bold text-green-600";
+            } else {
+                camStatus.innerHTML = "Đã tắt";
+                camStatus.className = "font-bold text-red-600";
+            }
+
             // Render details
             const cHTML = (s.details || []).map((q, idx) => {
                 let ansStr = 'Chưa làm';
@@ -1549,7 +1601,7 @@
             
             if(type === 'unpause') {
                 delete cmds[currentDetailSbd];
-                showToast('Đã gỡ bỏ mọi lệnh cấm/dừng', 'success');
+                showToast('Đã gỡ bỏ mọi lệnh', 'success');
             } else if(type === 'ban') {
                 if(confirm('Đình chỉ thi ngay lập tức thí sinh này? Hệ thống sẽ ghi nhận 0 điểm.')) {
                     cmds[currentDetailSbd] = { type: 'ban', timestamp: Date.now() };
@@ -1558,11 +1610,48 @@
             } else if(type === 'pause') {
                 cmds[currentDetailSbd] = { type: 'pause', until: Date.now() + durationMins * 60000 };
                 showToast(`Đã tạm dừng thí sinh ${durationMins} phút`, 'success');
+            } else if(type === 'request_camera') {
+                cmds[currentDetailSbd] = { type: 'request_camera', timestamp: Date.now() };
+                showToast(`Đã gửi yêu cầu bật Camera đến thí sinh`, 'success');
             }
             
             setLS(K_COMMANDS, cmds);
             openMonitorDetail(currentDetailSbd); // Refresh Modal
             loadMonitoringData(); // Refresh Grid
+        }
+
+        // --- CAMERA LOGIC ---
+        async function acceptCameraRequest() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                const videoEl = document.getElementById('local-video');
+                videoEl.srcObject = localStream;
+                document.getElementById('camera-preview-container').style.display = 'block';
+                document.getElementById('camera-request-modal').classList.add('hidden');
+                isCameraActive = true;
+                
+                // Xóa lệnh request camera để không bị lặp
+                const cmds = getLS(K_COMMANDS, {});
+                if(cmds[userInfo.ma_thi_sinh] && cmds[userInfo.ma_thi_sinh].type === 'request_camera') {
+                    delete cmds[userInfo.ma_thi_sinh];
+                    setLS(K_COMMANDS, cmds);
+                }
+                
+                updateMonitoringProgress();
+                showToast('Camera và Micro đã được bật thành công.', 'success');
+            } catch (err) {
+                console.error(err);
+                alert("Lỗi: Bạn đã từ chối quyền truy cập hoặc thiết bị không có Camera/Mic. Vui lòng cho phép trên trình duyệt để tiếp tục làm bài!");
+            }
+        }
+
+        function stopCamera() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            isCameraActive = false;
+            document.getElementById('camera-preview-container').style.display = 'none';
         }
 
         // --- PHÚC KHẢO ---
@@ -1616,10 +1705,11 @@
             
             if(timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                // Kiểm tra lệnh Admin (Pause / Ban)
+                // Kiểm tra lệnh Admin (Pause / Ban / Camera)
                 const cmds = getLS(K_COMMANDS, {});
                 const myCmd = cmds[userInfo.ma_thi_sinh];
                 const overlay = document.getElementById('student-pause-overlay');
+                const camModal = document.getElementById('camera-request-modal');
                 const now = Date.now();
 
                 if(myCmd) {
@@ -1635,9 +1725,14 @@
                         delete cmds[userInfo.ma_thi_sinh];
                         setLS(K_COMMANDS, cmds);
                         overlay.style.display = 'none';
+                    } else if (myCmd.type === 'request_camera' && !isCameraActive) {
+                        camModal.classList.remove('hidden');
+                        // Tạm dừng bộ đếm thời gian khi đang yêu cầu camera để thí sinh ko bị thiệt thòi thời gian
+                        return; 
                     }
                 } else {
                     overlay.style.display = 'none';
+                    if(!isCameraActive) camModal.classList.add('hidden'); // Tự động ẩn nếu admin gỡ lệnh
                 }
 
                 // Chạy đếm ngược bình thường nếu không bị pause
@@ -1807,6 +1902,7 @@
 
             // Ngừng giám sát vì đã nộp
             clearMonitoringProgress(); 
+            stopCamera();
 
             // Chuyển qua màn hình chấm điểm chờ 5 giây
             changeScreen('scoring-screen');
