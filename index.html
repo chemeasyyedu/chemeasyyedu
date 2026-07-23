@@ -453,14 +453,37 @@
 
             <!-- Modal Chi tiết Giám sát (Admin) -->
             <div id="monitor-detail-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 modal">
-                <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-3xl modal-content max-h-[90vh] flex flex-col">
+                <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-5xl modal-content max-h-[90vh] flex flex-col">
                     <div class="flex justify-between border-b pb-3 mb-4">
                         <h3 class="text-xl font-bold text-blue-800">Chi tiết Thí sinh: <span id="md-name">...</span> (<span id="md-sbd">...</span>)</h3>
                         <button onclick="hideMonitorDetail()" class="text-gray-500 hover:text-red-500 font-bold text-xl">&times;</button>
                     </div>
-                    <div class="flex-grow overflow-y-auto mb-4" id="md-content">
-                        <!-- Chi tiết các câu hỏi sẽ load ở đây -->
+                    
+                    <div class="flex-grow overflow-y-auto mb-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Danh sách câu hỏi -->
+                        <div class="md:col-span-2">
+                            <h4 class="font-bold text-gray-700 text-sm mb-2">Tiến độ làm bài:</h4>
+                            <div id="md-content" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                <!-- Chi tiết các câu hỏi sẽ load ở đây -->
+                            </div>
+                        </div>
+                        
+                        <!-- Khung xem Camera trực tiếp -->
+                        <div class="md:col-span-1 flex flex-col gap-2">
+                            <h4 class="font-bold text-gray-700 text-sm mb-2">Hình ảnh trực tiếp:</h4>
+                            <div class="w-full bg-black rounded-lg aspect-video flex items-center justify-center overflow-hidden border-4 border-gray-700 relative shadow-inner">
+                                <img id="md-live-camera" src="" class="w-full h-full object-cover hidden">
+                                
+                                <div id="md-camera-placeholder" class="text-gray-500 text-xs text-center p-2">
+                                    <svg class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    Chưa có tín hiệu Video
+                                </div>
+                                <span id="md-live-indicator" class="hidden absolute top-2 right-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse">LIVE</span>
+                            </div>
+                            <p class="text-[11px] text-gray-500 text-center mt-1">Lưu ý: Tín hiệu được truyền về mỗi 2.5 giây để tránh quá tải đường truyền hệ thống.</p>
+                        </div>
                     </div>
+
                     <div class="border-t pt-4 flex flex-col gap-3 bg-gray-50 p-3 rounded">
                         <div class="flex justify-between items-center text-sm">
                             <div class="font-medium text-gray-700">
@@ -772,6 +795,8 @@
         
         let isCameraActive = false;
         let localStream = null;
+        let cameraSnapshotInterval = null; // Biến lưu bộ đếm thời gian chụp ảnh ngầm
+        let currentSnapshot = null; // Lưu chuỗi ảnh nén
 
         // Editor state
         let editorExamId = null;
@@ -1478,7 +1503,8 @@
                 lastActive: Date.now(), timeLeft: timeLeft,
                 currQ: currentQuestionIndex + 1,
                 details: detailedAnswers,
-                cameraActive: isCameraActive
+                cameraActive: isCameraActive,
+                snapshot: currentSnapshot // Thêm dữ liệu ảnh vào gói tin truyền ngầm
             };
             setLS(K_MONITOR, monitorData);
         }
@@ -1537,6 +1563,18 @@
                     </div>
                 </div>`;
             }).join('');
+            
+            // Cập nhật ngầm Khung Video nếu Modal Chi tiết đang mở
+            if (currentDetailSbd && !document.getElementById('monitor-detail-modal').classList.contains('hidden')) {
+                const s = monitorData[currentDetailSbd];
+                if(s && s.cameraActive && s.snapshot) {
+                    const imgEl = document.getElementById('md-live-camera');
+                    imgEl.src = s.snapshot;
+                    imgEl.style.display = 'block';
+                    document.getElementById('md-camera-placeholder').style.display = 'none';
+                    document.getElementById('md-live-indicator').style.display = 'block';
+                }
+            }
         }
 
         // --- ADMIN COMMANDS & DETAILS ---
@@ -1589,11 +1627,30 @@
                 return `<div class="p-2 rounded ${bgClass} text-sm"><b>Câu ${idx+1}:</b> ${ansStr}</div>`;
             }).join('');
 
-            document.getElementById('md-content').innerHTML = `<div class="grid grid-cols-4 gap-2">${cHTML}</div>`;
+            document.getElementById('md-content').innerHTML = cHTML;
+            
+            // Render Camera Image ban đầu khi mở Modal
+            const imgEl = document.getElementById('md-live-camera');
+            const placeholder = document.getElementById('md-camera-placeholder');
+            const indicator = document.getElementById('md-live-indicator');
+            if (s.cameraActive && s.snapshot) {
+                imgEl.src = s.snapshot;
+                imgEl.style.display = 'block';
+                placeholder.style.display = 'none';
+                indicator.style.display = 'block';
+            } else {
+                imgEl.style.display = 'none';
+                placeholder.style.display = 'block';
+                indicator.style.display = 'none';
+            }
+
             document.getElementById('monitor-detail-modal').classList.remove('hidden');
         }
         
-        function hideMonitorDetail() { document.getElementById('monitor-detail-modal').classList.add('hidden'); }
+        function hideMonitorDetail() { 
+            document.getElementById('monitor-detail-modal').classList.add('hidden'); 
+            currentDetailSbd = null; // Giải phóng trạng thái để ngưng load video ngầm
+        }
 
         function adminSendCmd(type, durationMins = 0) {
             if(!currentDetailSbd) return;
@@ -1637,6 +1694,23 @@
                     setLS(K_COMMANDS, cmds);
                 }
                 
+                /* TÍNH NĂNG CHỤP ẢNH TỰ ĐỘNG GỬI VỀ ADMIN (MỖI 2.5s) */
+                const canvas = document.createElement('canvas');
+                // Ép kích thước nhỏ (320x240) để tránh tràn bộ nhớ trình duyệt
+                canvas.width = 320; 
+                canvas.height = 240; 
+                const ctx = canvas.getContext('2d');
+                
+                if(cameraSnapshotInterval) clearInterval(cameraSnapshotInterval);
+                cameraSnapshotInterval = setInterval(() => {
+                    if (isCameraActive && videoEl.readyState === videoEl.HAVE_ENOUGH_DATA) {
+                        ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+                        // Nén chất lượng 30% để file cực kỳ nhẹ (~5KB)
+                        currentSnapshot = canvas.toDataURL('image/jpeg', 0.3); 
+                        updateMonitoringProgress();
+                    }
+                }, 2500);
+
                 updateMonitoringProgress();
                 showToast('Camera và Micro đã được bật thành công.', 'success');
             } catch (err) {
@@ -1650,7 +1724,12 @@
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
             }
+            if (cameraSnapshotInterval) {
+                clearInterval(cameraSnapshotInterval);
+                cameraSnapshotInterval = null;
+            }
             isCameraActive = false;
+            currentSnapshot = null;
             document.getElementById('camera-preview-container').style.display = 'none';
         }
 
