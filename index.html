@@ -217,7 +217,7 @@
     </style>
 </head>
 <body>
-
+    <!-- -->
     <!-- Khung thông báo Toast -->
     <div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2"></div>
 
@@ -232,18 +232,20 @@
     <div id="banned-screen" class="screen flex-col items-center justify-center p-4 bg-gray-900 text-white z-50 fixed inset-0">
         <svg class="w-24 h-24 text-red-500 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
         <h1 class="text-4xl font-bold mb-4 text-red-500 text-center">BẠN ĐÃ BỊ ĐÌNH CHỈ THI</h1>
-        <p class="text-lg text-gray-300 text-center mb-8">Vi phạm quy chế phòng thi. Hệ thống đã khóa bài thi của bạn và ghi nhận 0 điểm.</p>
-        <button onclick="changeScreen('login-screen')" class="bg-gray-700 hover:bg-gray-600 px-6 py-2 rounded font-bold">Về trang chủ</button>
+        <p class="text-lg text-gray-300 text-center mb-8">Vi phạm quy chế phòng thi. Hệ thống đã khóa bài thi của bạn và ghi nhận 0 điểm. Nếu có khiếu nại xin vui lòng liên hệ cho Giám thị!</p>
+        <button onclick="changeScreen('login-screen')" class="bg-gray-700 hover:bg-gray-600 px-6 py-2 rounded font-bold">VỀ TRANG CHỦ</button>
     </div>
 
+    <!-- -->
     <!-- MÀN HÌNH CHẤM ĐIỂM (LOADING 5-8s) -->
     <div id="scoring-screen" class="screen flex-col items-center justify-center p-4 bg-white z-40 fixed inset-0">
         <div class="scoring-spinner mb-6"></div>
         <h2 class="text-2xl font-bold text-blue-800 mb-2">Đang nộp bài...</h2>
-        <p class="text-gray-600 pulse-text font-medium text-lg">Hệ thống đang xử lý và phân tích điểm số của bạn. Xin vui lòng đợi trong giây lát...</p>
-        <p class="text-gray-400 text-sm mt-2">KHÔNG ĐƯỢC THOÁT KHỎI MÀN HÌNH! NẾU KHÔNG HIỆN ĐIỂM SỐ VUI LÒNG LIÊN HỆ ĐẾN MAIL( chemeasyyeduction@gmail.com)</p>
+        <p class="text-gray-600 pulse-text font-medium text-lg">Hệ thống đang xử lý và phân tích điểm số của bạn</p>
+        <p class="text-gray-400 text-sm mt-2">THÍ SINH KHÔNG THOÁT KHỎI TRANG THI KHI CHƯA CÓ SỰ CHO PHÉP TỪ GIÁM THỊ!</p>
     </div>
 
+    <!-- -->
     <!-- 1. GIAO DIỆN ĐĂNG NHẬP -->
     <div id="login-screen" class="screen active-screen items-center justify-center">
         <div class="custom-login-container">
@@ -252,11 +254,11 @@
             </div>
             <div class="login-header-text">
                 <h1>HỆ THỐNG BỒI DƯỠNG VÀ LUYỆN THI CHEMEASYY</h1>
-                <h2>Mở trí- Luyện tài- Dựng nhân</h2>
+                 <h2>Mở trí- Luyện tài- Dựng nhân</h2>
                 <h3>BAN KHẢO THÍ VÀ ĐÁNH GIÁ CHẤT LƯỢNG</h3>
             </div>
             <div class="login-card-wrapper">
-                <div class="login-card-title">ĐĂNG NHẬP HỆ THỐNG</div>
+                <div class="login-card-title">ĐĂNG NHẬP HỆ THỐNG TRANG THI</div>
                 <form id="login-form" class="login-form-grid">
                     <div class="custom-input-group">
                         <label for="ma_thi_sinh">Mã số Hệ thống/ Số báo danh</label>
@@ -265,21 +267,22 @@
                     <div class="custom-input-group">
                         <label for="dot_thi">Đợt thi/ Kỳ thi</label>
                         <select id="dot_thi" name="dot_thi" class="custom-select">
-                            <option>KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH KỲ</option>
-                            <option>KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG TƯ DUY</option>
-                            <option>KỲ THI THPTG 2027</option>
-                             <option>KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG THÁNG</option>
-                             <option>KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG QUÝ</option>
-                             <option>...</option>
+                        <option>KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH KỲ 2026</option>
+                              <option>KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG TUẦN</option>
+                              <option>KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG THÁNG</option>
+                            <option>KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG QUÝ</option
+                   <option>KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG TƯ DUY</option>
+                              <option>KỲ THI TỐT NGHIỆP THPTQG2027</option
+                                <option>KỲ THI ĐẠI HỌC NĂM 2027</option
+                                <option>...</option
                         </select>
                     </div>
                     <div class="custom-input-group">
                         <label for="ho_ten">Họ và tên thí sinh</label>
-                        <input type="text" id="ho_ten" name="ho_ten" class="custom-input" placeholder="Nhập đầy đủ Họ và tên...">
+                        <input type="text" id="ho_ten" name="ho_ten" class="custom-input" placeholder="Nhập ĐẦY ĐỦ Họ và tên...">
                     </div>
                     <div class="custom-input-group">
                         <label for="ngay_sinh">Ngày sinh</label>
-                        <!-- Thay đổi ô ngày sinh thành chọn lịch -->
                         <input type="date" id="ngay_sinh" name="ngay_sinh" class="custom-input">
                     </div>
                     <div class="custom-input-group">
@@ -287,7 +290,7 @@
                         <input type="password" id="mat_khau" name="mat_khau" class="custom-input">
                     </div>
                     <div class="custom-input-group">
-                        <button type="button" onclick="login()" class="custom-btn-login">ĐĂNG NHẬP</button>
+                        <button type="button" onclick="login()" class="custom-btn-login">ĐĂNG NHẬP</button>w            
                     </div>
                     <div style="grid-column: 1 / -1; text-align: center;">
                         <p id="login-error" class="text-red-500 text-sm hidden font-medium bg-red-100 p-2 rounded">Thông tin đăng nhập không hợp lệ.</p>
@@ -297,10 +300,11 @@
         </div>
     </div>
 
+    <!-- -->
     <!-- 2. GIAO DIỆN CHỌN MÔN (THÍ SINH) -->
     <div id="subject-selection-screen" class="screen items-center justify-center p-4">
         <div class="card subject-card p-6">
-            <h1 class="text-center text-3xl font-bold mb-8 text-gray-800">KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG</h1>
+            <h1 id="subject-screen-title" class="text-center text-3xl font-bold mb-8 text-gray-800">KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG</h1>
             
             <div class="grid md:grid-cols-2 gap-6 mb-6">
                 <div class="p-4 bg-blue-50 rounded-lg">
@@ -328,6 +332,7 @@
         </div>
     </div>
 
+    <!-- -->
     <!-- Modal chọn Sub-môn -->
     <div id="subject-option-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 modal">
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm modal-content">
@@ -361,26 +366,27 @@
         </div>
     </div>
 
+    <!-- -->
     <!-- 3. GIAO DIỆN ADMIN TỔNG HỢP -->
     <div id="admin-dashboard-screen" class="screen flex-col bg-gray-100">
         <div class="bg-white shadow">
             <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-               <h1 class="text-2xl font-bold text-blue-800"CHEMEASYY EDUCATION🧪</h1>
-                <h1 class="text-2xl font-bold text-blue-800"HỆ THỐNG QUẢN LÝ THÍ SINH VÀ ĐIỂM THI</h1>
+                <h1 class="text-2xl font-bold text-blue-800">CHEMEASYY EDUCATION</h1>
+                <h1 class="text-2xl font-bold text-blue-800">HỆ THỐNG QUẢN LÝ THÍ SINH VÀ ĐIỂM THI</h1>
                 <button onclick="changeScreen('login-screen')" class="btn-secondary border border-gray-300 text-sm">Đăng xuất</button>
             </div>
             <!-- Tabs Navigation -->
             <div class="max-w-7xl mx-auto px-4 flex space-x-2 border-b mt-4">
-                <button class="admin-tab active" onclick="switchAdminTab('tab-exams', this)">Quản lý và Nhập liệu Đề Thi</button>
-                <button class="admin-tab" onclick="switchAdminTab('tab-results', this)">Kết quả Thi của Thí sinh</button>
+                <button class="admin-tab active" onclick="switchAdminTab('tab-exams', this)">Quản lý Đề Thi</button>
+                <button class="admin-tab" onclick="switchAdminTab('tab-results', this)">Kết quả Thi</button>
                 <button class="admin-tab" onclick="switchAdminTab('tab-monitoring', this)">Giám sát Phòng Thi</button>
-                <button class="admin-tab" onclick="switchAdminTab('tab-accounts', this)">Tài khoản Đăng nhập của Thí sinh</button>
+                <button class="admin-tab" onclick="switchAdminTab('tab-accounts', this)">Tài khoản Thí sinh</button>
             </div>
         </div>
 
         <div class="max-w-7xl mx-auto w-full p-4 flex-grow">
             
-            <!-- TAB 1: Quản lý và Nhập liệu Đề Thi -->
+            <!-- TAB 1: QUẢN LÝ ĐỀ THI -->
             <div id="tab-exams" class="admin-content active">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-gray-700">Kho Đề Thi</h2>
@@ -390,7 +396,7 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên đề thi/ Đợt thi</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên đề thi</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Môn học</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Lớp</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số câu</th>
@@ -442,6 +448,7 @@
                 </div>
             </div>
 
+            <!-- -->
             <!-- TAB 3: GIÁM SÁT PHÒNG THI -->
             <div id="tab-monitoring" class="admin-content">
                 <div class="flex justify-between items-center mb-4">
@@ -523,6 +530,7 @@
                 </div>
             </div>
 
+            <!-- -->
             <!-- TAB 4: TÀI KHOẢN THÍ SINH -->
             <div id="tab-accounts" class="admin-content">
                 <div class="grid md:grid-cols-3 gap-6">
@@ -567,6 +575,7 @@
         </div>
     </div>
 
+    <!-- -->
     <!-- 4. GIAO DIỆN TẠO ĐỀ THI (EXAM EDITOR) -->
     <div id="exam-editor-screen" class="screen flex-col p-4 bg-gray-50">
         <div class="max-w-7xl mx-auto w-full">
@@ -644,6 +653,7 @@
         </div>
     </div>
 
+    <!-- -->
     <!-- 5. GIAO DIỆN LÀM BÀI (THÍ SINH) -->
     <div id="exam-screen" class="screen flex-col relative">
         <!-- Khu vực hiển thị Camera local (ẩn mặc định) -->
@@ -725,6 +735,7 @@
         </div>
     </div>
 
+    <!-- -->
     <!-- 6. GIAO DIỆN KẾT QUẢ -->
     <div id="result-screen" class="screen flex-col items-center justify-center p-4">
         <div class="card result-box p-8 w-full max-w-md text-center border-4 border-green-600 rounded-xl">
@@ -754,6 +765,7 @@
         </div>
     </div>
 
+    <!-- -->
     <script>
         // --- CONSTANTS & CONFIG ---
         const ADMIN_CODE = '22122007';
@@ -788,7 +800,7 @@
         }
 
         let currentScreen = 'login-screen';
-        let userInfo = { ho_ten: '', ma_thi_sinh: '', examId: null, exam_code: null, class_code: null, subject_name: null }; 
+        let userInfo = { ho_ten: '', ma_thi_sinh: '', examId: null, exam_code: null, class_code: null, subject_name: null, dot_thi: null }; 
         
         // Exam state
         let activeExamConfig = null; 
@@ -807,6 +819,74 @@
         let editorExamId = null;
         let editorQuestions = [];
         let editorExamCodes = ['0000'];
+
+        const K_SESSION = 'exam_active_session_state_v5';
+
+        function saveCurrentSessionState() {
+            const state = {
+                currentScreen,
+                userInfo,
+                activeExamConfig,
+                currentQuestionIndex,
+                timeLeft,
+                isCameraActive
+            };
+            sessionStorage.setItem(K_SESSION, JSON.stringify(state));
+        }
+
+        function restoreSessionState() {
+            const data = sessionStorage.getItem(K_SESSION);
+            if (!data) return false;
+            try {
+                const state = JSON.parse(data);
+                if (state.currentScreen && state.currentScreen !== 'login-screen' && state.currentScreen !== 'banned-screen') {
+                    currentScreen = state.currentScreen;
+                    userInfo = state.userInfo || userInfo;
+                    activeExamConfig = state.activeExamConfig || activeExamConfig;
+                    currentQuestionIndex = state.currentQuestionIndex || 0;
+                    timeLeft = state.timeLeft || 0;
+
+                    // Khôi phục theo màn hình hiện tại
+                    if (currentScreen === 'exam-screen' && activeExamConfig) {
+                        document.getElementById('exam-ho_ten').textContent = userInfo.ho_ten;
+                        document.getElementById('exam-sbd').textContent = userInfo.ma_thi_sinh;
+                        document.getElementById('exam-subject-display').textContent = userInfo.subject_name;
+                        document.getElementById('exam-class-display').textContent = userInfo.class_code;
+                        document.getElementById('exam-code-display').textContent = userInfo.exam_code;
+                        
+                        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+                        document.getElementById('exam-screen').classList.add('active-screen');
+                        document.querySelector('.bg-animated').style.display = 'none';
+                        
+                        document.getElementById('total-questions').textContent = activeExamConfig.questions.length;
+                        updateQuestionNavigation();
+                        renderQuestion(currentQuestionIndex);
+                        
+                        if (timerInterval) clearInterval(timerInterval);
+                        timerInterval = setInterval(examTimerTick, 1000);
+
+                        if (state.isCameraActive) {
+                            // Nhắc nhở cấp lại camera nếu reload trong lúc đang thi có cam
+                            setTimeout(() => {
+                                document.getElementById('camera-request-modal').classList.remove('hidden');
+                            }, 500);
+                        }
+                        return true;
+                    } else if (currentScreen === 'subject-selection-screen') {
+                        changeScreen('subject-selection-screen');
+                        return true;
+                    } else if (currentScreen === 'admin-dashboard-screen') {
+                        changeScreen('admin-dashboard-screen');
+                        return true;
+                    } else if (currentScreen === 'exam-editor-screen') {
+                        // Nếu đang sửa đề mà lỡ F5, an toàn nhất là trả về bảng điều khiển admin
+                        changeScreen('admin-dashboard-screen'); 
+                        return true;
+                    }
+                }
+            } catch(e) { console.error(e); }
+            return false;
+        }
 
         const DEFAULT_SUBJECTS = [
             { name: 'Ngữ văn', key: 'NGUVAN' }, { name: 'Toán', key: 'TOAN' },
@@ -840,7 +920,7 @@
             }
         }
 
-        // --- UTILS ---
+        //        // --- UTILS ---
         const generateUUID = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
         const getLS = (key, def = []) => { const d = localStorage.getItem(key); return d ? JSON.parse(d) : def; };
         const setLS = (key, val) => localStorage.setItem(key, JSON.stringify(val));
@@ -870,6 +950,7 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
             document.getElementById(newScreenId).classList.add('active-screen');
             currentScreen = newScreenId;
+            saveCurrentSessionState(); // Lưu lại mỗi khi chuyển màn hình
 
             // Xử lý background của đăng nhập
             if (newScreenId === 'login-screen' || newScreenId === 'banned-screen') {
@@ -892,6 +973,12 @@
             if (newScreenId === 'subject-selection-screen') {
                 document.getElementById('info-ho_ten').textContent = userInfo.ho_ten;
                 document.getElementById('info-sbd').textContent = userInfo.ma_thi_sinh;
+                
+                // Hiển thị tên Kỳ thi động từ lúc Login
+                if (userInfo.dot_thi) {
+                    document.getElementById('subject-screen-title').textContent = userInfo.dot_thi.toUpperCase();
+                }
+                
                 renderSubjectList(); 
             }
         }
@@ -903,15 +990,17 @@
             document.getElementById(tabId).classList.add('active');
         }
 
-        // --- LOGIN LOGIC ---
+        //        // --- LOGIN LOGIC ---
         function login() {
             const maSo = document.getElementById('ma_thi_sinh').value.trim();
             const hoTen = document.getElementById('ho_ten').value.trim();
             const matKhau = document.getElementById('mat_khau').value;
+            const dotThi = document.getElementById('dot_thi').value;
             const err = document.getElementById('login-error');
             err.classList.add('hidden');
 
             if (maSo === ADMIN_CODE && matKhau === ADMIN_PASS) {
+                userInfo = { ho_ten: 'Admin', ma_thi_sinh: 'ADMIN', dot_thi: dotThi };
                 changeScreen('admin-dashboard-screen');
                 return;
             }
@@ -925,12 +1014,12 @@
             const student = accounts.find(a => a.sbd === maSo && a.password === matKhau);
 
             if (student) {
-                userInfo = { ho_ten: student.name, ma_thi_sinh: student.sbd };
+                userInfo = { ho_ten: student.name, ma_thi_sinh: student.sbd, dot_thi: dotThi };
                 changeScreen('subject-selection-screen'); return;
             }
             
             if (matKhau === STUDENT_DEFAULT_PASS) {
-                userInfo = { ho_ten: hoTen || 'Thí sinh tự do', ma_thi_sinh: maSo };
+                userInfo = { ho_ten: hoTen || 'Thí sinh tự do', ma_thi_sinh: maSo, dot_thi: dotThi };
                 changeScreen('subject-selection-screen'); return;
             }
 
@@ -938,7 +1027,7 @@
             err.classList.remove('hidden');
         }
 
-        // --- STUDENT: SUBJECT SELECTION ---
+        //        // --- STUDENT: SUBJECT SELECTION ---
         function renderSubjectList() {
             const container = document.getElementById('subject-list');
             const subjects = getSubjects();
@@ -1013,7 +1102,7 @@
             initExamEngine();
         }
 
-        // --- ADMIN: EXAM MANAGEMENT ---
+        //        // --- ADMIN: EXAM MANAGEMENT ---
         function loadAdminExamsList() {
             const exams = getLS(K_EXAMS);
             const subjects = getSubjects();
@@ -1073,7 +1162,7 @@
             }
         }
 
-        // --- EDITOR LOGIC ---
+        //        // --- EDITOR LOGIC ---
         function renderExamCodesList() {
             const c = document.getElementById('exam_codes_list_editor');
             c.innerHTML = editorExamCodes.filter(code => code !== '0000').map(code => `
@@ -1248,7 +1337,7 @@
             }
         }
 
-        // --- TÍCH HỢP AI GEMINI PHÂN TÍCH FILE WORD ---
+        //        // --- TÍCH HỢP AI GEMINI PHÂN TÍCH FILE WORD ---
         async function handleAIWordImport(event) {
             const file = event.target.files[0];
             if(!file) return;
@@ -1362,7 +1451,7 @@
         }
 
 
-        // --- ADMIN: ACCOUNTS (EXCEL) ---
+        //        // --- ADMIN: ACCOUNTS (EXCEL) ---
         function renderAccountsTable() {
             const accs = getLS(K_ACCOUNTS);
             document.getElementById('account_count').textContent = accs.length;
@@ -1430,7 +1519,7 @@
         }
 
 
-        // --- ADMIN: RESULTS & EXPORT ---
+        //        // --- ADMIN: RESULTS & EXPORT ---
         function loadStudentResults() {
             const results = getLS(K_RESULTS);
             const exams = [...new Set(results.map(r => r.examName))];
@@ -1485,7 +1574,7 @@
         }
 
 
-        // --- REAL-TIME MONITORING (Ngầm ghi nhận) ---
+        //        // --- REAL-TIME MONITORING (Ngầm ghi nhận) ---
         function updateMonitoringProgress() {
             if(!activeExamConfig || !userInfo.ma_thi_sinh) return;
             // Đếm số câu đã làm
@@ -1582,7 +1671,7 @@
             }
         }
 
-        // --- ADMIN COMMANDS & DETAILS ---
+        //        // --- ADMIN COMMANDS & DETAILS ---
         let currentDetailSbd = null;
         function openMonitorDetail(sbd) {
             const monitorData = getLS(K_MONITOR, {});
@@ -1682,7 +1771,7 @@
             loadMonitoringData(); // Refresh Grid
         }
 
-        // --- CAMERA LOGIC ---
+        //        // --- CAMERA LOGIC ---
         async function acceptCameraRequest() {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -1738,7 +1827,7 @@
             document.getElementById('camera-preview-container').style.display = 'none';
         }
 
-        // --- PHÚC KHẢO ---
+        //        // --- PHÚC KHẢO ---
         function showAppealsModal() {
             const list = getLS(K_APPEALS, []);
             const container = document.getElementById('appeals-list');
@@ -1774,8 +1863,7 @@
             showToast('Đã gửi yêu cầu đến Giám thị!', 'success');
         }
 
-
-        // --- STUDENT EXAM ENGINE ---
+        //        // --- STUDENT EXAM ENGINE ---
         function initExamEngine() {
             currentQuestionIndex = 0; timeLeft = activeExamConfig.timeLimit;
             activeExamConfig.questions.forEach(q => {
@@ -1788,45 +1876,48 @@
             updateQuestionNavigation(); renderQuestion(0);
             
             if(timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                // Kiểm tra lệnh Admin (Pause / Ban / Camera)
-                const cmds = getLS(K_COMMANDS, {});
-                const myCmd = cmds[userInfo.ma_thi_sinh];
-                const overlay = document.getElementById('student-pause-overlay');
-                const camModal = document.getElementById('camera-request-modal');
-                const now = Date.now();
+            timerInterval = setInterval(examTimerTick, 1000);
+            saveCurrentSessionState();
+        }
 
-                if(myCmd) {
-                    if(myCmd.type === 'ban') {
-                        forceSubmitBanned(); return;
-                    } else if(myCmd.type === 'pause' && now < myCmd.until) {
-                        const secLeft = Math.ceil((myCmd.until - now) / 1000);
-                        document.getElementById('pause-countdown').textContent = secLeft;
-                        overlay.style.display = 'flex';
-                        return; // BỎ QUA countdown thời gian làm bài (đóng băng thời gian)
-                    } else if (myCmd.type === 'pause' && now >= myCmd.until) {
-                        // Hết hạn pause tự động xóa lệnh
-                        delete cmds[userInfo.ma_thi_sinh];
-                        setLS(K_COMMANDS, cmds);
-                        overlay.style.display = 'none';
-                    } else if (myCmd.type === 'request_camera' && !isCameraActive) {
-                        camModal.classList.remove('hidden');
-                        // Tạm dừng bộ đếm thời gian khi đang yêu cầu camera để thí sinh ko bị thiệt thòi thời gian
-                        return; 
-                    }
-                } else {
+        function examTimerTick() {
+            // Kiểm tra lệnh Admin (Pause / Ban / Camera)
+            const cmds = getLS(K_COMMANDS, {});
+            const myCmd = cmds[userInfo.ma_thi_sinh];
+            const overlay = document.getElementById('student-pause-overlay');
+            const camModal = document.getElementById('camera-request-modal');
+            const now = Date.now();
+
+            if(myCmd) {
+                if(myCmd.type === 'ban') {
+                    forceSubmitBanned(); return;
+                } else if(myCmd.type === 'pause' && now < myCmd.until) {
+                    const secLeft = Math.ceil((myCmd.until - now) / 1000);
+                    document.getElementById('pause-countdown').textContent = secLeft;
+                    overlay.style.display = 'flex';
+                    return; // BỎ QUA countdown thời gian làm bài (đóng băng thời gian)
+                } else if (myCmd.type === 'pause' && now >= myCmd.until) {
+                    // Hết hạn pause tự động xóa lệnh
+                    delete cmds[userInfo.ma_thi_sinh];
+                    setLS(K_COMMANDS, cmds);
                     overlay.style.display = 'none';
-                    if(!isCameraActive) camModal.classList.add('hidden'); // Tự động ẩn nếu admin gỡ lệnh
+                } else if (myCmd.type === 'request_camera' && !isCameraActive) {
+                    camModal.classList.remove('hidden');
+                    return; 
                 }
+            } else {
+                overlay.style.display = 'none';
+                if(!isCameraActive) camModal.classList.add('hidden');
+            }
 
-                // Chạy đếm ngược bình thường nếu không bị pause
-                timeLeft--;
-                const m = String(Math.floor(timeLeft/60)).padStart(2,'0');
-                const s = String(timeLeft%60).padStart(2,'0');
-                document.getElementById('timer').textContent = `${m}:${s}`;
-                updateMonitoringProgress(); 
-                if(timeLeft <= 0) executeSubmission();
-            }, 1000);
+            // Chạy đếm ngược bình thường nếu không bị pause
+            timeLeft--;
+            const m = String(Math.floor(timeLeft/60)).padStart(2,'0');
+            const s = String(timeLeft%60).padStart(2,'0');
+            document.getElementById('timer').textContent = `${m}:${s}`;
+            updateMonitoringProgress();
+            saveCurrentSessionState(); // Cập nhật thời gian vào session storage định kỳ
+            if(timeLeft <= 0) executeSubmission();
         }
 
         // Bị Admin cưỡng chế nộp bài (0 điểm)
@@ -1895,25 +1986,28 @@
                     console.error('MathJax error:', err);
                 });
             }
-
-            document.querySelectorAll('.question-nav-item').forEach(b => b.classList.remove('active'));
-            document.getElementById(`nav-q-${index}`).classList.add('active');
         }
 
-        function ansMC(qIdx, optIdx) { activeExamConfig.questions[qIdx].selected = optIdx; updateQuestionNavigation(); }
+        function ansMC(qIdx, optIdx) { 
+            activeExamConfig.questions[qIdx].selected = optIdx; 
+            updateQuestionNavigation(); 
+            saveCurrentSessionState();
+        }
         function ansTF(qIdx, subIdx, val) {
             if(!activeExamConfig.questions[qIdx].selected) activeExamConfig.questions[qIdx].selected = [null,null,null,null];
             activeExamConfig.questions[qIdx].selected[subIdx] = val;
             updateQuestionNavigation();
+            saveCurrentSessionState();
         }
         function ansNum(e, qIdx, subIdx) {
             let val = e.target.value.trim().toUpperCase();
             activeExamConfig.questions[qIdx].selected[subIdx] = val;
             updateQuestionNavigation();
+            saveCurrentSessionState();
         }
 
-        function nextQuestion() { renderQuestion((currentQuestionIndex + 1) % activeExamConfig.questions.length); }
-        function prevQuestion() { renderQuestion((currentQuestionIndex - 1 + activeExamConfig.questions.length) % activeExamConfig.questions.length); }
+        function nextQuestion() { renderQuestion((currentQuestionIndex + 1) % activeExamConfig.questions.length); saveCurrentSessionState(); }
+        function prevQuestion() { renderQuestion((currentQuestionIndex - 1 + activeExamConfig.questions.length) % activeExamConfig.questions.length); saveCurrentSessionState(); }
 
         function updateQuestionNavigation() {
             const nav = document.getElementById('question-nav');
@@ -1939,6 +2033,7 @@
 
         function executeSubmission() {
             clearInterval(timerInterval);
+            sessionStorage.removeItem(K_SESSION); // Xóa session khi đã nộp bài thành công
             let score = 0, correct = 0, answered = 0;
             
             activeExamConfig.questions.forEach(q => {
@@ -2006,6 +2101,14 @@
                 changeScreen('result-screen');
             }, 5000); // Đợi 5s
         }
+
+        // Khởi động khi tải lại trang
+        window.onload = function() {
+            const restored = restoreSessionState();
+            if (!restored) {
+                changeScreen('login-screen');
+            }
+        };
 
     </script>
 </body>
