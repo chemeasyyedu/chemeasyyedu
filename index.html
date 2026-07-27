@@ -3,64 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHEMEASYYEDU- TRANG KHẢO THÍ ĐGCL VÀ NL</title>
+    <title>CHEMEASYY EDUCATION - KHẢO THÍ ĐÁNH GIÁ CHẤT LƯỢNG</title>
+    
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <!-- Thư viện SheetJS để xuất/nhập Excel -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <!-- Thư viện Mammoth JS để đọc file Word -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
 
-    <!-- TÍCH HỢP FIREBASE (DUAL-STORAGE MODE) -->
+    <!-- Thư viện MathJax để render LaTeX -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+            startup: { typeset: false } // Tắt tự động render lúc load trang
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- KHỞI TẠO FIREBASE CLOUD DATABASE (Chuẩn v11) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CẤU HÌNH FIREBASE (Dán key thật vào đây khi muốn chạy Online, nếu không sẽ tự chạy Offline)
-      const firebaseConfig = {
-  apiKey: "AIzaSyCbNC7RSwD_hhacqVYQkYSVX-RCdIwNSnc",
-  authDomain: "he-thong-thi-2026-cee.firebaseapp.com",
-  projectId: "he-thong-thi-2026-cee",
-  storageBucket: "he-thong-thi-2026-cee.firebasestorage.app",
-  messagingSenderId: "323776019052",
-  appId: "1:323776019052:web:74b07dea05a5f0e7493649",
-  measurementId: "G-1V75EG9499"
-};
-
-        window.isCloud = firebaseConfig.apiKey !== "YOUR_API_KEY";
-
-        window.fallbackToLocal = function() {
-            window.isCloud = false;
-            document.getElementById('db-loading-overlay').style.display = 'none';
-            window.isDbReady = true;
-            console.warn("Chạy chế độ LocalStorage (Không có Firebase API Key).");
+        // MÃ CẤU HÌNH FIREBASE CỦA BẠN
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbNC7RSwD_hhacqVYQkYSVX-RCdIwNSnc",
+            authDomain: "he-thong-thi-2026-cee.firebaseapp.com",
+            projectId: "he-thong-thi-2026-cee",
+            storageBucket: "he-thong-thi-2026-cee.firebasestorage.app",
+            messagingSenderId: "323776019052",
+            appId: "1:323776019052:web:74b07dea05a5f0e7493649",
+            measurementId: "G-1V75EG9499"
         };
 
-        if (window.isCloud) {
-            try {
-                const app = initializeApp(firebaseConfig);
-                window.db = getFirestore(app);
-                window.auth = getAuth(app);
-                
-                window.fb_doc = doc; window.fb_setDoc = setDoc; window.fb_getDoc = getDoc;
-                window.fb_collection = collection; window.fb_getDocs = getDocs; 
-                window.fb_deleteDoc = deleteDoc; window.fb_onSnapshot = onSnapshot;
+        try {
+            const app = initializeApp(firebaseConfig);
+            window.db = getFirestore(app);
+            window.auth = getAuth(app);
+            window.fb = { doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, getDocs };
 
-                signInAnonymously(window.auth).then(() => {
-                    document.getElementById('db-loading-overlay').style.display = 'none';
-                    window.isDbReady = true;
-                }).catch((err) => {
-                    console.error("Lỗi Firebase Auth (Key không hợp lệ), chuyển sang Local:", err);
-                    window.fallbackToLocal();
-                });
-            } catch(e) {
-                console.error("Lỗi khởi tạo Firebase:", e);
-                window.fallbackToLocal();
-            }
-        } else {
-            window.fallbackToLocal();
+            // Đăng nhập ẩn danh để kết nối Đám mây
+            signInAnonymously(window.auth).then(() => {
+                document.getElementById('db-loading-overlay').style.display = 'none';
+                window.isDbReady = true;
+                if (window.onFirebaseReady) window.onFirebaseReady();
+            }).catch((err) => {
+                console.error("Lỗi xác thực Firebase:", err);
+                alert("Lỗi kết nối máy chủ Đám mây!\nVui lòng vào Firebase Console -> Authentication -> Bật chế độ Anonymous (Ẩn danh).");
+            });
+        } catch(e) {
+            console.error("Lỗi khởi tạo Firebase:", e);
         }
     </script>
 
@@ -71,97 +67,39 @@
             --btn-blue: #0000cd;
             --input-bg: #ccf3f6;
         }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color-main); overflow-x: hidden; }
+        .no-select { user-select: none; -webkit-user-select: none; -moz-user-select: none; }
         
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color-main);
-            overflow-x: hidden;
-        }
-
-        /* Lớp CSS chống bôi đen copy */
-        .no-select {
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-        }
+        #db-loading-overlay { position: fixed; inset: 0; background: #fff; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .big-spinner { border: 6px solid #f3f3f3; border-top: 6px solid #3b82f6; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
         
-        #db-loading-overlay {
-            position: fixed; inset: 0; background: #fff; z-index: 99999; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        
-        /* Hiệu ứng bong bóng cho Background */
-        .bg-animated {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-            background: linear-gradient(135deg, #dcf7fa 0%, #b4e8ed 100%);
-            overflow: hidden;
-        }
-        .bubbles {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; margin: 0; padding: 0;
-        }
-        .bubbles li {
-            position: absolute; list-style: none; display: block;
-            width: 20px; height: 20px; background: rgba(255, 255, 255, 0.4);
-            bottom: -150px; animation: bubble-rise 25s infinite linear; border-radius: 50%;
-        }
+        .bg-animated { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; background: linear-gradient(135deg, #dcf7fa 0%, #b4e8ed 100%); overflow: hidden; }
+        .bubbles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; margin: 0; padding: 0; }
+        .bubbles li { position: absolute; list-style: none; display: block; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.4); bottom: -150px; animation: bubble-rise 25s infinite linear; border-radius: 50%; }
         .bubbles li:nth-child(1){ left: 10%; width: 80px; height: 80px; animation-delay: 0s; }
         .bubbles li:nth-child(2){ left: 20%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 17s; }
         .bubbles li:nth-child(3){ left: 25%; width: 50px; height: 50px; animation-delay: 4s; }
         .bubbles li:nth-child(4){ left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
         .bubbles li:nth-child(5){ left: 70%; width: 30px; height: 30px; animation-delay: 3s; }
-        .bubbles li:nth-child(6){ left: 80%; width: 100px; height: 100px; animation-delay: 3s; background: rgba(255, 255, 255, 0.2); }
-        .bubbles li:nth-child(7){ left: 32%; width: 120px; height: 120px; animation-delay: 7s; }
-        .bubbles li:nth-child(8){ left: 55%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 30s; }
-        .bubbles li:nth-child(9){ left: 25%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
-        .bubbles li:nth-child(10){ left: 90%; width: 70px; height: 70px; animation-delay: 11s; }
-
-        @keyframes bubble-rise {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
-        }
+        @keyframes bubble-rise { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; } }
 
         .screen { display: none; min-height: 100vh; }
         .active-screen { display: flex; }
         
-        .custom-login-container {
-            width: 100%; max-width: 900px; margin: 0 auto; padding: 1.5rem; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            min-height: 100vh; z-index: 10;
-        }
-
+        .custom-login-container { width: 100%; max-width: 900px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; z-index: 10; }
         .login-header-text { text-align: center; margin-bottom: 1.5rem; }
         .login-header-text h1 { color: #006b5e; font-weight: 800; font-size: 1.5rem; margin-bottom: 0.25rem; }
-        .login-header-text h2 { color: #333; font-weight: 600; font-size: 1.25rem; }
-
-        .login-card-wrapper {
-            background-color: white; border-radius: 2rem; border: 12px solid var(--border-yellow); 
-            width: 100%; padding: 0; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .login-card-title {
-            background-color: #f8f9fa; text-align: center; padding: 1rem;
-            border-bottom: 1px solid #eee; font-weight: 700; font-size: 1.25rem; color: #004d40;
-        }
-
+        .login-header-text h2 { color: #006b5e; font-weight: 700; font-size: 1.25rem; margin-bottom: 0.25rem; }
+        .login-header-text h3 { color: #333; font-weight: 600; font-size: 1.1rem; }
+        .login-card-wrapper { background-color: white; border-radius: 2rem; border: 12px solid var(--border-yellow); width: 100%; padding: 0; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .login-card-title { background-color: #f8f9fa; text-align: center; padding: 1rem; border-bottom: 1px solid #eee; font-weight: 700; font-size: 1.25rem; color: #004d40; }
         .login-form-grid { padding: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem 2rem; align-items: end; }
         .custom-input-group { display: flex; flex-direction: column; text-align: left; }
         .custom-input-group label { margin-bottom: 0.5rem; font-size: 0.95rem; color: #333; font-weight: 600; }
-        .custom-input, .custom-select {
-            background-color: var(--input-bg); border: 2px solid #a0d8de;
-            padding: 0.8rem 1rem; border-radius: 0.5rem; width: 100%; outline: none; transition: border-color 0.2s;
-        }
-        .custom-input:focus, .custom-select:focus { border-color: #008080; box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.1); }
-        input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; filter: invert(0.4) sepia(1) saturate(3) hue-rotate(130deg); }
-
-        .custom-btn-login {
-            background-color: var(--btn-blue); color: white; font-weight: 900;
-            font-size: 1.3rem; padding: 0.8rem 2rem; border-radius: 0.5rem;
-            border: none; width: 100%; cursor: pointer; text-transform: uppercase;
-            letter-spacing: 1px; box-shadow: 0 6px 12px rgba(0,0,139,0.3); transition: all 0.2s;
-        }
-        .custom-btn-login:hover { background-color: #00008b; transform: translateY(-2px); }
-
+        .custom-input, .custom-select { background-color: var(--input-bg); border: 2px solid #a0d8de; padding: 0.8rem 1rem; border-radius: 0.5rem; width: 100%; outline: none; transition: border-color 0.2s; }
+        .custom-btn-login { background-color: var(--btn-blue); color: white; font-weight: 900; font-size: 1.3rem; padding: 0.8rem 2rem; border-radius: 0.5rem; border: none; width: 100%; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 6px 12px rgba(0,0,139,0.3); transition: all 0.2s; }
         .logo-top { width: 100%; max-width: 150px; height: auto; margin-bottom: 1rem; display: flex; justify-content: center; }
+        
         .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
         .subject-card { width: 100%; max-width: 1100px; }
         .exam-panel { max-height: calc(100vh - 8rem); overflow-y: auto; }
@@ -169,29 +107,12 @@
         .question-nav-item.active { background-color: #3b82f6; color: white; font-weight: 700; }
         .question-nav-item.answered { background-color: #10b981; color: white; }
         
-        .btn-primary { background-color: #3b82f6; color: white; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600; transition: background-color 0.2s; cursor: pointer; }
-        .btn-primary:hover { background-color: #2563eb; }
-        .btn-secondary { background-color: #f3f4f6; color: #1f2937; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600; transition: background-color 0.2s; cursor: pointer;}
-        .btn-secondary:hover { background-color: #e5e7eb; }
-        
-        #question-nav::-webkit-scrollbar { display: none; }
-        #question-nav { -ms-overflow-style: none; scrollbar-width: none; }
+        .btn-primary { background-color: #3b82f6; color: white; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; }
+        .btn-secondary { background-color: #f3f4f6; color: #1f2937; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer;}
         
         .question-option label { display: block; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; }
-        .question-option label:hover { background-color: #f3f4f6; }
         .question-option input:checked + label { background-color: #dbeafe; border-color: #3b82f6; font-weight: 600; }
-        
-        .result-box { border: 2px solid #065f46; }
-        .section-title { background-color: #e0f2fe; color: #0c4a6e; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 700; margin-bottom: 1rem; }
-        
-        .modal { transition: opacity 0.3s ease-in-out; }
-        .modal-content { transform: translateY(-50px); transition: transform 0.3s ease-in-out; }
-        .modal.open .modal-content { transform: translateY(0); }
-        .question-item { border: 1px solid #e5e7eb; padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; background-color: #fafafa; }
-        .option-input-group { display: flex; align-items: center; margin-bottom: 0.5rem; }
-        .option-input-group input[type="radio"] { margin-right: 0.5rem; }
-        .numeric-input-cell { width: 50px; height: 50px; text-align: center; border: 2px solid #3b82f6; border-radius: 0.375rem; font-size: 1.25rem; font-weight: 700; outline: none; transition: border-color 0.2s; }
-        .numeric-input-cell:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); }
+        .numeric-input-cell { width: 50px; height: 50px; text-align: center; border: 2px solid #3b82f6; border-radius: 0.375rem; font-size: 1.25rem; font-weight: 700; outline: none; }
         
         .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #3b82f6; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -200,101 +121,102 @@
         .admin-tab.active { border-bottom-color: #2563eb; color: #2563eb; background-color: #f3f4f6; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;}
         .admin-content { display: none; }
         .admin-content.active { display: block; }
+        
+        .scoring-spinner { width: 80px; height: 80px; border-radius: 50%; border: 8px solid rgba(59, 130, 246, 0.2); border-top: 8px solid #3b82f6; animation: spin 1s linear infinite; }
+        #camera-preview-container { position: fixed; bottom: 20px; right: 20px; width: 200px; height: 150px; background-color: #000; border-radius: 0.5rem; border: 3px solid #3b82f6; overflow: hidden; z-index: 50; display: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
+        #local-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
         @media (max-width: 768px) {
             .exam-layout { flex-direction: column; }
             .question-content { width: 100%; padding-right: 0; }
             .question-navigation { width: 100%; border-left: none; border-top: 1px solid #e5e7eb; margin-top: 1rem; padding-top: 1rem; }
-            .question-nav-item { width: 48px; height: 48px; }
             .login-form-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; }
-            .login-card-wrapper { border-width: 6px; }
         }
     </style>
 </head>
 <body class="no-select">
 
-    <!-- Màn hình chờ Load DB -->
+    <!-- Loading Database Overlay -->
     <div id="db-loading-overlay">
-        <div class="spinner border-t-blue-600 border-gray-200 w-16 h-16 mb-4"></div>
-        <h2 class="text-xl font-bold text-gray-700">Đang khởi tạo hệ thống...</h2>
-        <p class="text-gray-500 mt-2">Vui lòng chờ trong giây lát</p>
+        <div class="big-spinner mb-4"></div>
+        <h2 class="text-2xl font-bold text-gray-700">Đang khởi tạo hệ thống...</h2>
+        <p class="text-gray-500 mt-2 text-center max-w-sm">Đang kết nối với máy chủ Đám mây của Google.</p>
     </div>
 
-    <!-- Khung thông báo Toast -->
     <div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+    <div class="bg-animated"><ul class="bubbles"><li></li><li></li><li></li><li></li><li></li></ul></div>
 
-    <div class="bg-animated"><ul class="bubbles"><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ul></div>
+    <!-- CẤM THI -->
+    <div id="banned-screen" class="screen flex-col items-center justify-center p-4 bg-gray-900 text-white z-50 fixed inset-0">
+        <h1 class="text-4xl font-bold mb-4 text-red-500 text-center">BẠN ĐÃ BỊ ĐÌNH CHỈ THI</h1>
+        <p class="text-lg text-gray-300 text-center mb-8">Hệ thống đã khóa bài thi của bạn và ghi nhận 0 điểm.</p>
+        <button onclick="changeScreen('login-screen')" class="bg-gray-700 px-6 py-2 rounded font-bold">VỀ TRANG CHỦ</button>
+    </div>
+
+    <!-- CHẤM ĐIỂM -->
+    <div id="scoring-screen" class="screen flex-col items-center justify-center p-4 bg-white z-40 fixed inset-0">
+        <div class="scoring-spinner mb-6"></div>
+        <h2 class="text-2xl font-bold text-blue-800 mb-2">Đang nộp bài...</h2>
+        <p class="text-gray-600 font-medium text-lg">Hệ thống đang xử lý và lưu điểm số lên Đám mây</p>
+    </div>
 
     <!-- 1. GIAO DIỆN ĐĂNG NHẬP -->
     <div id="login-screen" class="screen active-screen items-center justify-center">
         <div class="custom-login-container">
             <div class="logo-top">
-                <img src="https://i.postimg.cc/wMs3Wv7Q/8-removebg-preview.png" alt="Logo" style="width: 100%; height: auto; object-fit: contain;">
+                <img src="https://i.postimg.cc/wMs3Wv7Q/8-removebg-preview.png" alt="Logo">
             </div>
             <div class="login-header-text">
                 <h1>HỆ THỐNG BỒI DƯỠNG VÀ LUYỆN THI CHEMEASYY</h1>
-                 <h2>Mở trí- Luyện tài- Dựng nhân</h2>
+                <h2>Mở trí - Luyện tài - Dựng nhân</h2>
                 <h3>BAN KHẢO THÍ VÀ ĐÁNH GIÁ CHẤT LƯỢNG</h3>
             </div>
             <div class="login-card-wrapper">
                 <div class="login-card-title">ĐĂNG NHẬP HỆ THỐNG TRANG THI</div>
                 <form id="login-form" class="login-form-grid">
                     <div class="custom-input-group">
-                        <label for="ma_thi_sinh">Mã số Hệ thống/ Số báo danh</label>
-                        <input type="text" id="ma_thi_sinh" name="ma_thi_sinh" class="custom-input" maxlength="8" inputmode="numeric">
+                        <label>Mã số Hệ thống/ Số báo danh</label>
+                        <input type="text" id="ma_thi_sinh" class="custom-input" maxlength="8">
                     </div>
                     <div class="custom-input-group">
-                        <label for="dot_thi">Đợt thi/ Kỳ thi</label>
-                        <select id="dot_thi" name="dot_thi" class="custom-select">
-                            <option>Kỳ thi tốt nghiệp THPT 2027</option>
-                            <option>ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH KỲ</option>
-                            <option>ĐÁNH GIÁ CHẤT LƯỢNG TƯ DUY HÓA HỌC</option>
+                        <label>Đợt thi/ Kỳ thi</label>
+                        <select id="dot_thi" class="custom-select">
+                            <option>KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH KỲ 2026</option>
                         </select>
                     </div>
                     <div class="custom-input-group">
-                        <label for="ho_ten">Họ và tên thí sinh</label>
-                        <input type="text" id="ho_ten" name="ho_ten" class="custom-input" placeholder="Nhập họ và tên...">
+                        <label>Họ và tên thí sinh</label>
+                        <input type="text" id="ho_ten" class="custom-input">
                     </div>
                     <div class="custom-input-group">
-                        <label for="ngay_sinh">Ngày sinh</label>
-                        <input type="date" id="ngay_sinh" name="ngay_sinh" class="custom-input">
+                        <label>Ngày sinh</label>
+                        <input type="date" id="ngay_sinh" class="custom-input">
                     </div>
                     <div class="custom-input-group">
-                        <label for="mat_khau">Mật khẩu</label>
-                        <input type="password" id="mat_khau" name="mat_khau" class="custom-input">
+                        <label>Mật khẩu</label>
+                        <input type="password" id="mat_khau" class="custom-input">
                     </div>
                     <div class="custom-input-group">
-                        <button type="button" onclick="login()" class="custom-btn-login">ĐĂNG NHẬP</button>
-                    </div>
-                    <div style="grid-column: 1 / -1; text-align: center;">
-                        <p id="login-error" class="text-red-500 text-sm hidden font-medium bg-red-100 p-2 rounded">Thông tin đăng nhập không hợp lệ.</p>
+                        <button type="button" onclick="login()" class="custom-btn-login">ĐĂNG NHẬP</button>            
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- 2. GIAO DIỆN CHỌN MÔN (THÍ SINH) -->
+    <!-- 2. GIAO DIỆN CHỌN MÔN -->
     <div id="subject-selection-screen" class="screen items-center justify-center p-4">
         <div class="card subject-card p-6">
-            <h1 class="text-center text-3xl font-bold mb-8 text-gray-800">KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG</h1>
-            
+            <h1 id="subject-screen-title" class="text-center text-3xl font-bold mb-8 text-gray-800">KỲ THI ĐÁNH GIÁ CHẤT LƯỢNG</h1>
             <div class="grid md:grid-cols-2 gap-6 mb-6">
                 <div class="p-4 bg-blue-50 rounded-lg">
                     <h2 class="font-bold text-lg mb-2 text-blue-800">THÔNG TIN THÍ SINH</h2>
                     <p class="text-sm"><span class="font-medium">Họ và tên:</span> <span id="info-ho_ten">...</span></p>
                     <p class="text-sm"><span class="font-medium">SBD:</span> <span id="info-sbd">...</span></p>
-                    <p class="text-sm"><span class="font-medium">Ngày sinh:</span> <input type="text" value="dd/mm/yy" class="w-full bg-transparent border-b border-blue-200 focus:border-blue-500 outline-none"></p>
-                </div>
-                <div class="p-4 bg-green-50 rounded-lg">
-                    <h2 class="font-bold text-lg mb-2 text-green-800">HỘI ĐỒNG THI</h2>
-                    <p class="text-sm"><span class="font-medium">Điểm thi:</span> <input type="text" value="" class="w-full bg-transparent border-b border-green-200 focus:border-green-500 outline-none"></p>
-                    <p class="text-sm"><span class="font-medium">Phòng thi:</span> <input type="text" value="" class="w-full bg-transparent border-b border-green-200 focus:border-green-500 outline-none"></p>
                 </div>
             </div>
-
             <div class="p-6 bg-gray-50 rounded-lg">
-                <h2 class="font-bold text-xl mb-4 text-gray-800">CHỌN MÔN THI</h2>
+                <h2 class="font-bold text-xl mb-4 text-gray-800">DANH SÁCH MÔN THI</h2>
                 <div id="subject-list" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"></div>
             </div>
             <div class="text-center mt-6">
@@ -303,61 +225,51 @@
         </div>
     </div>
 
-    <!-- Modal chọn Sub-môn -->
-    <div id="subject-option-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 modal">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm modal-content">
-            <h3 class="text-xl font-bold mb-4" id="modal-subject-title">Chọn tùy chọn</h3>
-            <div id="modal-options-container" class="space-y-3"></div>
-            <div class="flex justify-end mt-6">
-                <button onclick="hideSubjectOptionsModal()" class="btn-secondary">Hủy</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal nhập Mã lớp -->
+    <!-- Modal Vào Thi -->
     <div id="class-login-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 modal">
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm modal-content">
             <h3 class="text-xl font-bold mb-4">Vào Phòng Thi: <span id="modal-subject-name" class="text-blue-600"></span></h3>
             <form id="class-login-form">
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700">Mã lớp thi *</label>
-                    <input type="text" id="class_code_input" class="w-full border border-gray-300 rounded-md p-1.5 focus:border-blue-500 outline-none">
+                    <input type="text" id="class_code_input" class="w-full border rounded-md p-1.5 focus:border-blue-500 outline-none">
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700">Mật khẩu lớp thi *</label>
-                    <input type="password" id="class_password_input" class="w-full border border-gray-300 rounded-md p-1.5 focus:border-blue-500 outline-none">
-                    <p id="class-login-error" class="text-red-500 text-sm mt-1 hidden">Lỗi.</p>
+                    <input type="password" id="class_password_input" class="w-full border rounded-md p-1.5 focus:border-blue-500 outline-none">
                 </div>
                 <div class="flex justify-end space-x-4">
                     <button type="button" onclick="hideClassLoginModal()" class="btn-secondary">Hủy</button>
-                    <button type="submit" class="btn-primary">Vào thi</button>
+                    <button type="button" onclick="startExamAttempt()" class="btn-primary">Vào thi</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- 3. GIAO DIỆN ADMIN TỔNG HỢP -->
+    <!-- 3. ADMIN DASHBOARD -->
     <div id="admin-dashboard-screen" class="screen flex-col bg-gray-100">
         <div class="bg-white shadow">
             <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-blue-800">CHEMEASYY EDUCATION</h1>
-                <h2 class="text-2xl font-bold text-blue-800">HỆ THỐNG QUẢN LÝ THÍ SINH</h2>
-                <button onclick="changeScreen('login-screen')" class="btn-secondary border border-gray-300 text-sm">Đăng xuất</button>
+                <div>
+                    <h1 class="text-2xl font-bold text-blue-800">CHEMEASYY EDUCATION</h1>
+                    <h2 class="text-xl font-bold text-blue-800">HỆ THỐNG QUẢN LÝ ĐÁM MÂY</h2>
+                </div>
+                <button onclick="changeScreen('login-screen')" class="btn-secondary text-sm">Đăng xuất</button>
             </div>
             <div class="max-w-7xl mx-auto px-4 flex space-x-2 border-b mt-4">
                 <button class="admin-tab active" onclick="switchAdminTab('tab-exams', this)">Quản lý Đề Thi</button>
                 <button class="admin-tab" onclick="switchAdminTab('tab-results', this)">Kết quả Thi</button>
-                <button class="admin-tab" onclick="switchAdminTab('tab-monitoring', this)">Giám sát Phòng Thi (Live)</button>
+                <button class="admin-tab" onclick="switchAdminTab('tab-monitoring', this)">Giám sát Phòng Thi</button>
                 <button class="admin-tab" onclick="switchAdminTab('tab-accounts', this)">Tài khoản Thí sinh</button>
             </div>
         </div>
 
         <div class="max-w-7xl mx-auto w-full p-4 flex-grow">
-            <!-- TAB 1: QUẢN LÝ ĐỀ THI -->
+            <!-- TAB ĐỀ THI -->
             <div id="tab-exams" class="admin-content active">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-gray-700">Kho Đề Thi</h2>
-                    <button onclick="openExamEditor()" class="btn-primary bg-green-600 hover:bg-green-700">+ Tạo Đề Thi Mới</button>
+                    <h2 class="text-xl font-bold text-gray-700">Kho Đề Thi Cloud</h2>
+                    <button onclick="openExamEditor()" class="btn-primary bg-green-600">+ Tạo Đề Thi Mới</button>
                 </div>
                 <div class="card overflow-hidden">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -375,32 +287,27 @@
                 </div>
             </div>
 
-            <!-- TAB 2: KẾT QUẢ THI -->
+            <!-- TAB KẾT QUẢ -->
             <div id="tab-results" class="admin-content">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-gray-700">Danh sách Thí sinh đã nộp bài</h2>
+                    <h2 class="text-xl font-bold text-gray-700">Thí sinh đã nộp bài</h2>
                     <div class="space-x-2 flex">
-                        <button onclick="exportResultsToExcel()" class="btn-primary bg-blue-600 flex items-center">Xuất Excel</button>
+                        <button onclick="exportResultsToExcel()" class="btn-primary bg-blue-600">Xuất Excel</button>
                         <button onclick="resetTestData()" class="btn-primary bg-red-600">Xóa dữ liệu</button>
                     </div>
                 </div>
                 <div class="card p-4">
-                    <div class="mb-4 flex space-x-4">
-                        <select id="filter-exam-name" onchange="loadStudentResults()" class="border border-gray-300 rounded-md p-2 w-1/3">
-                            <option value="">-- Tất cả đề thi --</option>
-                        </select>
-                    </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">STT</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Họ và tên</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SBD</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Đề thi</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã đề</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Điểm</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thời gian nộp</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500">STT</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Họ và tên</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">SBD</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Đề thi</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Mã đề</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Điểm</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500">Thời gian</th>
                                 </tr>
                             </thead>
                             <tbody id="student-list" class="bg-white divide-y divide-gray-200"></tbody>
@@ -409,53 +316,42 @@
                 </div>
             </div>
 
-            <!-- TAB 3: GIÁM SÁT PHÒNG THI -->
+            <!-- TAB GIÁM SÁT -->
             <div id="tab-monitoring" class="admin-content">
                 <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-700">Hệ thống ngầm ghi nhận (Live)</h2>
-                        <p class="text-sm text-gray-500">Tự động cập nhật tiến độ làm bài của thí sinh theo thời gian thực.</p>
-                    </div>
+                    <h2 class="text-xl font-bold text-gray-700">Hệ thống ngầm ghi nhận (Live)</h2>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="monitoring-grid">
-                    <!-- Dữ liệu được push -->
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="monitoring-grid"></div>
             </div>
 
-            <!-- TAB 4: TÀI KHOẢN THÍ SINH -->
+            <!-- TAB TÀI KHOẢN -->
             <div id="tab-accounts" class="admin-content">
                 <div class="grid md:grid-cols-3 gap-6">
                     <div class="md:col-span-1 space-y-6">
                         <div class="card p-6">
                             <h3 class="font-bold mb-4">Thêm 1 Tài khoản</h3>
-                            <form id="add_account_form" class="space-y-3">
-                                <input type="text" id="new_sbd" placeholder="Mã số/SBD (8 số)" required class="w-full border rounded p-2" maxlength="8">
-                                <input type="text" id="new_name" placeholder="Họ và tên" required class="w-full border rounded p-2">
-                                <input type="password" id="new_password" placeholder="Mật khẩu" required class="w-full border rounded p-2">
-                                <button type="submit" class="btn-primary w-full bg-green-600">Lưu Tài khoản</button>
-                            </form>
+                            <div class="space-y-3">
+                                <input type="text" id="new_sbd" placeholder="Mã số/SBD (8 số)" class="w-full border rounded p-2" maxlength="8">
+                                <input type="text" id="new_name" placeholder="Họ và tên" class="w-full border rounded p-2">
+                                <input type="password" id="new_password" placeholder="Mật khẩu" class="w-full border rounded p-2">
+                                <button onclick="addSingleAccount()" class="btn-primary w-full bg-green-600">Lưu lên Cloud</button>
+                            </div>
                         </div>
                         <div class="card p-6 bg-blue-50 border border-blue-200">
                             <h3 class="font-bold mb-4 text-blue-800">Nhập từ File Excel</h3>
-                            <p class="text-xs mb-4 text-gray-600">File Excel cần có 3 cột theo thứ tự: <b>SBD</b> | <b>Họ Tên</b> | <b>Mật Khẩu</b>.</p>
-                            <input type="file" id="excel-file-upload" accept=".xlsx, .xls, .csv" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 mb-4"/>
-                            <button onclick="importAccountsExcel()" class="btn-primary w-full bg-blue-800">Tiến hành Nhập</button>
+                            <input type="file" id="excel-file-upload" accept=".xlsx, .xls, .csv" class="block w-full mb-4"/>
+                            <button onclick="importAccountsExcel()" class="btn-primary w-full bg-blue-800">Upload & Tạo hàng loạt</button>
                         </div>
                     </div>
                     <div class="md:col-span-2 card p-6">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold">Danh sách (<span id="account_count">0</span>)</h3>
+                            <h3 class="font-bold">Danh sách trên Cloud (<span id="account_count">0</span>)</h3>
                             <button onclick="clearAllAccounts()" class="text-red-500 text-sm hover:underline">Xóa tất cả</button>
                         </div>
                         <div class="overflow-y-auto max-h-[500px]">
                             <table class="min-w-full divide-y divide-gray-200 text-sm">
-                                <thead class="bg-gray-50 sticky top-0">
-                                    <tr>
-                                        <th class="px-4 py-2 text-left text-gray-500">SBD</th>
-                                        <th class="px-4 py-2 text-left text-gray-500">Họ và tên</th>
-                                        <th class="px-4 py-2 text-left text-gray-500">Mật khẩu</th>
-                                        <th class="px-4 py-2"></th>
-                                    </tr>
+                                <thead class="bg-gray-50">
+                                    <tr><th class="px-4 py-2 text-left">SBD</th><th class="px-4 py-2 text-left">Họ Tên</th><th class="px-4 py-2 text-left">Pass</th><th class="px-4 py-2"></th></tr>
                                 </thead>
                                 <tbody id="accounts_table" class="bg-white divide-y divide-gray-200"></tbody>
                             </table>
@@ -466,84 +362,68 @@
         </div>
     </div>
 
-    <!-- 4. GIAO DIỆN TẠO ĐỀ THI (EXAM EDITOR) -->
+    <!-- 4. EDITOR -->
     <div id="exam-editor-screen" class="screen flex-col p-4 bg-gray-50">
         <div class="max-w-7xl mx-auto w-full">
             <div class="flex justify-between items-center mb-4">
-                <h1 class="text-2xl font-bold text-purple-700">CÔNG CỤ SOẠN THẢO ĐỀ THI</h1>
-                <button onclick="changeScreen('admin-dashboard-screen')" class="btn-secondary">Hủy & Quay lại</button>
+                <h1 class="text-2xl font-bold text-purple-700">SOẠN ĐỀ THI LÊN ĐÁM MÂY</h1>
+                <button onclick="changeScreen('admin-dashboard-screen')" class="btn-secondary">Hủy</button>
             </div>
             
             <div class="card p-6 mb-6">
-                <h2 class="text-lg font-semibold mb-3">Thông tin chung</h2>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700">Tên Đề Thi (VD: Thi Thử Tháng 9)</label>
-                        <input type="text" id="editor-exam-name" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 outline-none">
+                        <label class="block text-sm">Tên Đề Thi</label>
+                        <input type="text" id="editor-exam-name" class="w-full border rounded p-2">
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700">Môn học áp dụng</label>
-                        <select id="editor-subject-select" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 outline-none"></select>
+                        <label class="block text-sm">Môn học</label>
+                        <select id="editor-subject-select" class="w-full border rounded p-2"></select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Mã Lớp Thi</label>
-                        <input type="text" id="editor-class-code" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 outline-none">
+                        <label class="block text-sm">Mã Lớp</label>
+                        <input type="text" id="editor-class-code" class="w-full border rounded p-2">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Mật khẩu Lớp Thi</label>
-                        <input type="text" id="editor-class-password" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 outline-none">
+                        <label class="block text-sm">Mật khẩu Lớp</label>
+                        <input type="text" id="editor-class-password" class="w-full border rounded p-2">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Thời gian (phút)</label>
-                        <input type="number" id="editor-time-limit" class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:border-blue-500 outline-none">
+                        <label class="block text-sm">Thời gian (phút)</label>
+                        <input type="number" id="editor-time-limit" class="w-full border rounded p-2">
                     </div>
                 </div>
             </div>
 
-            <div class="card p-6 mb-6 bg-blue-50 border border-blue-200">
-                <h2 class="text-lg font-semibold mb-3 text-blue-800">Mã đề hoán vị (Shuffle Keys)</h2>
-                <div class="flex space-x-4 items-center mb-4">
-                    <button onclick="generateRandomExamCode()" class="btn-primary py-1 px-3 text-sm bg-blue-600">Thêm Mã Ngẫu Nhiên</button>
-                </div>
+            <div class="card p-6 mb-6 bg-blue-50">
+                <h2 class="text-lg font-bold mb-3">Mã đề hoán vị</h2>
+                <button onclick="generateRandomExamCode()" class="btn-primary py-1 px-3 text-sm bg-blue-600 mb-4">Thêm Mã Ngẫu Nhiên</button>
                 <div class="flex flex-wrap gap-2" id="exam_codes_list_editor"></div>
             </div>
 
             <div class="card p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold">Danh sách Câu hỏi (<span id="editor-question-count">0</span> câu)</h2>
-                    <div class="flex space-x-2 items-center">
-                        <span id="ai-loading" class="hidden flex items-center text-sm font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded">
-                            <div class="spinner mr-2"></div> Đang gọi AI...
-                        </span>
-                        <input type="file" id="word-upload" accept=".docx" class="hidden" onchange="handleAIWordImport(event)">
-                        <button onclick="document.getElementById('word-upload').click()" class="btn-primary bg-indigo-600 hover:bg-indigo-700 flex items-center">
-                            Trích xuất bằng AI (Tải File Word)
-                        </button>
-                    </div>
-                </div>
+                <h2 class="text-lg font-bold mb-4">Câu hỏi (<span id="editor-question-count">0</span>)</h2>
                 <div id="questions-editor-container"></div>
-                <button onclick="addQuestionEditor()" class="btn-primary mt-4 py-3 px-4 w-full border-2 border-dashed border-gray-400 bg-white text-gray-700 hover:bg-gray-50">+ Thêm Câu hỏi Mới</button>
+                <button onclick="addQuestionEditor()" class="btn-primary mt-4 py-3 w-full bg-white text-gray-700 border-2 border-dashed border-gray-400">+ Thêm Câu Mới</button>
             </div>
             
             <div class="mt-6 flex justify-end">
-                <button onclick="saveExamData()" class="btn-primary py-3 px-8 text-lg bg-green-600 hover:bg-green-700">LƯU ĐỀ THI LÊN HỆ THỐNG</button>
+                <button onclick="saveExamData()" class="btn-primary py-3 px-8 text-lg bg-green-600">LƯU LÊN CLOUD</button>
             </div>
         </div>
     </div>
 
-    <!-- 5. GIAO DIỆN LÀM BÀI (THÍ SINH) -->
-    <div id="exam-screen" class="screen flex-col">
+    <!-- 5. GIAO DIỆN THI -->
+    <div id="exam-screen" class="screen flex-col relative">
         <header class="flex-shrink-0 bg-white shadow-md p-4">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <div class="text-sm font-medium text-gray-700">
+                <div class="text-sm font-medium">
                     <p><span id="exam-ho_ten">...</span> | SBD: <span id="exam-sbd">...</span></p>
-                    <p>Môn: <span class="font-bold text-blue-600" id="exam-subject-display">...</span> | Lớp: <span id="exam-class-display" class="font-bold text-green-600">...</span> | Mã đề: <span id="exam-code-display">...</span></p>
+                    <p>Môn: <span class="font-bold text-blue-600" id="exam-subject-display">...</span> | Lớp: <span id="exam-class-display" class="text-green-600">...</span> | Mã đề: <span id="exam-code-display">...</span></p>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-2 text-2xl font-bold text-red-600">
-                        <span id="timer">00:00</span>
-                    </div>
-                    <button onclick="confirmSubmission()" class="btn-primary py-2 px-6 text-lg bg-red-600 hover:bg-red-700">NỘP BÀI</button>
+                    <span id="timer" class="text-2xl font-bold text-red-600">00:00</span>
+                    <button onclick="confirmSubmission()" class="btn-primary py-2 px-6 bg-red-600">NỘP BÀI</button>
                 </div>
             </div>
         </header>
@@ -552,17 +432,15 @@
             <div class="max-w-7xl mx-auto h-full flex exam-layout">
                 <div id="exam-content" class="w-3/4 question-content pr-4 h-full exam-panel">
                     <div class="flex justify-between items-center mb-4">
-                        <div class="space-x-2">
-                            <button onclick="prevQuestion()" class="btn-secondary px-4">Câu trước</button>
-                            <button onclick="nextQuestion()" class="btn-primary px-4">Câu sau</button>
-                        </div>
-                        <span class="text-lg font-semibold text-gray-700">Đã trả lời: <span id="answered-count">0</span>/<span id="total-questions">0</span></span>
+                        <button onclick="prevQuestion()" class="btn-secondary px-4">Câu trước</button>
+                        <span class="font-bold">Đã làm: <span id="answered-count">0</span>/<span id="total-questions">0</span></span>
+                        <button onclick="nextQuestion()" class="btn-primary px-4">Câu sau</button>
                     </div>
                     <div id="question-container" class="card p-8 min-h-[500px]"></div>
                 </div>
                 <div class="w-1/4 question-navigation flex-shrink-0 pl-4">
                     <div class="card p-4 h-full flex flex-col">
-                        <h3 class="font-bold text-lg mb-3 text-center border-b pb-2">BẢNG ĐIỀU HƯỚNG</h3>
+                        <h3 class="font-bold text-center border-b pb-2">ĐIỀU HƯỚNG</h3>
                         <div id="question-nav" class="flex flex-col gap-4 overflow-y-auto exam-panel pb-10"></div>
                     </div>
                 </div>
@@ -570,98 +448,77 @@
         </main>
 
         <div id="submission-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 modal">
-            <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm modal-content text-center">
-                <h3 class="text-xl font-bold mb-2 text-red-600">Xác nhận nộp bài</h3>
-                <p class="mb-6 text-gray-600">Bạn có chắc chắn muốn nộp bài? Hành động này không thể hoàn tác.</p>
-                <div class="flex justify-center space-x-4">
+            <div class="bg-white p-6 rounded-lg text-center">
+                <h3 class="text-xl font-bold mb-6 text-red-600">Xác nhận nộp bài?</h3>
+                <div class="space-x-4">
                     <button onclick="hideSubmissionModal()" class="btn-secondary px-6">Hủy</button>
-                    <button onclick="submitExam()" class="btn-primary px-6 bg-red-600">Xác nhận Nộp</button>
+                    <button onclick="executeSubmission()" class="btn-primary px-6 bg-red-600">Đồng ý</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 6. GIAO DIỆN KẾT QUẢ -->
+    <!-- 6. KẾT QUẢ -->
     <div id="result-screen" class="screen flex-col items-center justify-center p-4">
-        <div class="card result-box p-8 w-full max-w-md text-center border-4 border-green-600 rounded-xl">
-            <h2 class="text-2xl font-bold mb-2 text-gray-800">NỘP BÀI THÀNH CÔNG</h2>
-            <div class="text-left bg-gray-50 p-4 rounded-lg mt-6 space-y-2">
-                <p class="flex justify-between border-b pb-2"><span class="text-gray-600">Tổng số câu:</span> <span class="font-bold" id="result-total"></span></p>
-                <p class="flex justify-between border-b pb-2"><span class="text-gray-600">Đã trả lời:</span> <span class="font-bold" id="result-answered"></span></p>
-                <p class="flex justify-between border-b pb-2"><span class="text-gray-600">Số câu đúng:</span> <span class="font-bold text-green-600" id="result-correct"></span></p>
-                <p class="flex justify-between text-lg mt-4"><span class="font-bold text-gray-800">ĐIỂM SỐ:</span> <span class="font-bold text-blue-700 text-2xl"><span id="result-score"></span>/10</span></p>
+        <div class="card result-box p-8 w-full max-w-md text-center border-4 border-green-600">
+            <h2 class="text-2xl font-bold mb-2">ĐÃ LƯU ĐIỂM THÀNH CÔNG</h2>
+            <div class="bg-gray-50 p-4 rounded-lg mt-6 space-y-2 text-left">
+                <p class="flex justify-between border-b pb-2">Tổng câu: <span id="result-total" class="font-bold"></span></p>
+                <p class="flex justify-between border-b pb-2">Đã trả lời: <span id="result-answered" class="font-bold"></span></p>
+                <p class="flex justify-between border-b pb-2">Số câu đúng: <span id="result-correct" class="font-bold text-green-600"></span></p>
+                <p class="flex justify-between text-lg mt-4 font-bold">ĐIỂM SỐ: <span class="text-blue-700 text-2xl" id="result-score"></span></p>
             </div>
-            <button onclick="changeScreen('login-screen')" class="btn-primary w-full mt-6 py-3">Về Trang Đăng Nhập</button>
+            <button onclick="changeScreen('login-screen')" class="btn-primary w-full mt-6 py-3">Về Trang Chủ</button>
         </div>
     </div>
-    
-    <script>
-        // --- BẢO MẬT PHÒNG THI (ANTI-CHEAT) ---
-        document.addEventListener('contextmenu', event => event.preventDefault()); 
-        document.addEventListener('keydown', function(event) {
-            if (event.keyCode === 123) { event.preventDefault(); return false; } 
-            if (event.ctrlKey && event.shiftKey && event.keyCode === 73) { event.preventDefault(); return false; } 
-            if (event.ctrlKey && event.keyCode === 85) { event.preventDefault(); return false; } 
-            if (event.ctrlKey && event.keyCode === 67 && currentScreen === 'exam-screen') { event.preventDefault(); return false; } 
-        });
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden' && currentScreen === 'exam-screen') {
-                showToast('CẢNH BÁO: BẠN ĐÃ CHUYỂN TAB KHÁC! Hành vi này đã bị ghi nhận.', 'error');
-            }
-        });
 
-        // --- HÀM BAO (WRAPPER) CHO CƠ SỞ DỮ LIỆU ---
-        // Giúp mã nguồn chạy an toàn trên cả Firebase lẫn LocalStorage
-        
+    <script>
+        // --- HÀM THÔNG BÁO ---
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded shadow-lg text-white font-bold transition-all duration-300 transform translate-x-10 opacity-0 flex items-center ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
+            toast.textContent = message;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-x-10', 'opacity-0'), 10);
+            setTimeout(() => { toast.classList.add('translate-x-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        // --- CÁC HÀM TƯƠNG TÁC VỚI FIREBASE CLOUD ---
+        // Hàm lấy toàn bộ danh sách từ Cloud
         async function cloud_getAll(colName) {
-            if (window.isCloud && window.db) {
-                const snapshot = await window.fb_getDocs(window.fb_collection(window.db, colName));
+            if(!window.db) { alert("Chưa kết nối Cloud!"); return []; }
+            try {
+                const snapshot = await window.fb.getDocs(window.fb.collection(window.db, colName));
                 let items = [];
-                snapshot.forEach(doc => items.push({ ...doc.data(), _docId: doc.id }));
+                snapshot.forEach(d => items.push({ ...d.data(), id: d.id }));
                 return items;
-            } else {
-                return JSON.parse(localStorage.getItem('DB_' + colName) || '[]');
+            } catch(e) {
+                console.error("Lỗi đọc dữ liệu:", e);
+                alert("LỖI BẢO MẬT TỪ CLOUD: Không có quyền đọc dữ liệu.\nBạn hãy vào Firebase -> Firestore -> Rules và đổi thành 'allow read, write: if true;' để Test.");
+                return [];
             }
         }
 
+        // Hàm ghi dữ liệu lên Cloud
         async function cloud_set(colName, docId, data) {
-            if (window.isCloud && window.db) {
-                await window.fb_setDoc(window.fb_doc(window.db, colName, docId), data);
-            } else {
-                let items = JSON.parse(localStorage.getItem('DB_' + colName) || '[]');
-                let idx = items.findIndex(item => item._docId === docId);
-                const newData = { ...data, _docId: docId };
-                if (idx > -1) items[idx] = newData; else items.push(newData);
-                localStorage.setItem('DB_' + colName, JSON.stringify(items));
+            if(!window.db) { alert("Chưa kết nối Cloud!"); return; }
+            try {
+                await window.fb.setDoc(window.fb.doc(window.db, colName, docId), data);
+            } catch(e) {
+                console.error("Lỗi ghi dữ liệu:", e);
+                alert("LỖI BẢO MẬT TỪ CLOUD: Không có quyền ghi dữ liệu.\nBạn hãy vào Firebase -> Firestore -> Rules và đổi thành 'allow read, write: if true;' để Test.");
+                throw e; // Ném lỗi để ngưng thực thi các lệnh tiếp theo
             }
         }
 
         async function cloud_delete(colName, docId) {
-            if (window.isCloud && window.db) {
-                await window.fb_deleteDoc(window.fb_doc(window.db, colName, docId));
-            } else {
-                let items = JSON.parse(localStorage.getItem('DB_' + colName) || '[]');
-                items = items.filter(item => item._docId !== docId);
-                localStorage.setItem('DB_' + colName, JSON.stringify(items));
-            }
+            if(!window.db) return;
+            try {
+                await window.fb.deleteDoc(window.fb.doc(window.db, colName, docId));
+            } catch(e) {}
         }
 
-        function cloud_onSnapshot(colName, callback) {
-            if (window.isCloud && window.db) {
-                return window.fb_onSnapshot(window.fb_collection(window.db, colName), (snapshot) => {
-                    let items = [];
-                    snapshot.forEach(doc => items.push(doc.data()));
-                    callback(items);
-                });
-            } else {
-                const getItems = () => JSON.parse(localStorage.getItem('DB_' + colName) || '[]');
-                callback(getItems());
-                const interval = setInterval(() => callback(getItems()), 2000);
-                return () => clearInterval(interval);
-            }
-        }
-
-        // --- CONSTANTS & CONFIG ---
+        // --- GLOBAL STATE ---
         const ADMIN_CODE = '22122007';
         const ADMIN_PASS = 'Huuhuy@2212_admin';
         const STUDENT_DEFAULT_PASS = 'HOAHOCVUIVE';
@@ -672,626 +529,348 @@
         let currentQuestionIndex = 0;
         let timeLeft = 0; 
         let timerInterval = null;
-        let unsubscribeMonitor = null;
+        let pendingScoreData = null; 
 
+        // Các biến dùng cho Editor
         let editorExamId = null;
         let editorQuestions = [];
         let editorExamCodes = ['0000'];
 
-        const ALL_SUBJECTS = [
-            { name: 'Ngữ văn', status: 'disabled', key: 'NGUVAN' }, 
-            { name: 'Toán', status: 'disabled', key: 'TOAN' }, 
-            { name: 'Vật lý', status: 'disabled', key: 'VATLY' },
-            { name: 'Hóa học', status: 'ready', key: 'HOAHOC' }, 
-            { name: 'Sinh học', status: 'disabled', key: 'SINHHOC' }, 
-            { name: 'Ngoại ngữ', status: 'options', key: 'NGOAINGU', options: [
-                { name: 'Tiếng Anh', key: 'NN_TIENGANH' }
-            ]} 
+        const DEFAULT_SUBJECTS = [
+            { name: 'Ngữ văn', key: 'NGUVAN' }, { name: 'Toán', key: 'TOAN' }, { name: 'Vật lý', key: 'VATLY' }, { name: 'Hóa học', key: 'HOAHOC' },
+            { name: 'Sinh học', key: 'SINHHOC' }, { name: 'Tiếng Anh', key: 'NN_EN' }
         ];
 
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `p-4 rounded shadow-lg text-white font-bold transition-all duration-300 transform translate-x-10 opacity-0 flex items-center pointer-events-auto ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
-            toast.innerHTML = `<span class="mr-2">${type === 'error' ? '⚠️' : '✅'}</span> ${message}`;
-            
-            const container = document.getElementById('toast-container');
-            container.appendChild(toast);
-            
-            setTimeout(() => { toast.classList.remove('translate-x-10', 'opacity-0'); }, 10);
-            setTimeout(() => {
-                toast.classList.add('translate-x-10', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
+        // Bảo mật F12, Copy
+        document.addEventListener('contextmenu', e => e.preventDefault()); 
+        document.addEventListener('keydown', e => { if (e.keyCode===123 || (e.ctrlKey && e.keyCode===85)) e.preventDefault(); });
 
-        const generateUUID = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
-        
-        function shuffleArray(array, seed) {
-            let prng = mulberry32(seed);
-            let currentIndex = array.length, randomIndex;
-            let result = [...array];
-            while (currentIndex !== 0) {
-                randomIndex = Math.floor(prng() * currentIndex);
-                currentIndex--;
-                [result[currentIndex], result[randomIndex]] = [result[randomIndex], result[currentIndex]];
-            }
-            return result;
-        }
-
-        function mulberry32(a) {
-            return function() {
-              a |= 0; a = a + 0x6D2B79F5 | 0; let t = a;
-              t = Math.imul(t ^ t >>> 15, 1 | t); t = t ^ t << 13; t = t ^ t >>> 6;
-              t = Math.imul(t, 63 | t); return ((t ^ t >>> 16) >>> 0) / 4294967296;
-            }
-        }
-
-        // --- NAVIGATION ---
+        // --- NAVIGATION & LOGIN ---
         function changeScreen(newScreenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
             document.getElementById(newScreenId).classList.add('active-screen');
             currentScreen = newScreenId;
+            if(newScreenId === 'login-screen') document.querySelector('.bg-animated').style.display = 'block';
+            else document.querySelector('.bg-animated').style.display = 'none';
 
-            if (newScreenId === 'login-screen') {
-                document.querySelector('.bg-animated').style.display = 'block';
-            } else {
-                document.querySelector('.bg-animated').style.display = 'none';
-            }
-
-            if (newScreenId === 'admin-dashboard-screen') {
+            if(newScreenId === 'admin-dashboard-screen') {
                 loadAdminExamsList();
                 loadStudentResults();
                 renderAccountsTable();
-                loadMonitoringDataLive(); 
-            } else {
-                if(unsubscribeMonitor) { unsubscribeMonitor(); unsubscribeMonitor = null; }
+                startAdminMonitoringListener();
             }
-
-            if (newScreenId === 'subject-selection-screen') {
+            if(newScreenId === 'subject-selection-screen') {
                 document.getElementById('info-ho_ten').textContent = userInfo.ho_ten;
                 document.getElementById('info-sbd').textContent = userInfo.ma_thi_sinh;
                 renderSubjectList(); 
             }
         }
 
-        function switchAdminTab(tabId, btnContext) {
-            document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
-            btnContext.classList.add('active');
-            document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
+        function switchAdminTab(tabId, btn) {
+            document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+            document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active')); document.getElementById(tabId).classList.add('active');
         }
 
-        // --- LOGIN LOGIC ---
         async function login() {
-            if(!window.isDbReady) return showToast('Hệ thống đang khởi tạo. Vui lòng chờ...', 'error');
-
             const maSo = document.getElementById('ma_thi_sinh').value.trim();
-            const hoTen = document.getElementById('ho_ten').value.trim();
             const matKhau = document.getElementById('mat_khau').value;
-            const err = document.getElementById('login-error');
-            err.classList.add('hidden');
-
-            if (maSo === ADMIN_CODE && matKhau === ADMIN_PASS) {
-                changeScreen('admin-dashboard-screen');
-                return;
+            const hoTen = document.getElementById('ho_ten').value;
+            if(maSo === ADMIN_CODE && matKhau === ADMIN_PASS) {
+                userInfo = { ho_ten: 'Admin', ma_thi_sinh: 'ADMIN' };
+                changeScreen('admin-dashboard-screen'); return;
             }
+            if(!/^\d{8}$/.test(maSo)) return showToast('SBD phải gồm 8 số', 'error');
 
-            if (!/^\d{8}$/.test(maSo)) {
-                err.textContent = "SBD phải gồm 8 chữ số.";
-                err.classList.remove('hidden'); return;
-            }
-            
+            // Gọi dữ liệu từ Đám mây
             const accounts = await cloud_getAll('accounts');
             const student = accounts.find(a => a.sbd === maSo && a.password === matKhau);
 
-            if (student) {
+            if(student) {
                 userInfo = { ho_ten: student.name, ma_thi_sinh: student.sbd };
-                changeScreen('subject-selection-screen'); return;
-            }
-            
-            if (matKhau === STUDENT_DEFAULT_PASS) {
+                changeScreen('subject-selection-screen');
+            } else if (matKhau === STUDENT_DEFAULT_PASS) {
                 userInfo = { ho_ten: hoTen || 'Thí sinh tự do', ma_thi_sinh: maSo };
-                changeScreen('subject-selection-screen'); return;
+                changeScreen('subject-selection-screen');
+            } else {
+                showToast("SBD hoặc Mật khẩu không đúng.", 'error');
             }
-
-            err.textContent = "SBD hoặc Mật khẩu không đúng.";
-            err.classList.remove('hidden');
         }
 
-        // --- STUDENT: SUBJECT SELECTION ---
         function renderSubjectList() {
-            const container = document.getElementById('subject-list');
-            container.innerHTML = ALL_SUBJECTS.map(sub => {
-                let btn = sub.status === 'ready' ? `<button onclick="showClassLoginModal('${sub.key}', '${sub.name}')" class="btn-primary py-1 px-4 text-sm w-full mt-2">Vào thi</button>` :
-                          sub.status === 'options' ? `<button onclick="showSubjectOptionsModal('${sub.key}', '${sub.name}', ${JSON.stringify(sub.options).replace(/"/g, '&quot;')})" class="btn-primary py-1 px-4 text-sm w-full mt-2 bg-purple-500">Chọn môn</button>` :
-                          `<button class="btn-secondary py-1 px-4 text-sm w-full mt-2 opacity-50 cursor-not-allowed" disabled>Chưa mở</button>`;
-                
-                return `<div class="p-3 border rounded-md bg-white flex flex-col items-center text-center"><span class="font-bold text-gray-700">${sub.name}</span>${btn}</div>`;
-            }).join('');
-        }
-
-        function showSubjectOptionsModal(key, name, opts) {
-            document.getElementById('modal-subject-title').textContent = `Chọn môn ${name}:`;
-            document.getElementById('modal-options-container').innerHTML = opts.map(o => `
-                <button onclick="showClassLoginModal('${o.key}', '${name} - ${o.name}')" class="btn-primary w-full bg-indigo-500 mb-2">${o.name}</button>
+            document.getElementById('subject-list').innerHTML = DEFAULT_SUBJECTS.map(sub => `
+                <div class="p-3 border rounded-md bg-white flex flex-col items-center">
+                    <span class="font-bold">${sub.name}</span>
+                    <button onclick="showClassLoginModal('${sub.key}', '${sub.name}')" class="btn-primary py-1 px-4 mt-2">Vào thi</button>
+                </div>
             `).join('');
-            document.getElementById('subject-option-modal').classList.remove('hidden');
         }
-        function hideSubjectOptionsModal() { document.getElementById('subject-option-modal').classList.add('hidden'); }
 
-        function showClassLoginModal(subjectKey, subjectName) {
-            hideSubjectOptionsModal();
-            document.getElementById('modal-subject-name').textContent = subjectName;
-            document.getElementById('class-login-error').classList.add('hidden');
-            document.getElementById('class_code_input').value = '';
-            document.getElementById('class_password_input').value = '';
-            
-            document.getElementById('class-login-form').onsubmit = (e) => {
-                e.preventDefault(); startExamAttempt(subjectKey, subjectName);
-            };
+        let tempSubjectKey = '';
+        let tempSubjectName = '';
+        function showClassLoginModal(sKey, sName) {
+            tempSubjectKey = sKey; tempSubjectName = sName;
+            document.getElementById('modal-subject-name').textContent = sName;
             document.getElementById('class-login-modal').classList.remove('hidden');
         }
         function hideClassLoginModal() { document.getElementById('class-login-modal').classList.add('hidden'); }
 
-        async function startExamAttempt(subjectKey, subjectName) {
+        async function startExamAttempt() {
             const code = document.getElementById('class_code_input').value.trim();
             const pass = document.getElementById('class_password_input').value;
-            const err = document.getElementById('class-login-error');
             
+            // Tìm đề thi trên ĐÁM MÂY
             const exams = await cloud_getAll('exams');
-            const exam = exams.find(e => e.subjectKey === subjectKey && e.className === code && e.classPass === pass);
+            const exam = exams.find(e => e.subjectKey === tempSubjectKey && e.className === code && e.classPass === pass);
 
-            if (!exam) {
-                err.textContent = "Mã lớp hoặc mật khẩu không đúng cho môn này.";
-                err.classList.remove('hidden'); return;
-            }
+            if(!exam) { showToast("Sai mã lớp hoặc mật khẩu!", 'error'); return; }
 
-            activeExamConfig = JSON.parse(JSON.stringify(exam));
+            activeExamConfig = exam;
+            const rCodes = (exam.examCodes||[]).filter(c => c !== '0000');
+            const usedCode = rCodes.length > 0 ? rCodes[Math.floor(Math.random() * rCodes.length)] : '0000';
             
-            const codes = activeExamConfig.examCodes || ['0000'];
-            const rCodes = codes.filter(c => c !== '0000');
-            const examCodeToUse = rCodes.length > 0 ? rCodes[Math.floor(Math.random() * rCodes.length)] : '0000';
-            
-            activeExamConfig.questions = shuffleArray(activeExamConfig.questions, parseInt(examCodeToUse, 10));
-            
-            userInfo.examId = exam.id || exam._docId;
-            userInfo.examName = exam.name;
-            userInfo.exam_code = examCodeToUse;
-            userInfo.class_code = code;
-            userInfo.subject_name = subjectName;
+            // Shuffle
+            let prng = function(a) { return function() { a|=0; a=a+0x6D2B79F5|0; let t=a; t=Math.imul(t^t>>>15,1|t); t=t^t<<13; t=t^t>>>6; t=Math.imul(t,63|t); return ((t^t>>>16)>>>0)/4294967296; } }(parseInt(usedCode,10));
+            let arr = [...activeExamConfig.questions], curr = arr.length, rand;
+            while(curr !== 0) { rand = Math.floor(prng() * curr); curr--; [arr[curr], arr[rand]] = [arr[rand], arr[curr]]; }
+            activeExamConfig.questions = arr;
+
+            userInfo.examId = exam.id; userInfo.examName = exam.name;
+            userInfo.exam_code = usedCode; userInfo.class_code = code; userInfo.subject_name = tempSubjectName;
 
             document.getElementById('exam-ho_ten').textContent = userInfo.ho_ten;
             document.getElementById('exam-sbd').textContent = userInfo.ma_thi_sinh;
-            document.getElementById('exam-subject-display').textContent = subjectName;
+            document.getElementById('exam-subject-display').textContent = tempSubjectName;
             document.getElementById('exam-class-display').textContent = code;
-            document.getElementById('exam-code-display').textContent = examCodeToUse;
+            document.getElementById('exam-code-display').textContent = usedCode;
 
             hideClassLoginModal();
             changeScreen('exam-screen');
             initExamEngine();
         }
 
-        // --- ADMIN: EXAM MANAGEMENT ---
+        // --- ADMIN FUNCTIONS ---
         async function loadAdminExamsList() {
             const exams = await cloud_getAll('exams');
-            const tbody = document.getElementById('admin-exams-list');
-            if (exams.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">Chưa có đề thi nào được tạo.</td></tr>';
-                return;
-            }
-            tbody.innerHTML = exams.map((e) => `
+            document.getElementById('admin-exams-list').innerHTML = exams.map(e => `
                 <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 font-bold text-blue-700">${e.name || 'Đề chưa đặt tên'}</td>
-                    <td class="px-6 py-4 text-sm">${ALL_SUBJECTS.flatMap(s=>s.options?s.options:s).find(s=>s.key===e.subjectKey)?.name || e.subjectKey}</td>
-                    <td class="px-6 py-4 font-mono text-green-600">${e.className}</td>
-                    <td class="px-6 py-4">${e.questions.length}</td>
+                    <td class="px-6 py-4 font-bold text-blue-700">${e.name}</td>
+                    <td class="px-6 py-4">${e.subjectKey}</td>
+                    <td class="px-6 py-4 text-green-600">${e.className}</td>
+                    <td class="px-6 py-4">${(e.questions||[]).length}</td>
                     <td class="px-6 py-4 space-x-2">
-                        <button onclick="editExam('${e._docId}')" class="text-blue-500 hover:underline">Sửa</button>
-                        <button onclick="deleteExam('${e._docId}')" class="text-red-500 hover:underline">Xóa</button>
+                        <button onclick="editExam('${e.id}')" class="text-blue-500">Sửa</button>
+                        <button onclick="deleteExam('${e.id}')" class="text-red-500">Xóa</button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        async function openExamEditor(examId = null) {
+        async function openExamEditor(id = null) {
             changeScreen('exam-editor-screen');
-            const subjects = ALL_SUBJECTS.flatMap(s => s.options ? s.options.map(o => ({...o, p:s.name})) : s).filter(s => s.key);
-            document.getElementById('editor-subject-select').innerHTML = subjects.map(s => `<option value="${s.key}">${s.p ? s.p+' - '+s.name : s.name}</option>`).join('');
-            
-            if (examId) {
-                const exams = await cloud_getAll('exams');
-                const ex = exams.find(e => e._docId === examId);
-                editorExamId = ex._docId;
-                document.getElementById('editor-exam-name').value = ex.name;
-                document.getElementById('editor-subject-select').value = ex.subjectKey;
-                document.getElementById('editor-class-code').value = ex.className;
-                document.getElementById('editor-class-password').value = ex.classPass;
-                document.getElementById('editor-time-limit').value = ex.timeLimit / 60;
-                editorQuestions = JSON.parse(JSON.stringify(ex.questions));
-                editorExamCodes = [...(ex.examCodes || ['0000'])];
+            document.getElementById('editor-subject-select').innerHTML = DEFAULT_SUBJECTS.map(s => `<option value="${s.key}">${s.name}</option>`).join('');
+            if(id) {
+                const exam = await window.cloud_get('exams', id);
+                editorExamId = id; document.getElementById('editor-exam-name').value = exam.name;
+                document.getElementById('editor-subject-select').value = exam.subjectKey;
+                document.getElementById('editor-class-code').value = exam.className;
+                document.getElementById('editor-class-password').value = exam.classPass;
+                document.getElementById('editor-time-limit').value = exam.timeLimit / 60;
+                editorQuestions = exam.questions; editorExamCodes = exam.examCodes;
             } else {
-                editorExamId = null;
-                document.getElementById('editor-exam-name').value = 'Đề Thi Mới';
-                document.getElementById('editor-class-code').value = 'L001';
-                document.getElementById('editor-class-password').value = 'pass123';
-                document.getElementById('editor-time-limit').value = 50;
-                editorQuestions = [];
-                editorExamCodes = ['0000'];
+                editorExamId = null; editorQuestions = []; editorExamCodes = ['0000'];
             }
-            renderEditorQuestions();
-            renderExamCodesList();
+            renderEditorQuestions(); renderExamCodesList();
         }
 
         function editExam(id) { openExamEditor(id); }
-        async function deleteExam(id) {
-            if(confirm('Xóa đề thi này khỏi hệ thống?')) {
-                await cloud_delete('exams', id);
-                loadAdminExamsList();
-                showToast('Đã xóa thành công!');
-            }
-        }
+        async function deleteExam(id) { if(confirm('Xóa đề thi trên Cloud?')) { await cloud_delete('exams', id); await loadAdminExamsList(); } }
 
-        // --- EDITOR LOGIC ---
         function renderExamCodesList() {
-            const c = document.getElementById('exam_codes_list_editor');
-            c.innerHTML = editorExamCodes.filter(code => code !== '0000').map(code => `
-                <span class="bg-indigo-100 text-indigo-800 text-sm px-3 py-1 rounded-full flex items-center">
-                    ${code} <button onclick="removeExamCode('${code}')" class="ml-2 text-red-500 font-bold">&times;</button>
-                </span>
-            `).join('');
+            document.getElementById('exam_codes_list_editor').innerHTML = editorExamCodes.filter(c => c!=='0000').map(c => `<span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">${c} <button onclick="removeExamCode('${c}')" class="ml-2 text-red-500">&times;</button></span>`).join('');
         }
-        function generateRandomExamCode() {
-            let code; do { code = String(Math.floor(Math.random()*9000)+1000).padStart(4,'0'); } while(editorExamCodes.includes(code));
-            editorExamCodes.push(code); renderExamCodesList();
-        }
-        function removeExamCode(c) { editorExamCodes = editorExamCodes.filter(x => x !== c); renderExamCodesList(); }
+        function generateRandomExamCode() { let c; do{c=String(Math.floor(Math.random()*9000)+1000).padStart(4,'0')}while(editorExamCodes.includes(c)); editorExamCodes.push(c); renderExamCodesList(); }
+        function removeExamCode(c) { editorExamCodes = editorExamCodes.filter(x=>x!==c); renderExamCodesList(); }
 
         function renderEditorQuestions() {
-            const container = document.getElementById('questions-editor-container');
             document.getElementById('editor-question-count').textContent = editorQuestions.length;
-            container.innerHTML = editorQuestions.map((q, i) => {
+            document.getElementById('questions-editor-container').innerHTML = editorQuestions.map((q, i) => {
                 let html = '';
                 if(q.section === 'Phần I') {
-                    html = q.options.map((opt, oI) => `
-                        <div class="flex items-center mb-1"><input type="radio" name="ed_ans_${i}" ${q.correctIndex===oI?'checked':''} value="${oI}" class="mr-2">
-                        <input type="text" value="${opt}" onchange="updateQData(${i}, 'opt', ${oI}, this.value)" class="border p-1 w-full text-sm"></div>
-                    `).join('');
-                } else if(q.section === 'Phần III') {
-                    html = `<div class="flex gap-2">` + [0,1,2,3].map(subI => `
-                        <input type="text" value="${q.correctDetails.answers[subI]||''}" onchange="updateQData(${i}, 'num', ${subI}, this.value)" class="border p-2 w-16 text-center">
-                    `).join('') + `</div><p class="text-xs text-gray-500 mt-1">Đáp án điền khuyết (tối đa 4 ô, bỏ trống nếu ít hơn)</p>`;
+                    html = q.options.map((opt, oI) => `<div class="flex items-center mb-1"><input type="radio" name="ed_ans_${i}" ${q.correctIndex===oI?'checked':''} value="${oI}" class="mr-2"><input type="text" value="${opt}" onchange="updateQData(${i}, 'opt', ${oI}, this.value)" class="border w-full text-sm"></div>`).join('');
+                } else if(q.section === 'Phần II') {
+                    html = `<div class="flex flex-col gap-2">` + [0,1,2,3].map(subI => `<div class="flex items-center gap-2"><span class="font-bold w-6">${String.fromCharCode(97+subI)}.</span><input type="text" value="${q.correctDetails.subOptions?.[subI]||''}" onchange="updateQData(${i}, 'tf_text', ${subI}, this.value)" class="border p-1 flex-grow text-sm"><select onchange="updateQData(${i}, 'tf_ans', ${subI}, this.value === 'true')" class="border p-1 text-sm"><option value="true" ${q.correctDetails.correctAnswers?.[subI] ? 'selected' : ''}>Đúng</option><option value="false" ${!q.correctDetails.correctAnswers?.[subI] ? 'selected' : ''}>Sai</option></select></div>`).join('') + `</div>`;
+                } else {
+                    html = `<div class="flex gap-2">` + [0,1,2,3].map(subI => `<input type="text" value="${q.correctDetails.answers[subI]||''}" onchange="updateQData(${i}, 'num', ${subI}, this.value)" class="border p-2 w-16 text-center">`).join('') + `</div>`;
                 }
-                
                 return `
                 <div class="border p-4 bg-white mb-4 rounded relative">
-                    <button onclick="removeEditorQ(${i})" class="absolute top-2 right-2 text-red-500 text-sm font-bold">X</button>
-                    <div class="flex gap-4 mb-2">
-                        <h4 class="font-bold">Câu ${i+1}</h4>
-                        <select onchange="changeQType(${i}, this.value)" class="border text-sm p-1">
-                            <option value="Phần I" ${q.section==='Phần I'?'selected':''}>Trắc nghiệm (4 đáp án)</option>
-                            <option value="Phần III" ${q.section==='Phần III'?'selected':''}>Điền khuyết (4 ô)</option>
-                        </select>
-                        <input type="number" step="0.1" value="${q.pointValue}" onchange="updateQData(${i}, 'pt', null, this.value)" class="border w-16 text-sm p-1" placeholder="Điểm">
+                    <button onclick="removeEditorQ(${i})" class="absolute top-2 right-2 text-red-500 font-bold">Xóa</button>
+                    <div class="flex gap-4 mb-2"><h4 class="font-bold">Câu ${i+1}</h4>
+                        <select onchange="changeQType(${i}, this.value)" class="border text-sm p-1"><option value="Phần I" ${q.section==='Phần I'?'selected':''}>Trắc nghiệm (4 đáp án)</option><option value="Phần II" ${q.section==='Phần II'?'selected':''}>Đúng/Sai</option><option value="Phần III" ${q.section==='Phần III'?'selected':''}>Điền khuyết</option></select>
+                        <input type="number" step="0.1" value="${q.pointValue}" onchange="updateQData(${i}, 'pt', null, this.value)" class="border w-16 text-sm p-1">
                     </div>
-                    <textarea onchange="updateQData(${i}, 'txt', null, this.value)" class="w-full border p-2 text-sm mb-2" rows="3" placeholder="Nội dung...">${q.text}</textarea>
+                    <textarea onchange="updateQData(${i}, 'txt', null, this.value)" class="w-full border p-2 text-sm mb-2" rows="3">${q.text}</textarea>
                     <div>${html}</div>
                 </div>`;
             }).join('');
         }
-
-        function addQuestionEditor() {
-            editorQuestions.push({ id: editorQuestions.length+1, section: 'Phần I', text: '', options: ['A','B','C','D'], correctIndex: 0, pointValue: 0.25, correctDetails: {type: 'MC'} });
-            renderEditorQuestions();
-        }
+        function addQuestionEditor() { editorQuestions.push({ id: editorQuestions.length+1, section: 'Phần I', text: 'Nội dung...', options: ['A','B','C','D'], correctIndex: 0, pointValue: 0.25, correctDetails: {type: 'MC'} }); renderEditorQuestions(); }
         function removeEditorQ(i) { editorQuestions.splice(i, 1); renderEditorQuestions(); }
         function changeQType(i, type) {
             editorQuestions[i].section = type;
-            if(type==='Phần I') { editorQuestions[i].options = ['','','','']; editorQuestions[i].correctIndex = 0; }
-            if(type==='Phần III') { editorQuestions[i].correctDetails = {type: 'NUMERIC', answers:['','','','']}; }
+            if(type==='Phần I') { editorQuestions[i].options = ['','','','']; editorQuestions[i].correctIndex=0; editorQuestions[i].correctDetails={type:'MC'}; }
+            if(type==='Phần II') { editorQuestions[i].correctDetails = {type:'TF', subOptions:['','','',''], correctAnswers:[true,true,true,true]}; }
+            if(type==='Phần III') { editorQuestions[i].correctDetails = {type:'NUMERIC', answers:['','','','']}; }
             renderEditorQuestions();
         }
-        function updateQData(i, field, sub, val) {
-            if(field==='txt') editorQuestions[i].text = val;
-            if(field==='pt') editorQuestions[i].pointValue = parseFloat(val)||0;
-            if(field==='opt') editorQuestions[i].options[sub] = val;
-            if(field==='num') editorQuestions[i].correctDetails.answers[sub] = val;
+        function updateQData(i, f, sub, val) {
+            if(f==='txt') editorQuestions[i].text=val; if(f==='pt') editorQuestions[i].pointValue=parseFloat(val)||0;
+            if(f==='opt') editorQuestions[i].options[sub]=val; if(f==='num') editorQuestions[i].correctDetails.answers[sub]=val;
+            if(f==='tf_text') editorQuestions[i].correctDetails.subOptions[sub]=val; if(f==='tf_ans') editorQuestions[i].correctDetails.correctAnswers[sub]=(val==='true');
         }
 
         async function saveExamData() {
-            const name = document.getElementById('editor-exam-name').value;
-            const sub = document.getElementById('editor-subject-select').value;
-            const cls = document.getElementById('editor-class-code').value;
-            const pwd = document.getElementById('editor-class-password').value;
-            const time = parseInt(document.getElementById('editor-time-limit').value) * 60;
-
-            if(!name || !cls || !pwd) return showToast('Vui lòng điền đủ Tên, Mã lớp và Mật khẩu.', 'error');
-            if(editorQuestions.length===0) return showToast('Đề thi phải có ít nhất 1 câu hỏi.', 'error');
-
             document.querySelectorAll('#questions-editor-container > div').forEach((div, i) => {
                 if(editorQuestions[i].section === 'Phần I') {
                     const checked = div.querySelector('input[type="radio"]:checked');
                     if(checked) editorQuestions[i].correctIndex = parseInt(checked.value);
                 }
             });
-
-            const newId = editorExamId || generateUUID();
             const newExam = {
-                id: newId,
-                name, subjectKey: sub, className: cls, classPass: pwd, timeLimit: time,
-                examCodes: editorExamCodes, questions: editorQuestions, points: {}
+                id: editorExamId || generateUUID(),
+                name: document.getElementById('editor-exam-name').value,
+                subjectKey: document.getElementById('editor-subject-select').value,
+                className: document.getElementById('editor-class-code').value,
+                classPass: document.getElementById('editor-class-password').value,
+                timeLimit: parseInt(document.getElementById('editor-time-limit').value)*60,
+                examCodes: editorExamCodes, questions: editorQuestions
             };
-
-            await cloud_set('exams', newId, newExam);
-            
-            showToast('Lưu đề thi thành công!');
-            changeScreen('admin-dashboard-screen');
+            try {
+                await cloud_set('exams', newExam.id, newExam); // LƯU LÊN CLOUD THỰC SỰ
+                showToast('Đã lưu đề thi lên Đám mây!', 'success');
+                changeScreen('admin-dashboard-screen');
+            } catch(e) {}
         }
 
-        // --- ADMIN: ACCOUNTS ---
+        // --- ACCOUNT MANAGEMENT (CLOUD) ---
         async function renderAccountsTable() {
             const accs = await cloud_getAll('accounts');
             document.getElementById('account_count').textContent = accs.length;
-            document.getElementById('accounts_table').innerHTML = accs.map(a => `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-2 font-mono">${a.sbd}</td>
-                    <td class="px-4 py-2">${a.name}</td>
-                    <td class="px-4 py-2 text-gray-400">${a.password}</td>
-                    <td class="px-4 py-2"><button onclick="delAcc('${a.sbd}')" class="text-red-500">Xóa</button></td>
-                </tr>
-            `).join('');
+            document.getElementById('accounts_table').innerHTML = accs.map(a => `<tr><td class="px-4 py-2">${a.id}</td><td class="px-4 py-2">${a.name}</td><td class="px-4 py-2">${a.password}</td><td><button onclick="cloud_delete('accounts', '${a.id}'); renderAccountsTable();" class="text-red-500">Xóa</button></td></tr>`).join('');
         }
-        
-        document.getElementById('add_account_form').onsubmit = async (e) => {
-            e.preventDefault();
-            const sbd = document.getElementById('new_sbd').value.trim();
-            const name = document.getElementById('new_name').value.trim();
-            const password = document.getElementById('new_password').value;
-            if(!/^\d{8}$/.test(sbd)) return showToast('SBD phải 8 số', 'error');
-            
-            await cloud_set('accounts', sbd, { sbd, name, password });
-            showToast('Lưu tài khoản thành công!');
-            renderAccountsTable();
-            e.target.reset();
-        };
-        
-        async function delAcc(sbd) {
-            await cloud_delete('accounts', sbd);
-            showToast('Đã xóa');
-            renderAccountsTable();
+        async function addSingleAccount() {
+            const sbd = document.getElementById('new_sbd').value; const name = document.getElementById('new_name').value; const password = document.getElementById('new_password').value;
+            if(!sbd) return;
+            await cloud_set('accounts', sbd, {sbd, name, password});
+            showToast("Lưu tài khoản thành công"); renderAccountsTable();
         }
         async function clearAllAccounts() {
-            if(confirm('Xóa TẤT CẢ tài khoản trên hệ thống?')) { 
+            if(confirm('Xóa sạch DB tài khoản?')) {
                 const accs = await cloud_getAll('accounts');
-                for(let a of accs) await cloud_delete('accounts', a.sbd);
-                renderAccountsTable(); 
+                for(let a of accs) await cloud_delete('accounts', a.id);
+                renderAccountsTable();
             }
         }
-
         function importAccountsExcel() {
-            const fileInput = document.getElementById('excel-file-upload');
-            if(!fileInput.files.length) return alert('Vui lòng chọn file Excel.');
-            
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const f = document.getElementById('excel-file-upload').files[0]; if(!f) return;
+            const r = new FileReader();
+            r.onload = async (e) => {
+                const data = new Uint8Array(e.target.result); const sheet = XLSX.read(data, {type: 'array'}).Sheets[XLSX.read(data, {type: 'array'}).SheetNames[0]];
                 const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
-                
-                let count = 0;
-                for(let i = 1; i < json.length; i++) { 
+                let c = 0;
+                for(let i=1; i<json.length; i++) {
                     const row = json[i];
-                    if(row.length >= 3) {
-                        const sbd = String(row[0]).trim();
-                        if(/^\d{8}$/.test(sbd)) {
-                            await cloud_set('accounts', sbd, { sbd: sbd, name: String(row[1]).trim(), password: String(row[2]).trim() });
-                            count++;
-                        }
+                    if(row.length>=3 && /^\d{8}$/.test(String(row[0]).trim())) {
+                        await cloud_set('accounts', String(row[0]).trim(), {sbd: String(row[0]).trim(), name: String(row[1]).trim(), password: String(row[2]).trim()}); c++;
                     }
                 }
-                renderAccountsTable();
-                showToast(`Đã lưu ${count} tài khoản mới.`);
-                fileInput.value = '';
-            };
-            reader.readAsArrayBuffer(fileInput.files[0]);
+                showToast(`Đã import ${c} tài khoản lên Cloud`); renderAccountsTable();
+            }; r.readAsArrayBuffer(f);
         }
 
-        // --- ADMIN: RESULTS & EXPORT ---
+        // --- RESULTS (CLOUD) ---
         async function loadStudentResults() {
             const results = await cloud_getAll('results');
-            const exams = [...new Set(results.map(r => r.examName))];
-            
-            const filterSel = document.getElementById('filter-exam-name');
-            const currFilter = filterSel.value;
-            filterSel.innerHTML = `<option value="">-- Tất cả đề thi --</option>` + exams.map(e => `<option value="${e}">${e}</option>`).join('');
-            filterSel.value = currFilter;
-
-            let filtered = results;
-            if(currFilter) filtered = filtered.filter(r => r.examName === currFilter);
-
-            const tbody = document.getElementById('student-list');
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-gray-500">Chưa có kết quả.</td></tr>`; return;
-            }
-
-            tbody.innerHTML = filtered.sort((a,b)=>b.timestamp-a.timestamp).map((r, i) => `
-                <tr>
-                    <td class="px-3 py-4 text-sm">${i+1}</td>
-                    <td class="px-6 py-4 font-bold text-gray-800">${r.name}</td>
-                    <td class="px-6 py-4 text-sm">${r.sbd}</td>
-                    <td class="px-6 py-4 text-sm text-blue-700">${r.examName}</td>
-                    <td class="px-6 py-4 text-sm">${r.exam_code}</td>
-                    <td class="px-6 py-4 font-bold text-red-600">${r.score}</td>
-                    <td class="px-6 py-4 text-sm">${new Date(r.timestamp).toLocaleString('vi-VN')}</td>
-                </tr>
-            `).join('');
+            document.getElementById('student-list').innerHTML = results.sort((a,b)=>b.timestamp-a.timestamp).map((r, i) => `<tr><td class="px-3 py-4">${i+1}</td><td class="px-6 py-4 font-bold">${r.name}</td><td class="px-6 py-4">${r.sbd}</td><td class="px-6 py-4">${r.examName}</td><td class="px-6 py-4">${r.exam_code}</td><td class="px-6 py-4 font-bold text-red-600">${r.score}</td><td class="px-6 py-4">${new Date(r.timestamp).toLocaleString('vi-VN')}</td></tr>`).join('');
         }
-
-        async function exportResultsToExcel() {
-            const results = await cloud_getAll('results');
-            if(results.length===0) return showToast('Không có dữ liệu để xuất.', 'error');
-            
-            const data = results.map((r, i) => ({
-                'STT': i+1, 'Họ và tên': r.name, 'Số báo danh': r.sbd, 
-                'Kỳ thi / Tên đề': r.examName, 'Lớp': r.class_code, 'Mã đề': r.exam_code,
-                'Điểm số': r.score, 'Thời gian nộp': new Date(r.timestamp).toLocaleString('vi-VN')
-            }));
-
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "KetQua");
-            XLSX.writeFile(wb, `KetQuaThi_${Date.now()}.xlsx`);
-        }
-
         async function resetTestData() {
-            if (confirm("XÓA TOÀN BỘ KẾT QUẢ THI?")) {
+            if(confirm("XÓA TOÀN BỘ ĐIỂM SỐ TRÊN CLOUD?")) {
                 const results = await cloud_getAll('results');
-                for(let r of results) await cloud_delete('results', r._docId);
+                for(let r of results) await cloud_delete('results', r.id);
                 loadStudentResults();
             }
         }
 
-        // --- REAL-TIME MONITORING (Ngầm ghi nhận) ---
-        async function updateMonitoringProgress() {
-            if(!activeExamConfig || !userInfo.ma_thi_sinh) return;
-            let answered = activeExamConfig.questions.filter(q => 
-                (q.section==='Phần I' && q.selected!==null && q.selected!==undefined) || 
-                (q.section==='Phần III' && q.selected && q.selected.some(s=>s!==""))
-            ).length;
-
-            const data = {
-                name: userInfo.ho_ten, sbd: userInfo.ma_thi_sinh,
-                examName: userInfo.examName,
-                answered: answered, total: activeExamConfig.questions.length,
-                lastActive: Date.now(), timeLeft: timeLeft
-            };
-            await cloud_set('monitoring', userInfo.ma_thi_sinh, data);
-        }
-
-        async function clearMonitoringProgress() {
-            await cloud_delete('monitoring', userInfo.ma_thi_sinh);
-        }
-
-        function loadMonitoringDataLive() {
-            if(unsubscribeMonitor) unsubscribeMonitor();
-            
-            unsubscribeMonitor = cloud_onSnapshot('monitoring', (sessions) => {
-                const grid = document.getElementById('monitoring-grid');
-                if(!grid) return;
-
-                if(sessions.length === 0) {
-                    grid.innerHTML = `<p class="col-span-full text-gray-500">Không có thí sinh nào đang làm bài.</p>`;
-                    return;
-                }
-
-                const now = Date.now();
-                grid.innerHTML = sessions.map(s => {
-                    const isOnline = (now - s.lastActive) < 15000;
-                    const statusColor = isOnline ? 'bg-green-500' : 'bg-yellow-500';
-                    const statusText = isOnline ? 'Đang hoạt động' : 'Mất kết nối';
+        // --- REALTIME MONITORING ---
+        let unsubMonitor = null;
+        function startAdminMonitoringListener() {
+            if(!window.fb) return;
+            if(unsubMonitor) unsubMonitor();
+            // Lắng nghe thay đổi Cloud theo thời gian thực (Real-time)
+            unsubMonitor = window.fb.onSnapshot(window.fb.collection(window.db, 'monitoring'), (snap) => {
+                let html = ''; const now = Date.now();
+                snap.forEach(doc => {
+                    const s = doc.data(); const isOnline = (now - s.lastActive) < 10000;
                     const percent = Math.round((s.answered / s.total) * 100);
-
-                    return `
-                    <div class="border rounded-lg p-4 bg-white shadow-sm">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h4 class="font-bold text-gray-800">${s.name}</h4>
-                                <p class="text-sm text-gray-500">SBD: ${s.sbd}</p>
-                            </div>
-                            <span class="flex items-center text-xs">
-                                <span class="w-2 h-2 rounded-full ${statusColor} mr-1"></span> ${statusText}
-                            </span>
-                        </div>
-                        <p class="text-xs text-blue-600 font-bold mb-2 truncate">${s.examName}</p>
-                        <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
-                            <div class="bg-blue-600 h-2 rounded-full transition-all" style="width: ${percent}%"></div>
-                        </div>
-                        <div class="flex justify-between text-xs text-gray-500">
-                            <span>Đã làm: ${s.answered}/${s.total}</span>
-                            <span>Còn lại: ${Math.floor(s.timeLeft/60)} phút</span>
-                        </div>
+                    html += `<div class="border p-4 bg-white rounded-lg">
+                        <div class="flex justify-between"><b>${s.name} (${s.sbd})</b> <span class="${isOnline?'text-green-500':'text-gray-400'} text-xs">● ${isOnline?'Online':'Offline'}</span></div>
+                        <div class="text-xs text-blue-600 font-bold mb-2">${s.examName}</div>
+                        <div class="w-full bg-gray-200 h-2 mb-1"><div class="bg-blue-600 h-2" style="width: ${percent}%"></div></div>
+                        <div class="flex justify-between text-xs text-gray-500"><span>Làm: ${s.answered}/${s.total}</span><span>Còn: ${Math.floor(s.timeLeft/60)}p</span></div>
                     </div>`;
-                }).join('');
+                });
+                document.getElementById('monitoring-grid').innerHTML = html;
             });
         }
 
-
-        // --- STUDENT EXAM ENGINE ---
+        // --- STUDENT ENGINE ---
         function initExamEngine() {
             currentQuestionIndex = 0; timeLeft = activeExamConfig.timeLimit;
             activeExamConfig.questions.forEach(q => {
                 if(q.section === 'Phần I') q.selected = null;
+                if(q.section === 'Phần II') q.selected = [null,null,null,null];
                 if(q.section === 'Phần III') q.selected = ["","","",""];
             });
-
             document.getElementById('total-questions').textContent = activeExamConfig.questions.length;
             updateQuestionNavigation(); renderQuestion(0);
-            
-            updateMonitoringProgress(); 
-            
             if(timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                const m = String(Math.floor(timeLeft/60)).padStart(2,'0');
-                const s = String(timeLeft%60).padStart(2,'0');
-                document.getElementById('timer').textContent = `${m}:${s}`;
-                
-                if (timeLeft % 5 === 0) updateMonitoringProgress(); 
-                
-                if(timeLeft <= 0) submitExam();
-            }, 1000);
+            timerInterval = setInterval(examTimerTick, 1000);
+        }
+
+        function examTimerTick() {
+            timeLeft--;
+            document.getElementById('timer').textContent = `${String(Math.floor(timeLeft/60)).padStart(2,'0')}:${String(timeLeft%60).padStart(2,'0')}`;
+            if(timeLeft % 3 === 0) { // Ghi log lên mây mỗi 3 giây
+                let answered = activeExamConfig.questions.filter(q => (q.section==='Phần I' && q.selected!==null) || (q.section==='Phần II' && q.selected && q.selected.some(s=>s!==null)) || (q.section==='Phần III' && q.selected && q.selected.some(s=>s!==""))).length;
+                cloud_set('monitoring', userInfo.ma_thi_sinh, { name: userInfo.ho_ten, sbd: userInfo.ma_thi_sinh, examName: userInfo.examName, answered: answered, total: activeExamConfig.questions.length, lastActive: Date.now(), timeLeft: timeLeft }).catch(e=>{});
+            }
+            if(timeLeft <= 0) executeSubmission();
         }
 
         function renderQuestion(index) {
-            currentQuestionIndex = index;
-            const q = activeExamConfig.questions[index];
-            const container = document.getElementById('question-container');
-            
+            currentQuestionIndex = index; const q = activeExamConfig.questions[index]; const container = document.getElementById('question-container');
             let ansHtml = '';
             if (q.section === 'Phần I') {
-                ansHtml = q.options.map((opt, i) => `
-                    <div class="mb-2 question-option">
-                        <input type="radio" id="q${q.id}_o${i}" name="q${q.id}" class="hidden" ${q.selected === i ? 'checked' : ''} onchange="ansMC(${index}, ${i})">
-                        <label for="q${q.id}_o${i}" class="flex items-start"><span class="font-bold text-blue-600 w-6">${String.fromCharCode(65+i)}.</span> <p>${opt}</p></label>
-                    </div>`).join('');
-            } else if (q.section === 'Phần III') {
-                ansHtml = `<div class="flex justify-center space-x-3">` + [0,1,2,3].map(i => `
-                    <input type="text" maxlength="1" value="${q.selected[i]||''}" oninput="ansNum(event, ${index}, ${i})" class="numeric-input-cell">
-                `).join('') + `</div>`;
+                ansHtml = q.options.map((opt, i) => `<div class="mb-2 question-option"><input type="radio" id="q${q.id}_o${i}" name="q${q.id}" class="hidden" ${q.selected === i ? 'checked' : ''} onchange="ansMC(${index}, ${i})"><label for="q${q.id}_o${i}" class="flex items-start"><span class="font-bold text-blue-600 w-6">${String.fromCharCode(65+i)}.</span> <p>${opt}</p></label></div>`).join('');
+            } else if (q.section === 'Phần II') {
+                ansHtml = `<div class="flex flex-col gap-3">` + [0,1,2,3].map(i => `<div class="flex justify-between items-center bg-gray-50 p-3 rounded border"><span>${String.fromCharCode(97+i)}. ${q.correctDetails.subOptions?.[i] || ''}</span><div class="flex gap-4 w-1/4 justify-end"><label class="text-green-700 font-bold"><input type="radio" name="q${q.id}_s${i}" onchange="ansTF(${index}, ${i}, true)" ${q.selected && q.selected[i]===true?'checked':''}> ĐÚNG</label><label class="text-red-700 font-bold"><input type="radio" name="q${q.id}_s${i}" onchange="ansTF(${index}, ${i}, false)" ${q.selected && q.selected[i]===false?'checked':''}> SAI</label></div></div>`).join('') + `</div>`;
+            } else {
+                ansHtml = `<div class="flex justify-center space-x-3">` + [0,1,2,3].map(i => `<input type="text" value="${q.selected[i]||''}" oninput="ansNum(event, ${index}, ${i})" class="numeric-input-cell">`).join('') + `</div>`;
             }
-
-            container.innerHTML = `
-                <p class="section-title text-sm">${q.section} (Điểm: ${q.pointValue})</p>
-                <h2 class="text-xl font-bold mb-4">Câu ${index + 1}:</h2> 
-                <div class="mb-6 border-b pb-4 text-lg whitespace-pre-wrap">${q.text}</div>
-                <div>${ansHtml}</div>
-            `;
-            
-            document.querySelectorAll('.question-nav-item').forEach(b => b.classList.remove('active'));
-            document.getElementById(`nav-q-${index}`).classList.add('active');
+            container.innerHTML = `<p class="section-title text-sm">${q.section} (Điểm: ${q.pointValue})</p><h2 class="text-xl font-bold mb-4">Câu ${index + 1}:</h2><div class="mb-4 border-b pb-4 text-lg whitespace-pre-wrap">${q.text}</div><div>${ansHtml}</div>`;
+            if (window.MathJax) MathJax.typesetPromise([container]).catch(err => {});
         }
 
-        function ansMC(qIdx, optIdx) { 
-            activeExamConfig.questions[qIdx].selected = optIdx; 
-            updateQuestionNavigation(); 
-            updateMonitoringProgress(); 
-        }
-        function ansNum(e, qIdx, subIdx) {
-            let val = e.target.value.slice(-1).toUpperCase();
-            e.target.value = val;
-            activeExamConfig.questions[qIdx].selected[subIdx] = val;
-            updateQuestionNavigation();
-            updateMonitoringProgress();
-        }
-
+        function ansMC(qIdx, optIdx) { activeExamConfig.questions[qIdx].selected = optIdx; updateQuestionNavigation(); }
+        function ansTF(qIdx, subIdx, val) { activeExamConfig.questions[qIdx].selected[subIdx] = val; updateQuestionNavigation(); }
+        function ansNum(e, qIdx, subIdx) { activeExamConfig.questions[qIdx].selected[subIdx] = e.target.value.trim().toUpperCase(); updateQuestionNavigation(); }
         function nextQuestion() { renderQuestion((currentQuestionIndex + 1) % activeExamConfig.questions.length); }
         function prevQuestion() { renderQuestion((currentQuestionIndex - 1 + activeExamConfig.questions.length) % activeExamConfig.questions.length); }
 
         function updateQuestionNavigation() {
-            const nav = document.getElementById('question-nav');
             let answered = 0;
-            nav.innerHTML = activeExamConfig.questions.map((q, i) => {
-                let isAns = (q.section==='Phần I' && q.selected!==null) || (q.section==='Phần III' && q.selected && q.selected.some(s=>s!==""));
+            document.getElementById('question-nav').innerHTML = activeExamConfig.questions.map((q, i) => {
+                let isAns = (q.section==='Phần I' && q.selected!==null) || (q.section==='Phần II' && q.selected && q.selected.some(s=>s!==null)) || (q.section==='Phần III' && q.selected && q.selected.some(s=>s!==""));
                 if(isAns) answered++;
                 return `<button id="nav-q-${i}" onclick="renderQuestion(${i})" class="question-nav-item w-10 h-10 rounded-full border ${isAns?'answered':'bg-white'}">${i+1}</button>`;
             }).join('');
@@ -1301,46 +880,43 @@
         function confirmSubmission() { document.getElementById('submission-modal').classList.remove('hidden'); }
         function hideSubmissionModal() { document.getElementById('submission-modal').classList.add('hidden'); }
 
-        async function submitExam() {
+        async function executeSubmission() {
             hideSubmissionModal(); clearInterval(timerInterval);
             let score = 0, correct = 0, answered = 0;
             
             activeExamConfig.questions.forEach(q => {
                 let isAns = false, isCorr = false;
-                if(q.section === 'Phần I' && q.selected !== null) {
-                    isAns = true; if(q.selected === q.correctIndex) isCorr = true;
+                if(q.section === 'Phần I' && q.selected !== null) { isAns = true; if(q.selected === q.correctIndex) { isCorr = true; score += q.pointValue; } }
+                if(q.section === 'Phần II' && q.selected && q.selected.some(s=>s!==null)) {
+                    isAns = true; let cM = 0;
+                    for(let i=0; i<4; i++) { if(q.selected[i] !== null && q.selected[i] === q.correctDetails.correctAnswers[i]) cM++; }
+                    if(cM === 1) score += q.pointValue * 0.1; else if(cM === 2) score += q.pointValue * 0.25; else if(cM === 3) score += q.pointValue * 0.5; else if(cM === 4) { score += q.pointValue; isCorr = true; }
                 }
-                if(q.section === 'Phần III' && q.selected.some(s=>s!=="")) {
-                    isAns = true;
-                    let match = true;
-                    for(let i=0; i<4; i++) {
-                        let ex = (q.correctDetails.answers[i]||'').trim().toUpperCase();
-                        let ac = (q.selected[i]||'').trim().toUpperCase();
-                        if(ex && ex !== ac) match = false;
-                        if(!ex && ac) match = false;
-                    }
-                    if(match) isCorr = true;
+                if(q.section === 'Phần III' && q.selected && q.selected.some(s=>s!=="")) {
+                    isAns = true; let match = true;
+                    for(let i=0; i<4; i++) { let ex = (q.correctDetails.answers[i]||'').trim().toUpperCase(); let ac = (q.selected[i]||'').trim().toUpperCase(); if(ex && ex !== ac) match = false; if(!ex && ac) match = false; }
+                    if(match) { isCorr = true; score += q.pointValue; }
                 }
-                if(isAns) answered++;
-                if(isCorr) { correct++; score += q.pointValue; }
+                if(isAns) answered++; if(isCorr) correct++;
             });
 
-            const resId = userInfo.ma_thi_sinh + '_' + Date.now();
-            await cloud_set('results', resId, {
-                sbd: userInfo.ma_thi_sinh, name: userInfo.ho_ten,
-                examId: userInfo.examId, examName: userInfo.examName, exam_code: userInfo.exam_code, class_code: userInfo.class_code,
-                score: score.toFixed(2), timestamp: Date.now()
-            });
+            pendingScoreData = { sbd: userInfo.ma_thi_sinh, name: userInfo.ho_ten, examId: userInfo.examId, examName: userInfo.examName, exam_code: userInfo.exam_code, class_code: userInfo.class_code, score: score.toFixed(2), timestamp: Date.now(), answered: answered, totalQ: activeExamConfig.questions.length, correct: correct };
             
-            clearMonitoringProgress(); 
+            cloud_delete('monitoring', userInfo.ma_thi_sinh); // Xóa khỏi danh sách đang thi
+            changeScreen('scoring-screen'); // Chuyển sang màn chấm điểm Loading
             
-            document.getElementById('result-total').textContent = activeExamConfig.questions.length;
-            document.getElementById('result-answered').textContent = answered;
-            document.getElementById('result-correct').textContent = correct;
-            document.getElementById('result-score').textContent = score.toFixed(2);
-            changeScreen('result-screen');
+            // LƯU KẾT QUẢ LÊN ĐÁM MÂY
+            try {
+                await cloud_set('results', userInfo.ma_thi_sinh + '_' + Date.now(), pendingScoreData);
+                setTimeout(() => {
+                    document.getElementById('result-total').textContent = pendingScoreData.totalQ; document.getElementById('result-answered').textContent = pendingScoreData.answered;
+                    document.getElementById('result-correct').textContent = pendingScoreData.correct; document.getElementById('result-score').textContent = pendingScoreData.score;
+                    changeScreen('result-screen');
+                }, 4000);
+            } catch(e) {
+                alert("Lỗi không thể lưu điểm! Hãy báo ngay cho giám thị.");
+            }
         }
-
     </script>
 </body>
 </html>
