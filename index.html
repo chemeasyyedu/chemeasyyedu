@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHEMEASYY EDUCATION-KHẢO THÍ ĐÁNH GIÁ CHẤT LƯỢNG</title>
+    <title>CHEMEASYYEDUCATION-KHẢO THÍ ĐÁNH GIÁ CHẤT LƯỢNG</title>
     
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -382,7 +382,6 @@
                         </h2>
                         <p class="text-sm text-gray-500 font-medium mt-1">Cập nhật tự động thời gian thực. Bấm vào thẻ để Xem màn hình & Phạt.</p>
                     </div>
-                    <!-- Nút refresh tay để dự phòng -->
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="monitoring-grid">
                     <!-- JS Render Active Sessions -->
@@ -608,7 +607,6 @@
                     <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Thêm 1 Câu hỏi Mới
                 </button>
             </div>
-            <!-- Margin bù cho navbar fixed top -->
             <div class="h-10"></div> 
         </div>
     </div>
@@ -791,7 +789,7 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
         // ==========================================
-        // DÁN FIREBASE CONFIG CỦA BẠN VÀO ĐÂY
+        // FIREBASE CONFIG CỦA BẠN
         // ==========================================
         const firebaseConfig = {
           apiKey: "AIzaSyCbNC7RSwD_hhacqVYQkYSVX-RCdIwNSnc",
@@ -804,17 +802,15 @@
         };
         
         let app, db, auth;
-        let isFirebaseActive = false; // Cờ kiểm tra trạng thái lưu trữ đám mây
+        let isFirebaseActive = false;
         
-        // Gắn các module vào window để các function bên dưới dùng chung
         window.fb = { collection, getDocs, doc, setDoc, deleteDoc, onSnapshot };
         
-        // Khởi tạo Firebase
         try {
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
-            window.db = db; // Lưu toàn cục
+            window.db = db; 
 
             signInAnonymously(auth).then(() => {
                 isFirebaseActive = true;
@@ -847,14 +843,12 @@
             isFirebaseActive = false;
             updateConnectionStatus(false);
             document.getElementById('global-loading').style.display = 'none';
-            showToast('Cảnh báo: Firebase chưa cấu hình đúng. Hệ thống đang chạy ở chế độ Dùng thử (Lưu trữ cục bộ). Lỗi: ' + msg, 'error');
+            showToast('Hệ thống đang chạy ở chế độ Dùng thử (Lưu trữ cục bộ). Lỗi: ' + msg, 'error');
         }
 
-        // ==========================================
-        // CÁC HÀM GIAO TIẾP DỮ LIỆU CHUNG (CLOUD / LOCAL)
-        // ==========================================
+        // Wrapper Giao tiếp Firebase
         window.cloud_get = async function(col, id) {
-            if(!isFirebaseActive) return null; // Dùng live listener thay thế get lẻ tẻ
+            if(!isFirebaseActive) return null; 
         };
 
         window.cloud_getAll = async function(colName) {
@@ -874,7 +868,7 @@
             if(!isFirebaseActive) {
                 let list = localStorage.getItem(colName);
                 list = list ? JSON.parse(list) : [];
-                if(colName === 'monitoring' || colName === 'commands') { // Dạng key-value
+                if(colName === 'monitoring' || colName === 'commands') { 
                     if(!Array.isArray(list)) list = Object.values(list);
                 }
                 const idx = list.findIndex(x => x.id === docId || x.sbd === docId);
@@ -893,7 +887,7 @@
                 await setDoc(doc(db, colName, docId), data);
                 return true;
             } catch(e) { 
-                showToast("Lỗi đẩy dữ liệu lên mây: " + e.message, 'error'); 
+                showToast("Lỗi đẩy dữ liệu: " + e.message, 'error'); 
                 console.error(e); return false; 
             }
         };
@@ -918,14 +912,11 @@
             } catch(e) { console.error(e); return false; }
         };
         
-        // Export hàm bắt đầu app để script dưới dùng
         window.startApp = function() {
-            loadExamConfig(); // Nạp dữ liệu lúc đầu
             const restored = restoreSessionState();
             if (!restored) changeScreen('login-screen');
         };
 
-        // Kích hoạt App sau khi nạp xong module
         setTimeout(() => window.startApp(), 500);
     </script>
 
@@ -935,13 +926,12 @@
         const ADMIN_PASS = 'Huuhuy@2212_admin';
         const STUDENT_DEFAULT_PASS = 'HOAHOCVUIVE';
         
-        // Tên Collection trên Cloud
         const K_EXAMS = 'exams'; 
         const K_ACCOUNTS = 'accounts';
         const K_RESULTS = 'results'; 
         const K_SUBJECTS = 'subjects'; 
+        const K_APPEALS = 'appeals';
 
-        // --- HÀM TOAST THÔNG BÁO THAY CHO ALERT ---
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `p-4 rounded-xl shadow-2xl text-white font-bold transition-all duration-300 transform translate-x-full opacity-0 flex items-center border-l-4 z-[10000] ${type === 'error' ? 'bg-gray-900 border-red-500' : 'bg-gray-900 border-green-500'}`;
@@ -957,7 +947,6 @@
         let currentScreen = 'login-screen';
         let userInfo = { ho_ten: '', ma_thi_sinh: '', examId: null, exam_code: null, class_code: null, subject_name: null, dot_thi: null }; 
         
-        // Exam state
         let activeExamConfig = null; 
         let currentQuestionIndex = 0;
         let timeLeft = 0; 
@@ -969,17 +958,31 @@
         let cameraSnapshotInterval = null; 
         let currentSnapshot = null; 
         
-        // Firebase Live Listeners
         let adminMonitorUnsubscribe = null;
         let studentCmdUnsubscribe = null;
+        let adminCommandsUnsubscribe = null;
 
-        // Editor state
         let editorExamId = null;
         let editorQuestions = [];
         let editorExamCodes = ['0000'];
 
         const K_SESSION = 'exam_session_state';
 
+        // --- BẢO MẬT CHỐNG GIAN LẬN ---
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden && currentScreen === 'exam-screen') {
+                showToast("CẢNH BÁO: BẠN VỪA RỜI KHỎI TRANG THI! Hành động này đã được ghi lại.", "error");
+            }
+        });
+
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) {
+                e.preventDefault();
+            }
+        });
+
+        // --- SESSION PERSISTENCE ---
         function saveCurrentSessionState() {
             const state = { currentScreen, userInfo, activeExamConfig, currentQuestionIndex, timeLeft, isCameraActive };
             sessionStorage.setItem(K_SESSION, JSON.stringify(state));
@@ -1012,7 +1015,7 @@
                         updateQuestionNavigation();
                         renderQuestion(currentQuestionIndex);
                         
-                        setupStudentCommandListener(); // Bật lại tai nghe lệnh
+                        setupStudentCommandListener(); 
                         if (timerInterval) clearInterval(timerInterval);
                         timerInterval = setInterval(examTimerTick, 1000);
 
@@ -1057,7 +1060,6 @@
             }
         }
 
-        // --- UTILS ---
         const generateUUID = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
         
         function shuffleArray(array, seed) {
@@ -1097,9 +1099,10 @@
                 loadAdminExamsList();
                 loadStudentResults();
                 renderAccountsTable();
-                setupAdminMonitoringListener(); // Bật Live Camera & Giám sát
+                setupAdminMonitoringListener(); 
             } else {
                 if(adminMonitorUnsubscribe) { adminMonitorUnsubscribe(); adminMonitorUnsubscribe = null; }
+                if(adminCommandsUnsubscribe) { adminCommandsUnsubscribe(); adminCommandsUnsubscribe = null; }
             }
 
             if (newScreenId === 'subject-selection-screen') {
@@ -1119,7 +1122,6 @@
             document.getElementById(tabId).classList.add('active');
         }
 
-        // --- LOGIN LOGIC ---
         async function login() {
             const maSo = document.getElementById('ma_thi_sinh').value.trim();
             const hoTen = document.getElementById('ho_ten').value.trim();
@@ -1129,7 +1131,7 @@
             err.classList.add('hidden');
 
             const btn = document.querySelector('.custom-btn-login');
-            btn.innerHTML = `<div class="spinner w-5 h-5 border-2"></div>`;
+            btn.innerHTML = `<div class="spinner w-5 h-5 border-2 inline-block align-middle"></div>`;
 
             if (maSo === ADMIN_CODE && matKhau === ADMIN_PASS) {
                 userInfo = { ho_ten: 'Admin', ma_thi_sinh: 'ADMIN', dot_thi: dotThi };
@@ -1160,7 +1162,6 @@
             err.textContent = "SBD hoặc Mật khẩu không đúng."; err.classList.remove('hidden');
         }
 
-        // --- STUDENT: SUBJECT SELECTION ---
         async function renderSubjectList() {
             const container = document.getElementById('subject-list');
             container.innerHTML = `<div class="col-span-full text-center py-4"><div class="spinner mx-auto border-t-blue-500"></div></div>`;
@@ -1195,7 +1196,7 @@
             const pass = document.getElementById('class_password_input').value;
             const err = document.getElementById('class-login-error');
             const btn = document.querySelector('#class-login-form button[type="submit"]');
-            btn.innerHTML = `<div class="spinner w-5 h-5 border-2"></div>`;
+            btn.innerHTML = `<div class="spinner w-5 h-5 border-2 inline-block align-middle"></div>`;
             
             const exams = await cloud_getAll(K_EXAMS);
             const exam = exams.find(e => e.subjectKey === subjectKey && e.className === code && e.classPass === pass);
@@ -1222,9 +1223,6 @@
             hideClassLoginModal(); changeScreen('exam-screen'); initExamEngine();
         }
 
-        // --- ADMIN: EXAM MANAGEMENT ---
-        function loadExamConfig() { /* Dummy compatibility */ }
-        
         async function loadAdminExamsList() {
             const tbody = document.getElementById('admin-exams-list');
             tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10"><div class="spinner mx-auto border-t-blue-500 mb-2"></div>Tải từ Đám mây...</td></tr>`;
@@ -1272,7 +1270,6 @@
         function editExam(id) { openExamEditor(id); }
         async function deleteExam(id) { if(confirm('Xóa đề thi này khỏi Máy chủ?')) { await cloud_delete(K_EXAMS, id); loadAdminExamsList(); } }
 
-        // --- EDITOR LOGIC ---
         function renderExamCodesList() {
             const c = document.getElementById('exam_codes_list_editor');
             c.innerHTML = editorExamCodes.filter(code => code !== '0000').map(code => `<span class="bg-indigo-100 text-indigo-800 text-sm px-3 py-1.5 rounded-lg border border-indigo-200 font-bold flex items-center shadow-sm">${code} <button onclick="removeExamCode('${code}')" class="ml-2 text-red-500 hover:text-red-700 bg-white rounded-full w-5 h-5 flex items-center justify-center font-black">&times;</button></span>`).join('');
@@ -1389,7 +1386,6 @@
             btn.innerHTML = oldText;
         }
 
-        // --- TÍCH HỢP AI GEMINI ---
         async function handleAIWordImport(event) {
             const file = event.target.files[0]; if(!file) return;
             const loader = document.getElementById('ai-loading'); loader.classList.remove('hidden');
@@ -1429,7 +1425,6 @@
             finally { loader.classList.add('hidden'); event.target.value = ''; }
         }
 
-        // --- ADMIN: ACCOUNTS (EXCEL) ---
         async function renderAccountsTable() {
             const accs = await cloud_getAll(K_ACCOUNTS);
             document.getElementById('account_count').textContent = accs.length;
@@ -1448,7 +1443,7 @@
             if(!/^\d{8}$/.test(sbd)) return showToast('SBD phải 8 số', 'error');
             const accs = await cloud_getAll(K_ACCOUNTS); if(accs.find(a=>a.sbd===sbd)) return showToast('SBD đã tồn tại trên mây', 'error');
             
-            const btn = e.target.querySelector('button'); const oldBtn = btn.innerHTML; btn.innerHTML = `<div class="spinner border-2 w-4 h-4"></div>`;
+            const btn = e.target.querySelector('button'); const oldBtn = btn.innerHTML; btn.innerHTML = `<div class="spinner border-2 w-4 h-4 inline-block"></div>`;
             await cloud_set(K_ACCOUNTS, sbd, {sbd, name, password}); renderAccountsTable();
             showToast('Tạo tài khoản thành công'); e.target.reset(); btn.innerHTML = oldBtn;
         };
@@ -1486,7 +1481,6 @@
             }; reader.readAsArrayBuffer(fileInput.files[0]);
         }
 
-        // --- ADMIN: RESULTS & EXPORT ---
         async function loadStudentResults() {
             const tbody = document.getElementById('student-list');
             tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10"><div class="spinner border-t-blue-500 mx-auto"></div></td></tr>`;
@@ -1516,7 +1510,7 @@
             `).join('');
 
             // Check appeals badge
-            const appeals = await cloud_getAll('appeals');
+            const appeals = await cloud_getAll(K_APPEALS);
             const b = document.getElementById('appeal-badge');
             if(appeals.length > 0) { b.classList.remove('hidden'); b.textContent = appeals.length; } else b.classList.add('hidden');
         }
@@ -1532,7 +1526,7 @@
             if (confirm("LỆNH NGUY HIỂM: Xóa toàn bộ Bảng Điểm và Lịch sử giám sát trên Đám mây? Hành động không thể hoàn tác!")) {
                 const res = await cloud_getAll(K_RESULTS); for(let r of res) await cloud_delete(K_RESULTS, r.id);
                 const mon = await cloud_getAll('monitoring'); for(let m of mon) await cloud_delete('monitoring', m.id);
-                loadStudentResults(); loadMonitoringData(); showToast('Đã dọn dẹp Database.', 'success');
+                loadStudentResults(); showToast('Đã dọn dẹp Database.', 'success');
             }
         }
 
@@ -1546,12 +1540,8 @@
                 (q.section==='Phần III' && q.selected && q.selected.some(s=>s!==""))
             ).length;
 
-            // Ghi nhận chi tiết từng đáp án để Admin xem
-            let detailedAnswers = activeExamConfig.questions.map(q => ({
-                id: q.id, section: q.section, selected: q.selected || null // Ép null nếu undefined để Firebase ko block
-            }));
+            let detailedAnswers = activeExamConfig.questions.map(q => ({ id: q.id, section: q.section, selected: q.selected || null }));
 
-            // Sử dụng JSON trick để rửa sạch triệt để các biến undefined ẩn bên trong object
             const cleanData = JSON.parse(JSON.stringify({
                 name: userInfo.ho_ten || "Ẩn danh", 
                 sbd: userInfo.ma_thi_sinh,
@@ -1580,7 +1570,6 @@
         function setupAdminMonitoringListener() {
             if(!window.fb || !window.db) return;
             
-            // 1. Bật tai nghe lệnh phạt (Non-blocking) để update UI cho thẻ tiến độ
             if(!adminCommandsUnsubscribe) {
                 adminCommandsUnsubscribe = window.fb.onSnapshot(window.fb.collection(window.db, 'commands'), snap => {
                     globalCommands = {};
@@ -1590,7 +1579,6 @@
 
             if(adminMonitorUnsubscribe) adminMonitorUnsubscribe();
             
-            // 2. Bật tai nghe tiến độ làm bài
             adminMonitorUnsubscribe = window.fb.onSnapshot(window.fb.collection(window.db, 'monitoring'), (snapshot) => {
                 const grid = document.getElementById('monitoring-grid');
                 if(!grid || currentScreen !== 'admin-dashboard-screen') return;
@@ -1600,7 +1588,7 @@
                 
                 snapshot.forEach(docSnap => {
                     const s = docSnap.data();
-                    if(!s || !s.sbd) return; // Bỏ qua data rác
+                    if(!s || !s.sbd) return;
 
                     const isOnline = (now - s.lastActive) < 15000; 
                     const statusColor = isOnline ? 'bg-green-500' : 'bg-gray-400';
@@ -1633,7 +1621,6 @@
                         </div>
                     </div>`;
 
-                    // Cập nhật Modal Chi tiết nếu đang mở
                     if (currentDetailSbd === s.sbd && !document.getElementById('monitor-detail-modal').classList.contains('hidden')) {
                         updateMonitorDetailUI(s, myCmd);
                     }
@@ -1644,9 +1631,6 @@
             });
         }
         
-        function loadMonitoringData() {} // Đã thay bằng Live Listener
-
-        // --- ADMIN COMMANDS & DETAILS ---
         let currentDetailSbd = null;
         async function openMonitorDetail(sbd) {
             currentDetailSbd = sbd;
@@ -1669,7 +1653,7 @@
             const camStatus = document.getElementById('md-camera-status');
             if (s.cameraActive) {
                 camStatus.innerHTML = "<span class='flex items-center'><span class='w-2.5 h-2.5 bg-green-500 rounded-full mr-1.5 animate-pulse shadow-[0_0_5px_#22c55e]'></span> Đang truyền hình ảnh</span>";
-                camStatus.className = "font-black text-green-600";
+                camStatus.className = "font-bold text-green-600";
             } else {
                 camStatus.innerHTML = "Đã tắt / Không có tín hiệu";
                 camStatus.className = "font-bold text-gray-500";
@@ -1741,7 +1725,7 @@
                 document.getElementById('camera-request-modal').classList.add('hidden');
                 isCameraActive = true;
                 
-                await cloud_delete('commands', userInfo.ma_thi_sinh); // Gỡ lệnh yêu cầu
+                await cloud_delete('commands', userInfo.ma_thi_sinh); 
                 
                 const canvas = document.createElement('canvas'); canvas.width = 320; canvas.height = 240; const ctx = canvas.getContext('2d');
                 if(cameraSnapshotInterval) clearInterval(cameraSnapshotInterval);
@@ -1771,11 +1755,11 @@
             if(list.length === 0) {
                 container.innerHTML = '<div class="text-center py-8"><svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg><p class="text-gray-500 font-bold">Hộp thư rỗng.</p></div>';
             } else {
-                container.innerHTML = list.reverse().map(a => `<div class="border-2 border-amber-100 p-4 rounded-xl bg-amber-50 shadow-sm"><div class="flex justify-between text-sm text-gray-500 mb-2 border-b border-amber-200 pb-2"><span class="font-black text-amber-900">${a.name} <span class="bg-white px-1 border rounded">${a.sbd}</span></span><span class="font-bold">${new Date(a.timestamp).toLocaleString('vi-VN')}</span></div><p class="text-gray-800 font-medium text-base">${a.reason}</p></div>`).join('');
+                container.innerHTML = list.reverse().map(a => `<div class="border-2 border-amber-100 p-4 rounded-xl bg-amber-50 shadow-sm"><div class="flex justify-between text-sm text-gray-500 mb-2 border-b border-amber-200 pb-2"><span class="font-bold text-amber-900">${a.name} <span class="bg-white px-1 border rounded">${a.sbd}</span></span><span class="font-bold">${new Date(a.timestamp).toLocaleString('vi-VN')}</span></div><p class="text-gray-800 font-medium text-base">${a.reason}</p></div>`).join('');
             }
             document.getElementById('appeals-modal').classList.remove('hidden');
         }
-        function hideAppealsModal() { document.getElementById('appeals-modal').classList.add('hidden'); loadStudentResults(); /* Tắt badge */ }
+        function hideAppealsModal() { document.getElementById('appeals-modal').classList.add('hidden'); loadStudentResults(); }
         async function clearAppeals() { if(confirm('Xóa sạch thư mục phúc khảo trên Đám mây?')) { const list = await cloud_getAll(K_APPEALS); for(let a of list) await cloud_delete(K_APPEALS, a.id); showAppealsModal(); } }
 
         function openAppealModal() { document.getElementById('appeal-submit-modal').classList.remove('hidden'); }
@@ -1834,7 +1818,7 @@
             document.getElementById('total-questions').textContent = activeExamConfig.questions.length;
             updateQuestionNavigation(); renderQuestion(0);
             
-            setupStudentCommandListener(); // Bật tai nghe lệnh 
+            setupStudentCommandListener(); 
             
             if(timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(examTimerTick, 1000);
@@ -1844,7 +1828,6 @@
         function examTimerTick() {
             const overlay = document.getElementById('student-pause-overlay');
             if(overlay.style.display === 'flex') {
-                // Đóng băng thời gian nếu bị phạt
                 let currentVal = parseInt(document.getElementById('pause-countdown').textContent);
                 if(currentVal > 0) document.getElementById('pause-countdown').textContent = currentVal - 1;
                 return;
@@ -1855,7 +1838,7 @@
             const s = String(timeLeft%60).padStart(2,'0');
             document.getElementById('timer').textContent = `${m}:${s}`;
             
-            if(timeLeft % 3 === 0) saveCurrentSessionState(); // Cập nhật session storage định kỳ
+            if(timeLeft % 3 === 0) saveCurrentSessionState();
             if(timeLeft <= 0) executeSubmission();
         }
 
