@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHEMEASYY EDUCATION- KHẢO THÍ ĐÁNH GIÁ CHẤT LƯỢNG</title>
+    <title>CHEMEASYY EDUCATION-TRANG THI ĐÁNH GIÁ CHẤT LƯỢNG HỌC VIÊN</title>
     
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -131,7 +131,7 @@
     <!-- Màn hình Loading Khởi tạo Firebase -->
     <div id="global-loading" class="fixed inset-0 bg-white z-[10000] flex flex-col items-center justify-center">
         <div class="spinner border-t-blue-600 w-16 h-16 mb-4"></div>
-        <h2 class="text-xl font-bold text-gray-700 animate-pulse">Đang kết nối Máy chủ Đám mây...</h2>
+        <h2 class="text-xl font-bold text-gray-700 animate-pulse">LOADING...</h2>
     </div>
 
     <!-- Background động -->
@@ -145,15 +145,15 @@
     <div id="banned-screen" class="screen flex-col items-center justify-center p-4 bg-gray-900 text-white z-50 fixed inset-0">
         <svg class="w-24 h-24 text-red-500 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
         <h1 class="text-4xl font-bold mb-4 text-red-500 text-center uppercase">Bạn đã bị đình chỉ thi</h1>
-        <p class="text-lg text-gray-300 text-center mb-8 max-w-xl">Vi phạm quy chế phòng thi (Thoát màn hình, gian lận,...). Hệ thống đã khóa bài thi của bạn và ghi nhận 0 điểm. Nếu có khiếu nại xin vui lòng liên hệ cho Giám thị!</p>
+        <p class="text-lg text-gray-300 text-center mb-8 max-w-xl">Vi phạm quy chế phòng thi. Hệ thống đã khóa bài thi của bạn và ghi nhận 0 điểm. Nếu có khiếu nại xin vui lòng liên hệ cho Giám thị!</p>
         <button onclick="changeScreen('login-screen')" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-lg font-bold shadow-lg transition-transform hover:scale-105">VỀ TRANG CHỦ</button>
     </div>
 
     <!-- MÀN HÌNH CHẤM ĐIỂM -->
     <div id="scoring-screen" class="screen flex-col items-center justify-center p-4 bg-white z-40 fixed inset-0">
         <div class="scoring-spinner mb-6"></div>
-        <h2 class="text-2xl font-bold text-blue-800 mb-2">Đang nộp bài lên Đám mây...</h2>
-        <p class="text-gray-600 pulse-text font-medium text-lg">Hệ thống AI đang xử lý và phân tích điểm số của bạn</p>
+        <h2 class="text-2xl font-bold text-blue-800 mb-2">BÀI THI CỦA BẠN ĐÃ ĐƯỢC GHI NHẬN</h2>
+        <p class="text-gray-600 pulse-text font-medium text-lg">Hệ thống đang xử lý và phân tích điểm số của bạn. Vui lòng đợi trong giây lát...</p>
         <p class="text-gray-400 text-sm mt-4 p-2 border border-dashed border-gray-300 rounded bg-gray-50">⚠️ THÍ SINH KHÔNG THOÁT KHỎI TRANG THI CHO ĐẾN KHI HIỆN ĐIỂM SỐ!</p>
     </div>
 
@@ -165,7 +165,7 @@
             </div>
             <div class="login-header-text">
                 <h1>HỆ THỐNG BỒI DƯỠNG VÀ LUYỆN THI CHEMEASYY</h1>
-                <h2 class="italic text-gray-600 text-base mb-2">"Mở trí - Luyện tài - Dựng nhân"</h2>
+                <h2 class="bold text-gray-600 text-base mb-2">Mở trí - Luyện tài - Dựng nhân</h2>
                 <h3>BAN KHẢO THÍ VÀ ĐÁNH GIÁ CHẤT LƯỢNG</h3>
             </div>
             <div class="login-card-wrapper relative">
@@ -176,7 +176,7 @@
                 <form id="login-form" class="login-form-grid">
                     <div class="custom-input-group">
                         <label for="ma_thi_sinh">Mã số Hệ thống/ Số báo danh</label>
-                        <input type="text" id="ma_thi_sinh" name="ma_thi_sinh" class="custom-input" maxlength="8" inputmode="numeric" placeholder="VD: 12345678">
+                        <input type="text" id="ma_thi_sinh" name="ma_thi_sinh" class="custom-input" maxlength="8" inputmode="numeric" placeholder="NHẬP ĐẦY ĐỦ 8 CHỮ ">
                     </div>
                     <div class="custom-input-group">
                         <label for="dot_thi">Đợt thi/ Kỳ thi</label>
@@ -187,7 +187,7 @@
                     </div>
                     <div class="custom-input-group">
                         <label for="ho_ten">Họ và tên thí sinh</label>
-                        <input type="text" id="ho_ten" name="ho_ten" class="custom-input" placeholder="Nhập Họ và tên...">
+                        <input type="text" id="ho_ten" name="ho_ten" class="custom-input" placeholder="NHẬP ĐẦY ĐỦ HỌ VÀ TÊN...">
                     </div>
                     <div class="custom-input-group">
                         <label for="ngay_sinh">Ngày sinh</label>
@@ -195,7 +195,7 @@
                     </div>
                     <div class="custom-input-group">
                         <label for="mat_khau">Mật khẩu</label>
-                        <input type="password" id="mat_khau" name="mat_khau" class="custom-input" placeholder="••••••••">
+                        <input type="password" id="mat_khau" name="mat_khau" class="custom-input" placeholder="">
                     </div>
                     <div class="custom-input-group">
                         <button type="button" onclick="login()" class="custom-btn-login flex items-center justify-center">
@@ -203,7 +203,7 @@
                         </button>            
                     </div>
                     <div style="grid-column: 1 / -1; text-align: center;">
-                        <p id="login-error" class="text-red-500 text-sm hidden font-medium bg-red-50 border border-red-200 p-2 rounded shadow-sm">Thông tin đăng nhập không hợp lệ.</p>
+                        <p id="login-error" class="text-red-500 text-sm hidden font-medium bg-red-50 border border-red-200 p-2 rounded shadow-sm">Thông tin đăng nhập không hợp lệ.Vui lòng kiểm tra lại...</p>
                     </div>
                 </form>
             </div>
@@ -288,7 +288,7 @@
             <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center border-b">
                 <div>
                     <h1 class="text-2xl font-black text-blue-900 tracking-tight">CHEMEASYY EDUCATION <span class="text-sm font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded ml-2 align-middle">ADMIN PRO</span></h1>
-                    <p class="text-sm font-semibold text-gray-500">HỆ THỐNG QUẢN LÝ THÍ SINH VÀ ĐIỂM THI ĐÁM MÂY</p>
+                    <p class="text-sm font-semibold text-gray-500">HỆ THỐNG QUẢN LÝ THÍ SINH VÀ ĐIỂM THI</p>
                 </div>
                 <button onclick="changeScreen('login-screen')" class="btn-secondary border border-gray-300 text-sm flex items-center hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg> Thoát
