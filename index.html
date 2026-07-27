@@ -90,8 +90,10 @@
         
         .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #3b82f6; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         .question-image-preview { max-width: 100%; max-height: 250px; object-fit: contain; border-radius: 0.5rem; margin-top: 0.5rem; border: 1px dashed #cbd5e1; padding: 0.25rem; }
         .exam-question-image { max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 0.5rem; margin: 1rem 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .essay-image-preview { max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 0.5rem; border: 2px dashed #3b82f6; padding: 0.25rem; background-color: #f8fafc; }
 
         .admin-tab { padding: 0.75rem 1.5rem; cursor: pointer; font-weight: 600; border-bottom: 2px solid transparent; color: #4b5563; transition: all 0.2s;}
         .admin-tab.active { border-bottom-color: #2563eb; color: #2563eb; background-color: #f3f4f6; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;}
@@ -1288,6 +1290,8 @@
                     html = `<div class="flex flex-col gap-2">` + [0,1,2,3].map(subI => `<div class="flex items-center gap-3 bg-gray-50 p-2.5 rounded border border-gray-200"><span class="font-black w-6 text-gray-500 bg-gray-200 rounded-full text-center text-sm">${String.fromCharCode(97+subI)}</span><input type="text" value="${q.correctDetails.subOptions?.[subI]||''}" onchange="updateQData(${i}, 'tf_text', ${subI}, this.value)" class="border border-gray-300 rounded p-1.5 flex-grow text-sm font-medium outline-none focus:border-indigo-500" placeholder="Nội dung ý..."><select onchange="updateQData(${i}, 'tf_ans', ${subI}, this.value === 'true')" class="border-2 rounded p-1 text-sm font-black outline-none ${q.correctDetails.correctAnswers?.[subI] ? 'text-green-700 border-green-400 bg-green-50' : 'text-red-700 border-red-400 bg-red-50'}"><option value="true" ${q.correctDetails.correctAnswers?.[subI] === true ? 'selected' : ''}>ĐÚNG</option><option value="false" ${q.correctDetails.correctAnswers?.[subI] === false ? 'selected' : ''}>SAI</option></select></div>`).join('') + `</div>`;
                 } else if(q.section === 'Phần III') {
                     html = `<div class="flex gap-3 justify-center bg-gray-50 p-4 rounded border border-gray-200">` + [0,1,2,3].map(subI => `<input type="text" value="${q.correctDetails.answers[subI]||''}" onchange="updateQData(${i}, 'num', ${subI}, this.value)" class="border-2 border-gray-300 rounded-lg p-2.5 w-20 text-center font-black text-lg text-indigo-700 outline-none focus:border-indigo-500">`).join('') + `</div><p class="text-xs font-bold text-gray-400 mt-2 text-center uppercase">Đáp án điền khuyết (Bỏ trống ô không dùng)</p>`;
+                } else if(q.section === 'Phần IV') {
+                    html = `<div class="bg-blue-50 p-4 rounded border border-blue-200 text-center"><p class="text-sm font-bold text-blue-800">Đây là câu hỏi Tự luận.</p><p class="text-xs text-blue-600 mt-1">Học sinh sẽ được phép nhập văn bản và đính kèm hình ảnh làm bài. Giám khảo sẽ chấm điểm thủ công phần này.</p></div>`;
                 }
                 
                 return `
@@ -1299,6 +1303,7 @@
                             <option value="Phần I" ${q.section==='Phần I'?'selected':''}>Phần I - Trắc nghiệm (4 đáp án)</option>
                             <option value="Phần II" ${q.section==='Phần II'?'selected':''}>Phần II - Đúng/Sai (4 ý)</option>
                             <option value="Phần III" ${q.section==='Phần III'?'selected':''}>Phần III - Điền khuyết</option>
+                            <option value="Phần IV" ${q.section==='Phần IV'?'selected':''}>Phần IV - Tự luận (Up ảnh)</option>
                         </select>
                         <div class="flex items-center bg-amber-50 border border-amber-200 rounded-lg px-2 py-1"><span class="text-xs font-bold text-amber-700 mr-2 uppercase">Điểm:</span><input type="number" step="0.01" value="${q.pointValue}" onchange="updateQData(${i}, 'pt', null, this.value)" class="bg-transparent w-16 text-sm font-black text-amber-900 outline-none text-center"></div>
                     </div>
@@ -1344,6 +1349,7 @@
             if(type==='Phần I') { editorQuestions[i].options = ['','','','']; editorQuestions[i].correctIndex = 0; editorQuestions[i].correctDetails = {type: 'MC'}; editorQuestions[i].pointValue=0.25;}
             if(type==='Phần II') { editorQuestions[i].correctDetails = {type: 'TF', subOptions: ['','','',''], correctAnswers: [true,true,true,true]}; editorQuestions[i].pointValue=1.0; }
             if(type==='Phần III') { editorQuestions[i].correctDetails = {type: 'NUMERIC', answers:['','','','']}; editorQuestions[i].pointValue=0.25;}
+            if(type==='Phần IV') { editorQuestions[i].correctDetails = {type: 'ESSAY'}; editorQuestions[i].pointValue=0; /* Tự luận chấm tay */}
             renderEditorQuestions();
         }
         function updateQData(i, field, sub, val) {
@@ -1396,9 +1402,9 @@
 
                 if(!textContent || textContent.trim() === '') { showToast('Không đọc được chữ từ Word.', 'error'); loader.classList.add('hidden'); return; }
 
-                const prompt = `Đóng vai một chuyên gia làm đề thi. Trích xuất câu hỏi từ văn bản. Phân loại theo "Phần I", "Phần II" (Đúng/Sai) hoặc "Phần III". \n\n` + textContent;
+                const updatedPrompt = `Đóng vai một chuyên gia làm đề thi. Trích xuất câu hỏi từ văn bản. Phân loại chính xác vào 1 trong 4 loại: "Phần I" (Trắc nghiệm), "Phần II" (Đúng/Sai), "Phần III" (Trả lời ngắn), "Phần IV" (Tự luận). \n\n` + textContent;
                 const payload = {
-                    contents: [{ parts: [{ text: prompt }] }],
+                    contents: [{ parts: [{ text: updatedPrompt }] }],
                     generationConfig: {
                         responseMimeType: "application/json",
                         responseSchema: { type: "ARRAY", items: { type: "OBJECT", properties: { "section": { "type": "STRING" }, "text": { "type": "STRING" }, "options": { "type": "ARRAY", "items": { "type": "STRING" } }, "correctIndex": { "type": "INTEGER" }, "subOptions": { "type": "ARRAY", "items": { "type": "STRING" } }, "correctAnswersTF": { "type": "ARRAY", "items": { "type": "BOOLEAN" } }, "answers": { "type": "ARRAY", "items": { "type": "STRING" } } }, "required": ["section", "text"] } }
@@ -1412,11 +1418,12 @@
                 if(jsonStr) {
                     const parsedQ = JSON.parse(jsonStr);
                     parsedQ.forEach(q => {
-                        let sec = q.section; if(sec !== 'Phần I' && sec !== 'Phần II' && sec !== 'Phần III') sec = 'Phần I';
+                        let sec = q.section; if(sec !== 'Phần I' && sec !== 'Phần II' && sec !== 'Phần III' && sec !== 'Phần IV') sec = 'Phần I';
                         let newQ = { id: editorQuestions.length + 1, section: sec, text: q.text || '', pointValue: 1.0 };
                         if(sec === 'Phần I') { newQ.options = q.options?.length ? q.options : ['A', 'B', 'C', 'D']; newQ.correctIndex = q.correctIndex || 0; newQ.correctDetails = { type: 'MC' }; newQ.pointValue = 0.25; } 
                         else if (sec === 'Phần II') { let subs = q.subOptions || []; while(subs.length<4) subs.push(""); let ansTF = q.correctAnswersTF || []; while(ansTF.length<4) ansTF.push(true); newQ.options=[]; newQ.correctDetails = { type: 'TF', subOptions: subs.slice(0,4), correctAnswers: ansTF.slice(0,4) }; newQ.pointValue = 1.0; } 
-                        else { let ansArray = q.answers || []; while(ansArray.length<4) ansArray.push(""); newQ.options=[]; newQ.correctDetails = { type: 'NUMERIC', answers: ansArray.slice(0,4) }; newQ.pointValue = 0.25; }
+                        else if (sec === 'Phần III') { let ansArray = q.answers || []; while(ansArray.length<4) ansArray.push(""); newQ.options=[]; newQ.correctDetails = { type: 'NUMERIC', answers: ansArray.slice(0,4) }; newQ.pointValue = 0.25; }
+                        else if (sec === 'Phần IV') { newQ.options=[]; newQ.correctDetails = { type: 'ESSAY' }; newQ.pointValue = 0; }
                         editorQuestions.push(newQ);
                     });
                     renderEditorQuestions(); showToast(`Đã tự động tạo ${parsedQ.length} câu hỏi bằng AI!`, 'success');
@@ -1537,7 +1544,8 @@
             let answered = activeExamConfig.questions.filter(q => 
                 (q.section==='Phần I' && q.selected!==null && q.selected!==undefined) || 
                 (q.section==='Phần II' && q.selected && q.selected.some(s=>s!==null)) ||
-                (q.section==='Phần III' && q.selected && q.selected.some(s=>s!==""))
+                (q.section==='Phần III' && q.selected && q.selected.some(s=>s!=="")) ||
+                (q.section==='Phần IV' && q.selected && (q.selected.text !== "" || q.selected.img !== null))
             ).length;
 
             let detailedAnswers = activeExamConfig.questions.map(q => ({ id: q.id, section: q.section, selected: q.selected || null }));
@@ -1674,6 +1682,10 @@
                 if(q.section === 'Phần III' && q.selected && q.selected.some(x=>x!=="")) {
                     ansStr = `Nhập: [${q.selected.join(', ')}]`;
                     bgClass = 'bg-emerald-50 text-emerald-800 border-emerald-200 border';
+                }
+                if(q.section === 'Phần IV' && q.selected && (q.selected.text !== "" || q.selected.img !== null)) {
+                    ansStr = `Tự luận: ${q.selected.img ? '[Có ảnh]' : '[Có chữ]'}`;
+                    bgClass = 'bg-amber-50 text-amber-800 border-amber-200 border';
                 }
                 return `<div class="p-2.5 rounded-lg ${bgClass} text-[13px] font-medium shadow-sm flex flex-col justify-center"><span class="text-[10px] font-black uppercase tracking-wider opacity-70 mb-0.5">Câu ${idx+1}</span> ${ansStr}</div>`;
             }).join('');
@@ -1813,6 +1825,7 @@
                 if(q.section === 'Phần I') q.selected = null;
                 if(q.section === 'Phần II') q.selected = [null,null,null,null];
                 if(q.section === 'Phần III') q.selected = ["","","",""];
+                if(q.section === 'Phần IV') q.selected = {text: "", img: null};
             });
 
             document.getElementById('total-questions').textContent = activeExamConfig.questions.length;
@@ -1862,6 +1875,23 @@
                 }).join('') + `</div>`;
             } else if (q.section === 'Phần III') {
                 ansHtml = `<div class="flex justify-center space-x-4">` + [0,1,2,3].map(i => `<input type="text" value="${q.selected[i]||''}" oninput="ansNum(event, ${index}, ${i})" class="numeric-input-cell !w-full !max-w-[100px] !h-16 !text-2xl border-2 rounded-xl shadow-inner text-blue-800 font-black bg-gray-50 focus:bg-white transition-colors">`).join('') + `</div><p class="text-center text-sm font-bold text-gray-400 mt-6 uppercase tracking-wider">Điền giá trị. Bỏ trống các ô dư.</p>`;
+            } else if (q.section === 'Phần IV') {
+                let txtVal = q.selected ? q.selected.text : "";
+                let imgPreview = (q.selected && q.selected.img) ? `<div class="mt-4 relative inline-block"><img src="${q.selected.img}" class="essay-image-preview shadow-sm"><button onclick="removeEssayImage(${index})" class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold border-2 border-white shadow">X</button></div>` : "";
+                
+                ansHtml = `<div class="space-y-4">
+                    <textarea oninput="ansEssayText(event, ${index})" class="w-full border-2 border-blue-200 rounded-xl p-4 text-gray-800 bg-blue-50/30 focus:bg-white focus:border-blue-500 outline-none transition-colors resize-y min-h-[150px] font-medium placeholder-gray-400" placeholder="Nhập phần giải thích hoặc lập luận tự luận của bạn vào đây...">${txtVal}</textarea>
+                    
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center border-dashed">
+                        <input type="file" id="essay_img_${index}" accept="image/png, image/jpeg, image/jpg" class="hidden" onchange="uploadEssayImage(${index}, this)">
+                        <button onclick="document.getElementById('essay_img_${index}').click()" class="btn-secondary flex items-center bg-white border border-gray-300 hover:border-blue-400 font-bold text-gray-700 shadow-sm px-6 py-2.5 rounded-lg transition-all">
+                            <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            Đính kèm Ảnh bài làm
+                        </button>
+                        <p class="text-xs text-gray-500 mt-2 font-medium">Chụp ảnh vở nháp để giám khảo chấm (Hỗ trợ nén tự động)</p>
+                        ${imgPreview}
+                    </div>
+                </div>`;
             }
 
             const imgHtml = q.image ? `<div class="w-full text-center mb-6"><img src="${q.image}" class="exam-question-image mx-auto rounded-xl shadow-md border-4 border-white"></div>` : '';
@@ -1873,6 +1903,33 @@
         function ansMC(qIdx, optIdx) { activeExamConfig.questions[qIdx].selected = optIdx; updateQuestionNavigation(); }
         function ansTF(qIdx, subIdx, val) { if(!activeExamConfig.questions[qIdx].selected) activeExamConfig.questions[qIdx].selected = [null,null,null,null]; activeExamConfig.questions[qIdx].selected[subIdx] = val; updateQuestionNavigation(); }
         function ansNum(e, qIdx, subIdx) { let val = e.target.value.trim().toUpperCase(); activeExamConfig.questions[qIdx].selected[subIdx] = val; updateQuestionNavigation(); }
+        function ansEssayText(e, qIdx) { 
+            if(!activeExamConfig.questions[qIdx].selected) activeExamConfig.questions[qIdx].selected = {text: "", img: null};
+            activeExamConfig.questions[qIdx].selected.text = e.target.value; 
+            updateQuestionNavigation(); 
+        }
+        function uploadEssayImage(qIdx, input) {
+            if(!input.files || !input.files[0]) return;
+            const file = input.files[0]; const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas'); let w = img.width, h = img.height;
+                    const MAX_SIZE = 1000; // Giới hạn kích thước ảnh học sinh up
+                    if(w > MAX_SIZE || h > MAX_SIZE) { if(w > h) { h = Math.round(h * MAX_SIZE / w); w = MAX_SIZE; } else { w = Math.round(w * MAX_SIZE / h); h = MAX_SIZE; } }
+                    canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+                    
+                    if(!activeExamConfig.questions[qIdx].selected) activeExamConfig.questions[qIdx].selected = {text: "", img: null};
+                    activeExamConfig.questions[qIdx].selected.img = canvas.toDataURL('image/jpeg', 0.6); // Nén 60%
+                    
+                    renderQuestion(qIdx); updateQuestionNavigation(); showToast('Tải ảnh bài làm thành công!', 'success');
+                }; img.src = e.target.result;
+            }; reader.readAsDataURL(file); input.value = ""; 
+        }
+        function removeEssayImage(qIdx) {
+            if(activeExamConfig.questions[qIdx].selected) activeExamConfig.questions[qIdx].selected.img = null;
+            renderQuestion(qIdx); updateQuestionNavigation();
+        }
 
         function nextQuestion() { renderQuestion((currentQuestionIndex + 1) % activeExamConfig.questions.length); }
         function prevQuestion() { renderQuestion((currentQuestionIndex - 1 + activeExamConfig.questions.length) % activeExamConfig.questions.length); }
@@ -1881,6 +1938,8 @@
             const nav = document.getElementById('question-nav'); let answered = 0;
             nav.innerHTML = activeExamConfig.questions.map((q, i) => {
                 let isAns = (q.section==='Phần I' && q.selected!==null) || (q.section==='Phần II' && q.selected && q.selected.some(s=>s!==null)) || (q.section==='Phần III' && q.selected && q.selected.some(s=>s!==""));
+                if(q.section === 'Phần IV' && q.selected && (q.selected.text.trim() !== "" || q.selected.img !== null)) isAns = true;
+                
                 if(isAns) answered++;
                 let cls = isAns ? 'answered bg-green-500 text-white font-black border-green-600 shadow-md' : 'bg-gray-50 text-gray-600 font-bold border-gray-200 hover:bg-gray-100';
                 if(i === currentQuestionIndex) cls += ' ring-4 ring-blue-300 ring-offset-1 transform scale-110 z-10 border-blue-500';
@@ -1916,8 +1975,12 @@
                     }
                     if(match) isCorr = true;
                 }
+                if(q.section === 'Phần IV' && q.selected && (q.selected.text.trim() !== "" || q.selected.img !== null)) {
+                    isAns = true; // Tính là đã làm, nhưng không cộng điểm
+                }
+                
                 if(isAns) answered++;
-                if(isCorr && q.section !== 'Phần II') { correct++; score += q.pointValue; }
+                if(isCorr && q.section !== 'Phần II' && q.section !== 'Phần IV') { correct++; score += q.pointValue; }
                 if(q.section === 'Phần II' && isCorr) { correct++; } 
             });
 
