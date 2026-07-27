@@ -19,14 +19,15 @@
         import { getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // CẤU HÌNH FIREBASE (Dán key thật vào đây khi muốn chạy Online, nếu không sẽ tự chạy Offline)
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef"
-        };
+      const firebaseConfig = {
+  apiKey: "AIzaSyCbNC7RSwD_hhacqVYQkYSVX-RCdIwNSnc",
+  authDomain: "he-thong-thi-2026-cee.firebaseapp.com",
+  projectId: "he-thong-thi-2026-cee",
+  storageBucket: "he-thong-thi-2026-cee.firebasestorage.app",
+  messagingSenderId: "323776019052",
+  appId: "1:323776019052:web:74b07dea05a5f0e7493649",
+  measurementId: "G-1V75EG9499"
+};
 
         window.isCloud = firebaseConfig.apiKey !== "YOUR_API_KEY";
 
