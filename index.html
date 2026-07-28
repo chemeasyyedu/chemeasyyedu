@@ -297,10 +297,11 @@
             <div class="w-full md:w-5/12 bg-slate-900/80 p-6 md:p-10 flex flex-col items-center justify-center border-r border-slate-700/50 relative overflow-hidden">
                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-cyan-900/40 via-transparent to-transparent"></div>
                 <img src="https://i.postimg.cc/wMs3Wv7Q/8-removebg-preview.png" alt="CHEMEASYY Logo" class="h-28 md:h-40 w-auto mb-5 drop-shadow-[0_0_20px_rgba(6,182,212,0.5)] theme-logo relative z-10 hover:scale-105 transition-transform duration-500">
-                <h1 class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-emerald-300 font-black text-lg sm:text-xl md:text-2xl lg:text-3xl mb-2 tracking-tight drop-shadow-sm uppercase text-center relative z-10 whitespace-nowrap w-full">HỆ THỐNG BỒI DƯỠNG VÀ LUYỆN THI CHEMEASYY</h1>
-                <h2 class="text-emerald-400 font-bold text-base sm:text-lg bold mb-4 text-center relative z-10 whitespace-nowrap w-full">Mở trí - Luyện tài - Dựng nhân</h2>
-                <div class="border-t border-b border-slate-700/50 py-2 px-6 inline-block relative z-10">
-                    <h3 class="text-slate-300 font-bold text-xs md:text-sm tracking-widest uppercase text-center whitespace-nowrap"><i class="fa-solid fa-scale-balanced text-cyan-500 mr-2"></i>Ban Khảo Thí & Đánh Giá</h3>
+            <h1 class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-emerald-300 font-black text-xs sm:text-sm md:text-xs lg:text-sm xl:text-base mb-2 tracking-tighter drop-shadow-sm uppercase text-center relative z-10 whitespace-nowrap w-full">HỆ THỐNG BỒI DƯỠNG VÀ LUYỆN THI CHEMEASYY</h1>
+                <h2 class="text-emerald-400 font-bold text-[10px] sm:text-xs md:text-[10px] lg:text-xs xl:text-sm bold mb-4 text-center relative z-10 whitespace-nowrap w-full">Mở trí - Luyện tài - Dựng nhân</h2>
+                
+                <div class="border-t border-b border-slate-700/50 py-2 px-3 md:px-5 inline-block relative z-10 mt-2">
+                    <h3 class="text-slate-300 font-bold text-[9px] sm:text-[10px] md:text-[9px] lg:text-[10px] xl:text-xs tracking-widest uppercase text-center whitespace-nowrap"><i class="fa-solid fa-scale-balanced text-cyan-500 mr-2"></i>Ban Khảo thí và Đánh giá Chất lượng</h3>
                 </div>
             </div>
             
@@ -434,8 +435,8 @@
                         <i class="fa-solid fa-network-wired"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl md:text-2xl font-black text-white tracking-tight">CHEM-ADMIN <span class="text-xs font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded ml-2 align-middle">PRO V8.0</span></h1>
-                        <p class="text-xs font-medium text-slate-500 tracking-widest uppercase mt-0.5">Control Center</p>
+                        <h1 class="text-xl md:text-2xl font-black text-white tracking-tight">CHEMEASYY EDUCATION<span class="text-xs font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded ml-2 align-middle">Trung thực- Khách quan- Sáng tạo- Bền vững</span></h1>
+                        <p class="text-xs font-medium text-slate-500 tracking-widest uppercase mt-0.5">TRUNG TÂM ĐIỀU KHIỂN HỆ THỐNG</p>
                     </div>
                 </div>
                 <button onclick="changeScreen('login-screen')" class="btn-secondary bg-transparent border-slate-700 text-sm flex items-center hover:bg-rose-900/20 hover:text-rose-400 hover:border-rose-800 transition-colors">
@@ -445,9 +446,9 @@
             <!-- Tabs Navigation -->
             <div class="max-w-7xl mx-auto px-4 flex space-x-1 mt-1 overflow-x-auto custom-scrollbar pb-1">
                 <button class="admin-tab active whitespace-nowrap" onclick="switchAdminTab('tab-exams', this)"><i class="fa-solid fa-file-signature mr-1"></i> Quản lý Đề Thi</button>
-                <button class="admin-tab whitespace-nowrap" onclick="switchAdminTab('tab-results', this)"><i class="fa-solid fa-chart-column mr-1"></i> Kết quả Thi</button>
-                <button class="admin-tab text-emerald-400 bg-emerald-900/20 border-emerald-800/50 whitespace-nowrap" onclick="switchAdminTab('tab-monitoring', this)"><i class="fa-solid fa-satellite-dish mr-1 animate-pulse"></i> Giám sát Live</button>
-                <button class="admin-tab whitespace-nowrap" onclick="switchAdminTab('tab-accounts', this)"><i class="fa-solid fa-users-gear mr-1"></i> Tài khoản DB</button>
+                <button class="admin-tab whitespace-nowrap" onclick="switchAdminTab('tab-results', this)"><i class="fa-solid fa-chart-column mr-1"></i> Quản lý Kết quả Thi</button>
+                <button class="admin-tab text-emerald-400 bg-emerald-900/20 border-emerald-800/50 whitespace-nowrap" onclick="switchAdminTab('tab-monitoring', this)"><i class="fa-solid fa-satellite-dish mr-1 animate-pulse"></i> Giám sát Thí sinh</button>
+                <button class="admin-tab whitespace-nowrap" onclick="switchAdminTab('tab-accounts', this)"><i class="fa-solid fa-users-gear mr-1"></i> Quản lý Tài khoản Thí sinh</button>
             </div>
         </div>
 
@@ -457,17 +458,17 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 bg-slate-800/60 p-5 rounded-2xl border border-slate-700 shadow-lg backdrop-blur gap-4">
                     <div>
                         <h2 class="text-xl font-black text-white flex items-center"><i class="fa-solid fa-database text-cyan-400 mr-2"></i> Cloud Exam Database</h2>
-                        <p class="text-sm text-slate-400 mt-1">Kho lưu trữ cấu hình đề thi trên máy chủ phân tán.</p>
+                        <p class="text-sm text-slate-400 mt-1">Kho lưu trữ đề thi.</p>
                     </div>
-                    <button onclick="openExamEditor()" class="btn-primary w-full md:w-auto shadow-[0_0_15px_rgba(6,182,212,0.4)] flex items-center justify-center"><i class="fa-solid fa-plus mr-2"></i> SOẠN ĐỀ MỚI</button>
+                    <button onclick="openExamEditor()" class="btn-primary w-full md:w-auto shadow-[0_0_15px_rgba(6,182,212,0.4)] flex items-center justify-center"><i class="fa-solid fa-plus mr-2"></i> NHẬP ĐỀ MỚI</button>
                 </div>
                 <div class="glass-card overflow-hidden">
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="min-w-full divide-y divide-slate-700">
                             <thead class="bg-slate-900/80">
                                 <tr>
-                                    <th class="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider">Tên Cấu Hình Đề</th>
-                                    <th class="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider">Phân Môn</th>
+                                    <th class="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider">Tên Đề thi/Khảo sát</th>
+                                    <th class="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider">Môn thi</th>
                                     <th class="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider">Mã Lớp / Pass</th>
                                     <th class="px-6 py-4 text-center text-xs font-black text-slate-400 uppercase tracking-wider">Số câu</th>
                                     <th class="px-6 py-4 text-right text-xs font-black text-slate-400 uppercase tracking-wider">Công cụ</th>
@@ -676,7 +677,7 @@
                 <h1 class="text-xl md:text-2xl font-black text-white flex items-center"><div class="w-8 h-8 bg-cyan-900/50 rounded flex items-center justify-center mr-3 border border-cyan-500/50 text-cyan-400"><i class="fa-solid fa-pen-nib"></i></div> LAB EDITOR ENGINE</h1>
                 <div class="space-x-3 flex w-full md:w-auto">
                     <button onclick="changeScreen('admin-dashboard-screen')" class="btn-secondary font-bold flex-1 md:flex-none justify-center flex items-center"><i class="fa-solid fa-arrow-left mr-2"></i> Hủy</button>
-                    <button onclick="saveExamData()" class="btn-primary shadow-[0_0_15px_rgba(6,182,212,0.5)] font-bold px-8 flex-1 md:flex-none justify-center flex items-center"><i class="fa-solid fa-cloud-arrow-up mr-2"></i> PUSH LÊN CLOUD</button>
+                    <button onclick="saveExamData()" class="btn-primary shadow-[0_0_15px_rgba(6,182,212,0.5)] font-bold px-8 flex-1 md:flex-none justify-center flex items-center"><i class="fa-solid fa-cloud-arrow-up mr-2"></i> HOÀN TẤT ĐỀ THI</button>
                 </div>
             </div>
         </div>
@@ -687,7 +688,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div class="md:col-span-2">
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tên Gói Đề (Package Name)</label>
-                        <input type="text" id="editor-exam-name" class="custom-input font-bold text-cyan-300 bg-slate-900/80" placeholder="VD: Khảo sát Hóa Học Hữu Cơ Lần 1">
+                        <input type="text" id="editor-exam-name" class="custom-input font-bold text-cyan-300 bg-slate-900/80" placeholder="">
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Phân Môn (Subject Category)</label>
@@ -698,15 +699,15 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Mã Phòng (Room ID)</label>
-                        <input type="text" id="editor-class-code" class="custom-input font-mono font-bold text-emerald-400 bg-emerald-950/20 border-emerald-900/50 text-center uppercase" placeholder="L001">
+                        <input type="text" id="editor-class-code" class="custom-input font-mono font-bold text-emerald-400 bg-emerald-950/20 border-emerald-900/50 text-center uppercase" placeholder="">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Khóa Phòng (Access Key)</label>
-                        <input type="text" id="editor-class-password" class="custom-input font-mono bg-slate-900/80 text-center" placeholder="pass123">
+                        <input type="text" id="editor-class-password" class="custom-input font-mono bg-slate-900/80 text-center" placeholder="">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Thời lượng (Phút)</label>
-                        <input type="number" id="editor-time-limit" class="custom-input font-bold text-amber-400 bg-amber-950/20 border-amber-900/50 text-center" value="50">
+                        <input type="number" id="editor-time-limit" class="custom-input font-bold text-amber-400 bg-amber-950/20 border-amber-900/50 text-center" value="0">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Thang điểm Max</label>
@@ -829,8 +830,8 @@
                 <div id="exam-content" class="w-full md:w-3/4 question-content h-full exam-panel pb-24 md:pb-0 custom-scrollbar">
                     <div class="flex justify-between items-center mb-6 bg-slate-800/80 backdrop-blur p-4 rounded-2xl shadow-lg border border-slate-700 sticky top-0 z-20">
                         <div class="space-x-3 flex">
-                            <button onclick="prevQuestion()" class="btn-secondary px-5 py-2.5 flex items-center text-sm bg-slate-900 hover:bg-slate-700 border-slate-700"><i class="fa-solid fa-chevron-left mr-2 text-cyan-500"></i> Lùi lại</button>
-                            <button onclick="nextQuestion()" class="btn-primary px-5 py-2.5 flex items-center text-sm shadow-[0_0_10px_rgba(6,182,212,0.3)]">Tiếp tới <i class="fa-solid fa-chevron-right ml-2"></i></button>
+                            <button onclick="prevQuestion()" class="btn-secondary px-5 py-2.5 flex items-center text-sm bg-slate-900 hover:bg-slate-700 border-slate-700"><i class="fa-solid fa-chevron-left mr-2 text-cyan-500"></i> Câu trước</button>
+                            <button onclick="nextQuestion()" class="btn-primary px-5 py-2.5 flex items-center text-sm shadow-[0_0_10px_rgba(6,182,212,0.3)]">Câu  <i class="fa-solid fa-chevron-right ml-2"></i></button>
                         </div>
                         <div class="flex items-center bg-slate-900 px-4 py-2 rounded-xl border border-slate-700 shadow-inner">
                             <i class="fa-solid fa-chart-pie text-slate-500 mr-2"></i>
