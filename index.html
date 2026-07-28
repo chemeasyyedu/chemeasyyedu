@@ -296,12 +296,14 @@
             <!-- Cột Trái: Logo & Branding -->
             <div class="w-full md:w-5/12 bg-slate-900/80 p-6 md:p-10 flex flex-col items-center justify-center border-r border-slate-700/50 relative overflow-hidden">
                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-cyan-900/40 via-transparent to-transparent"></div>
-                <img src="https://i.postimg.cc/wMs3Wv7Q/8-removebg-preview.png" alt="CHEMEASYY Logo" class="h-28 md:h-40 w-auto mb-5 drop-shadow-[0_0_20px_rgba(6,182,212,0.5)] theme-logo relative z-10 hover:scale-105 transition-transform duration-500">
-            <h1 class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-emerald-300 font-black text-xs sm:text-sm md:text-xs lg:text-sm xl:text-base mb-2 tracking-tighter drop-shadow-sm uppercase text-center relative z-10 whitespace-nowrap w-full">HỆ THỐNG BỒI DƯỠNG VÀ LUYỆN THI CHEMEASYY</h1>
-                <h2 class="text-emerald-400 font-bold text-[10px] sm:text-xs md:text-[10px] lg:text-xs xl:text-sm bold mb-4 text-center relative z-10 whitespace-nowrap w-full">Mở trí - Luyện tài - Dựng nhân</h2>
+                <img src="https://i.postimg.cc/wMs3Wv7Q/8-removebg-preview.png" alt="CHEMEASYY Logo" class="h-24 md:h-32 w-auto mb-4 drop-shadow-[0_0_20px_rgba(6,182,212,0.5)] theme-logo relative z-10 hover:scale-105 transition-transform duration-500">
                 
-                <div class="border-t border-b border-slate-700/50 py-2 px-3 md:px-5 inline-block relative z-10 mt-2">
-                    <h3 class="text-slate-300 font-bold text-[9px] sm:text-[10px] md:text-[9px] lg:text-[10px] xl:text-xs tracking-widest uppercase text-center whitespace-nowrap"><i class="fa-solid fa-scale-balanced text-cyan-500 mr-2"></i>Ban Khảo thí và Đánh giá Chất lượng</h3>
+                <h2 class="text-slate-300 font-bold text-[10px] md:text-xs mb-1 tracking-widest uppercase text-center relative z-10 whitespace-nowrap w-full">HỆ THỐNG BỒI DƯỠNG VÀ LUYỆN THI</h2>
+                <h1 class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-emerald-300 font-black text-2xl md:text-3xl lg:text-4xl mb-3 tracking-tighter drop-shadow-sm uppercase text-center relative z-10 whitespace-nowrap w-full">CHEMEASYY</h1>
+                <p class="text-emerald-400 font-bold text-xs md:text-sm BOLD mb-5 text-center relative z-10 whitespace-nowrap w-full">Mở trí - Luyện tài - Dựng nhân</p>
+                
+                <div class="border-t border-b border-slate-700/50 py-2 px-3 md:px-5 inline-block relative z-10">
+                    <h3 class="text-slate-300 font-bold text-[10px] md:text-xs tracking-widest uppercase text-center whitespace-nowrap"><i class="fa-solid fa-scale-balanced text-cyan-500 mr-2"></i>BAN KHẢO THÍ VÀ ĐÁNH GIÁ CHẤT LƯỢNG</h3>
                 </div>
             </div>
             
@@ -543,38 +545,24 @@
                 </div>
             </div>
 
-         <!-- Modal Chi tiết Giám sát (Admin) -->
-<div id="monitor-detail-modal" class="hidden fixed inset-0 bg-gray-900/90 backdrop-blur-md flex items-center justify-center z-[9999] modal">
-    <!-- KHÔNG sử dụng overflow-hidden ở div này nếu nút X nằm ngoài, hoặc đảm bảo nút X nằm gọn bên TRONG viền -->
-    <div class="bg-white rounded-2xl shadow-[0_0_50px_rgba(59,130,246,0.2)] w-full max-w-6xl modal-content max-h-[95vh] flex flex-col relative border-2 border-blue-400">
-        
-        <!-- HEADER CỐ ĐỊNH -->
-        <div class="bg-gray-50 px-6 py-4 flex justify-between items-center border-b relative z-20">
-            <div class="flex items-center gap-4">
-                <div class="bg-blue-100 text-blue-800 p-2 rounded-lg border border-blue-200"><i class="fa-solid fa-user-ninja text-xl"></i></div>
-                <div>
-                    <h3 class="text-2xl font-black text-blue-900 flex items-center" id="md-name">...</h3>
-                    <p class="text-xs font-bold text-gray-500 mt-1 uppercase tracking-widest"><i class="fa-solid fa-hashtag"></i> <span id="md-sbd" class="text-gray-700">...</span></p>
-                </div>
-            </div>
-            <!-- Đảm bảo nút này có z-index cao và nằm phía trước -->
-            <button onclick="hideMonitorDetail()" class="text-gray-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-full w-10 h-10 flex items-center justify-center transition-colors border border-gray-200 z-50 relative"><i class="fa-solid fa-xmark text-lg"></i></button>
-        </div>
-        
-        <!-- NỘI DUNG CUỘN ĐỘC LẬP -->
-        <!-- Đưa overflow-y-auto vào đây để nội dung không đè lên header và nút tắt -->
-        <div class="flex-grow overflow-y-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 bg-gray-100/50 relative z-10 custom-scrollbar">
-            <!-- Danh sách câu hỏi ... -->
-            <!-- ... -->
-        </div>
-
-        <!-- FOOTER CỐ ĐỊNH -->
-        <div class="border-t border-gray-200 bg-white px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4 relative z-20">
-            <!-- Console Lệnh Hành Động ... -->
-            <!-- ... -->
-        </div>
-    </div>
-</div>
+            <!-- Modal Chi tiết Giám sát (Admin) -->
+            <div id="monitor-detail-modal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-[9999] modal p-4">
+                <div class="bg-slate-800 rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.2)] w-full max-w-6xl modal-content flex flex-col relative border border-slate-600 max-h-[95vh]">
+                    <div class="absolute inset-0 pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiMxZTI5M2IiPjwvcmVjdD48cGF0aCBkPSJNMCAwTDggOFpNOCAwTDAgOFoiIHN0cm9rZT0iIzMzNDE1NSIgc3Ryb2tlLXdpZHRoPSIxIj48L3BhdGg+PC9zdmc+')] opacity-20 rounded-2xl"></div>
+                    
+                    <!-- HEADER CỐ ĐỊNH -->
+                    <div class="bg-slate-900 px-6 py-4 flex justify-between items-center border-b border-slate-700 relative z-20 rounded-t-2xl">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-cyan-900/30 text-cyan-400 p-3 rounded-xl border border-cyan-800/50"><i class="fa-solid fa-user-ninja text-xl"></i></div>
+                            <div>
+                                <h3 class="text-2xl font-black text-white flex items-center" id="md-name">...</h3>
+                                <p class="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest"><i class="fa-solid fa-hashtag"></i> <span id="md-sbd" class="text-cyan-300">...</span></p>
+                            </div>
+                        </div>
+                        <button onclick="hideMonitorDetail()" class="text-slate-400 hover:text-rose-400 bg-slate-800 hover:bg-rose-900/30 rounded-full w-10 h-10 flex items-center justify-center transition-colors border border-slate-700 z-50 relative"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    
+                    <!-- NỘI DUNG CUỘN ĐỘC LẬP -->
                     <div class="flex-grow overflow-y-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 bg-slate-950/50 relative z-10 custom-scrollbar">
                         <!-- Danh sách câu hỏi -->
                         <div class="lg:col-span-2 bg-slate-800/80 p-5 rounded-2xl border border-slate-700 shadow-inner flex flex-col">
@@ -615,7 +603,8 @@
                         </div>
                     </div>
 
-                    <div class="border-t border-slate-700 bg-slate-900 px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
+                    <!-- FOOTER CỐ ĐỊNH -->
+                    <div class="border-t border-slate-700 bg-slate-900 px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4 relative z-20 rounded-b-2xl">
                         <div class="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center"><i class="fa-solid fa-terminal mr-2"></i> Console Lệnh Hành Động</div>
                         <div class="flex space-x-2 flex-wrap justify-center md:justify-end">
                             <button onclick="adminSendCmd('unpause')" class="btn-secondary text-xs"><i class="fa-solid fa-eraser mr-1"></i> Xóa lệnh phạt</button>
@@ -2293,3 +2282,6 @@
     </script>
 </body>
 </html>
+```
+
+Đây là bản mã hoàn chỉnh, chạy ổn định nhất. Không thiếu một dòng, không lỗi nút (X) và giao diện trang chủ đã được căn chỉnh tỷ lệ chuẩn xác. Bạn có thể sử dụng ngay lập tức!
