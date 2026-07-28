@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PORATAL CHEMEASYY EDUCATION</title>
+    <title>TESTLAB-CHEMEASYYEDU</title>
     
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,14 +12,20 @@
     <!-- FontAwesome cho Icon Hóa Học -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Thư viện SheetJS & Mammoth -->
+    <!-- Thư viện SheetJS & Mammoth (Xử lý Excel & Word) -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
 
     <!-- Thư viện MathJax (Hiển thị Hóa học & Toán học LaTeX) -->
     <script>
         window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+            // Cấu hình tải thêm gói mhchem để gõ \ce{}
+            loader: {load: ['[tex]/mhchem']},
+            tex: { 
+                packages: {'[+]': ['mhchem']},
+                inlineMath: [['$', '$'], ['\\(', '\\)']], 
+                displayMath: [['$$', '$$'], ['\\[', '\\]']] 
+            },
             startup: { typeset: false }
         };
     </script>
@@ -150,13 +156,14 @@
 
         #student-pause-overlay { display: none; backdrop-filter: blur(15px); background-color: rgba(11,17,33,0.9); z-index: 9999; }
         
-        /* Camera dời lên 80px để không bị đè bởi nút Theme */
+        /* Camera */
         #camera-preview-container { position: fixed; bottom: 80px; right: 20px; width: 220px; height: 165px; background-color: #000; border-radius: 0.75rem; border: 2px solid #06B6D4; overflow: hidden; z-index: 50; display: none; box-shadow: 0 0 20px rgba(6,182,212,0.3); }
         #local-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
         .wave-effect { background-image: linear-gradient(45deg, rgba(255,255,255,.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.1) 50%, rgba(255,255,255,.1) 75%, transparent 75%, transparent); background-size: 1rem 1rem; animation: wave 1s linear infinite; }
         @keyframes wave { from { background-position: 1rem 0; } to { background-position: 0 0; } }
 
+        /* Render Ảnh */
         .question-image-preview { max-width: 100%; max-height: 250px; object-fit: contain; border-radius: 0.5rem; margin-top: 0.5rem; border: 1px dashed #cbd5e1; padding: 0.25rem; }
         .exam-question-image { max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 0.5rem; margin: 1rem 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .essay-image-preview { max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 0.5rem; border: 2px dashed #3b82f6; padding: 0.25rem; background-color: #f8fafc; }
@@ -170,21 +177,25 @@
         }
 
         /* -----------------------------------------------------
-           GIAO DIỆN CLASSIC (SÁNG) - 100% NỀN TRẮNG, CHỮ ĐEN/XANH/ĐỎ 
+           GIAO DIỆN CLASSIC (SÁNG) - PURE WHITE (Trắng/Đen/Đỏ/Xanh)
            ----------------------------------------------------- */
         body.theme-classic { background-color: #ffffff; color: #000000; }
         body.theme-classic .chem-bg { background-image: none; background-color: #ffffff; }
         body.theme-classic .glow-orb-1, body.theme-classic .glow-orb-2 { display: none; }
         
         body.theme-classic .glass-card { background: #ffffff; border: 1px solid #d1d5db; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); backdrop-filter: none; }
+        
+        /* Màu viền thẻ */
         body.theme-classic .glass-card.border-t-cyan-500 { border-top-color: #065f46 !important; border-top-width: 4px; }
         body.theme-classic .glass-card.border-t-emerald-500 { border-top-color: #166534 !important; border-top-width: 4px; }
         body.theme-classic .glass-card.border-t-rose-500 { border-top-color: #dc2626 !important; border-top-width: 4px; }
         body.theme-classic .glass-card.border-t-violet-500 { border-top-color: #000000 !important; border-top-width: 4px; }
         
+        /* Input & Select */
         body.theme-classic .custom-input, body.theme-classic .custom-select, body.theme-classic .custom-textarea { background-color: #ffffff; border: 1px solid #9ca3af; color: #000000; box-shadow: none; }
         body.theme-classic .custom-input:focus, body.theme-classic .custom-select:focus, body.theme-classic .custom-textarea:focus { border-color: #065f46; box-shadow: 0 0 0 2px rgba(6, 95, 70, 0.2); background-color: #ffffff; }
         
+        /* Texts */
         body.theme-classic .text-slate-300, body.theme-classic .text-slate-400, body.theme-classic .text-slate-500 { color: #000000 !important; }
         body.theme-classic .text-white, body.theme-classic .text-slate-200 { color: #000000 !important; }
         body.theme-classic .text-transparent.bg-gradient-to-r { background: none; color: #000000; -webkit-text-fill-color: #000000; }
@@ -192,37 +203,44 @@
         body.theme-classic .text-emerald-400 { color: #166534 !important; font-weight: 800; }
         body.theme-classic .text-cyan-300, body.theme-classic .text-cyan-400, body.theme-classic .text-cyan-500 { color: #065f46 !important; font-weight: 800; }
         body.theme-classic .text-violet-400 { color: #000000 !important; font-weight: 800; }
+        body.theme-classic .text-rose-500, body.theme-classic .text-rose-400 { color: #dc2626 !important; }
+        body.theme-classic .text-amber-500, body.theme-classic .text-amber-400 { color: #000000 !important; }
         
-        body.theme-classic .bg-slate-800\/50, body.theme-classic .bg-slate-900\/50, body.theme-classic .bg-slate-800\/80, body.theme-classic .bg-slate-900\/80, body.theme-classic .bg-slate-900, body.theme-classic .bg-slate-800 { background-color: #ffffff; border-color: #e5e7eb; color: #000000;}
+        /* Background & Border Panels */
+        body.theme-classic .bg-slate-800\/60, body.theme-classic .bg-slate-900\/60, body.theme-classic .bg-slate-900\/40, 
+        body.theme-classic .bg-slate-800\/50, body.theme-classic .bg-slate-900\/50, body.theme-classic .bg-slate-800\/80, 
+        body.theme-classic .bg-slate-900\/80, body.theme-classic .bg-slate-900, body.theme-classic .bg-slate-800 { 
+            background-color: #ffffff !important; border-color: #e5e7eb; color: #000000;
+        }
         body.theme-classic .border-slate-700, body.theme-classic .border-slate-700\/50, body.theme-classic .border-slate-800 { border-color: #d1d5db !important; }
         
+        /* Buttons */
         body.theme-classic .btn-primary { background: #065f46; color: #ffffff !important; box-shadow: 0 2px 4px rgba(6,95,70,0.2); border: none; }
         body.theme-classic .btn-primary:hover { background: #047857; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(6,95,70,0.3); }
         body.theme-classic .btn-secondary { background: #ffffff; color: #dc2626 !important; border: 1px solid #dc2626; }
         body.theme-classic .btn-secondary:hover { background: #fef2f2; color: #b91c1c !important; }
         body.theme-classic .theme-logo { filter: none; }
         
+        /* Nút Giao Diện */
         body.theme-classic #theme-toggle-btn { background: #ffffff; border-color: #d1d5db; color: #000000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
+        /* Tùy chọn Trắc nghiệm */
         body.theme-classic .question-option label { background: #ffffff; border-color: #9ca3af; color: #000000;}
         body.theme-classic .question-option label:hover { border-color: #065f46; background: #f0fdf4; }
         body.theme-classic .question-option input:checked + label { background: #f0fdf4; border-color: #065f46; box-shadow: inset 0 0 0 1px #065f46; }
         body.theme-classic .question-option input:checked + label .opt-letter { color: #065f46; text-shadow: none; }
         
+        /* Nhãn màu */
         body.theme-classic .bg-cyan-950, body.theme-classic .bg-cyan-900\/30, body.theme-classic .bg-cyan-950\/50 { background-color: #f0fdf4; border-color: #bbf7d0; color: #166534 !important;}
         body.theme-classic .bg-emerald-950, body.theme-classic .bg-emerald-900\/30 { background-color: #f0fdf4; border-color: #bbf7d0; color: #166534 !important;}
         body.theme-classic .bg-rose-950, body.theme-classic .bg-rose-950\/50, body.theme-classic .bg-rose-950\/30 { background-color: #fef2f2; border-color: #fecaca; color: #dc2626 !important;}
-        
-        body.theme-classic .text-rose-500, body.theme-classic .text-rose-400 { color: #dc2626 !important; }
-        body.theme-classic .text-amber-500, body.theme-classic .text-amber-400 { color: #000000 !important; }
         body.theme-classic .text-\[10px\] { color: #4b5563 !important; }
         
+        /* Tab Admin & Nav */
         body.theme-classic .admin-tab { color: #000000; }
         body.theme-classic .admin-tab.active { border-bottom-color: #065f46; color: #065f46; background: #f0fdf4; }
-        
         body.theme-classic .question-nav-item.active { background: #ffffff; color: #065f46; border-color: #065f46; box-shadow: inset 0 0 0 2px #065f46; }
         body.theme-classic .question-nav-item.answered { background: #065f46; color: #ffffff !important; border-color: #047857; }
-        body.theme-classic .text-transparent { color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -237,7 +255,7 @@
             <i class="fa-solid fa-atom text-6xl text-cyan-400 animate-spin" style="animation-duration: 3s;"></i>
             <div class="absolute inset-0 border-4 border-t-cyan-400 border-r-transparent border-b-violet-500 border-l-transparent rounded-full animate-spin" style="animation-direction: reverse; width: 100px; height: 100px; margin: -18px;"></div>
         </div>
-        <h2 class="text-xl font-bold text-cyan-300 tracking-widest uppercase animate-pulse">CHEMEASYY EDUCATION...Establishing Lab Connection...</h2>
+        <h2 class="text-xl font-bold text-cyan-300 tracking-widest uppercase animate-pulse">CHEMEASYY EDUCATION...LOADING...</h2>
     </div>
 
     <!-- Background động Hóa học -->
@@ -261,10 +279,10 @@
             <i class="fa-solid fa-microscope text-4xl text-cyan-500 absolute animate-pulse"></i>
         </div>
         <h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-3 tracking-wide">ĐANG PHÂN TÍCH KẾT QUẢ</h2>
-        <p class="text-slate-400 pulse-text font-medium text-lg">Hệ thống đang xử lý. Vui lòng không đóng trình duyệt...</p>
+        <p class="text-slate-400 pulse-text font-medium text-lg">Hệ thống đang xử lý dữ liệu. Vui lòng không đóng trình duyệt...</p>
     </div>
 
-    <!-- NÚT CHUYỂN ĐỔI GIAO DIỆN (THEME SWITCHER) CHỈ 1 ICON Ở GÓC DƯỚI BÊN PHẢI -->
+    <!-- NÚT CHUYỂN ĐỔI GIAO DIỆN (THEME SWITCHER) GÓC DƯỚI BÊN PHẢI -->
     <div class="fixed bottom-6 right-6 z-[99999]">
         <button onclick="toggleTheme()" id="theme-toggle-btn" class="w-12 h-12 flex items-center justify-center bg-slate-800/80 backdrop-blur-md border border-slate-700 rounded-full shadow-lg hover:bg-slate-700 transition-all">
             <i class="fa-solid fa-moon text-cyan-400 text-xl" id="theme-icon"></i>
@@ -279,10 +297,10 @@
             <div class="w-full md:w-5/12 bg-slate-900/80 p-6 md:p-10 flex flex-col items-center justify-center border-r border-slate-700/50 relative overflow-hidden">
                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-cyan-900/40 via-transparent to-transparent"></div>
                 <img src="https://i.postimg.cc/wMs3Wv7Q/8-removebg-preview.png" alt="CHEMEASYY Logo" class="h-28 md:h-40 w-auto mb-5 drop-shadow-[0_0_20px_rgba(6,182,212,0.5)] theme-logo relative z-10 hover:scale-105 transition-transform duration-500">
-                <h1 class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-emerald-300 font-black text-2xl md:text-3xl mb-2 tracking-tight drop-shadow-sm uppercase text-center relative z-10">HỆ THỐNG BỒI DƯỠNG VÀ LUYỆN THI CHEMEASYY</h1>
-                <h2 class="text-emerald-400 font-bold text-lg italic mb-4 text-center relative z-10">Mở trí - Luyện tài - Dựng nhân</h2>
+                <h1 class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-emerald-300 font-black text-lg sm:text-xl md:text-2xl lg:text-3xl mb-2 tracking-tight drop-shadow-sm uppercase text-center relative z-10 whitespace-nowrap w-full">HỆ THỐNG BỒI DƯỠNG VÀ LUYỆN THI CHEMEASYY</h1>
+                <h2 class="text-emerald-400 font-bold text-base sm:text-lg bold mb-4 text-center relative z-10 whitespace-nowrap w-full">Mở trí - Luyện tài - Dựng nhân</h2>
                 <div class="border-t border-b border-slate-700/50 py-2 px-6 inline-block relative z-10">
-                    <h3 class="text-slate-300 font-bold text-xs md:text-sm tracking-widest uppercase text-center"><i class="fa-solid fa-scale-balanced text-cyan-500 mr-2"></i>Ban Khảo thí và Đánh giá chất lượng</h3>
+                    <h3 class="text-slate-300 font-bold text-xs md:text-sm tracking-widest uppercase text-center whitespace-nowrap"><i class="fa-solid fa-scale-balanced text-cyan-500 mr-2"></i>Ban Khảo Thí & Đánh Giá</h3>
                 </div>
             </div>
             
@@ -416,8 +434,8 @@
                         <i class="fa-solid fa-network-wired"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl md:text-2xl font-black text-white tracking-tight">CHEMEASYY EDUCATION <span class="text-xs font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded ml-2 align-middle">Trung thực- Sáng tạo- Kết nối</span></h1>
-                        <p class="text-xs font-medium text-slate-500 tracking-widest uppercase mt-0.5">TRANG ĐIỂU HÀNH THÍ SINH VÀ HỆ THỐNG</p>
+                        <h1 class="text-xl md:text-2xl font-black text-white tracking-tight">CHEM-ADMIN <span class="text-xs font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded ml-2 align-middle">PRO V8.0</span></h1>
+                        <p class="text-xs font-medium text-slate-500 tracking-widest uppercase mt-0.5">Control Center</p>
                     </div>
                 </div>
                 <button onclick="changeScreen('login-screen')" class="btn-secondary bg-transparent border-slate-700 text-sm flex items-center hover:bg-rose-900/20 hover:text-rose-400 hover:border-rose-800 transition-colors">
@@ -429,7 +447,7 @@
                 <button class="admin-tab active whitespace-nowrap" onclick="switchAdminTab('tab-exams', this)"><i class="fa-solid fa-file-signature mr-1"></i> Quản lý Đề Thi</button>
                 <button class="admin-tab whitespace-nowrap" onclick="switchAdminTab('tab-results', this)"><i class="fa-solid fa-chart-column mr-1"></i> Kết quả Thi</button>
                 <button class="admin-tab text-emerald-400 bg-emerald-900/20 border-emerald-800/50 whitespace-nowrap" onclick="switchAdminTab('tab-monitoring', this)"><i class="fa-solid fa-satellite-dish mr-1 animate-pulse"></i> Giám sát Live</button>
-                <button class="admin-tab whitespace-nowrap" onclick="switchAdminTab('tab-accounts', this)"><i class="fa-solid fa-users-gear mr-1"></i> Quản lý Tài khoản Đăng nhập</button>
+                <button class="admin-tab whitespace-nowrap" onclick="switchAdminTab('tab-accounts', this)"><i class="fa-solid fa-users-gear mr-1"></i> Tài khoản DB</button>
             </div>
         </div>
 
@@ -439,7 +457,7 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 bg-slate-800/60 p-5 rounded-2xl border border-slate-700 shadow-lg backdrop-blur gap-4">
                     <div>
                         <h2 class="text-xl font-black text-white flex items-center"><i class="fa-solid fa-database text-cyan-400 mr-2"></i> Cloud Exam Database</h2>
-                        <p class="text-sm text-slate-400 mt-1">Kho lưu trữ đề .</p>
+                        <p class="text-sm text-slate-400 mt-1">Kho lưu trữ cấu hình đề thi trên máy chủ phân tán.</p>
                     </div>
                     <button onclick="openExamEditor()" class="btn-primary w-full md:w-auto shadow-[0_0_15px_rgba(6,182,212,0.4)] flex items-center justify-center"><i class="fa-solid fa-plus mr-2"></i> SOẠN ĐỀ MỚI</button>
                 </div>
@@ -448,8 +466,8 @@
                         <table class="min-w-full divide-y divide-slate-700">
                             <thead class="bg-slate-900/80">
                                 <tr>
-                                    <th class="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider">Tên Đề thi</th>
-                                    <th class="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider">Môn học</th>
+                                    <th class="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider">Tên Cấu Hình Đề</th>
+                                    <th class="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider">Phân Môn</th>
                                     <th class="px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider">Mã Lớp / Pass</th>
                                     <th class="px-6 py-4 text-center text-xs font-black text-slate-400 uppercase tracking-wider">Số câu</th>
                                     <th class="px-6 py-4 text-right text-xs font-black text-slate-400 uppercase tracking-wider">Công cụ</th>
@@ -716,7 +734,7 @@
                     <!-- Tính năng Phân tích AI Word -->
                     <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 items-center w-full md:w-auto">
                         <span id="ai-loading" class="hidden flex items-center text-xs font-bold text-amber-400 bg-amber-950/50 border border-amber-900/50 px-4 py-2.5 rounded-xl shadow-sm">
-                            <i class="fa-solid fa-microchip animate-bounce mr-2"></i> Đang phân tích Word...
+                            <div class="spinner mr-2 border-t-amber-400"></div> Đang phân tách Word...
                         </span>
                         <input type="file" id="word-upload" accept=".docx" class="hidden" onchange="handleAIWordImport(event)">
                         <button onclick="document.getElementById('word-upload').click()" class="btn-primary bg-gradient-to-r from-cyan-600 to-blue-600 shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center w-full md:w-auto justify-center py-3">
@@ -923,12 +941,16 @@
         </div>
     </div>
 
+    <!-- CODE JS LOGIC GIỮ NGUYÊN BẢN V6.0 -->
     <script type="module">
         // IMPORT FIREBASE v11 MODULES
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
+        // ==========================================
+        // FIREBASE CONFIG CỦA BẠN
+        // ==========================================
         const firebaseConfig = {
           apiKey: "AIzaSyCbNC7RSwD_hhacqVYQkYSVX-RCdIwNSnc",
           authDomain: "he-thong-thi-2026-cee.firebaseapp.com",
@@ -982,6 +1004,7 @@
             showToast('Hệ thống đang chạy ở chế độ Local. Lỗi: ' + msg, 'error');
         }
 
+        // Wrapper Giao tiếp Firebase
         window.cloud_get = async function(col, id) {
             if(!isFirebaseActive) return null; 
         };
@@ -1236,7 +1259,12 @@
             if (newScreenId === 'subject-selection-screen') {
                 document.getElementById('info-ho_ten').textContent = userInfo.ho_ten;
                 document.getElementById('info-sbd').textContent = userInfo.ma_thi_sinh;
-                if (userInfo.dot_thi) document.getElementById('subject-screen-title').textContent = userInfo.dot_thi.toUpperCase();
+                
+                // Ép tiêu đề trang luôn cập nhật đúng nội dung Đợt thi đã lấy từ form đăng nhập
+                if (userInfo.dot_thi) {
+                    document.getElementById('subject-screen-title').textContent = userInfo.dot_thi.toUpperCase();
+                }
+                
                 renderSubjectList(); 
             }
         }
@@ -1466,6 +1494,7 @@
                 </div>`;
             }).join('');
 
+            // Tự động render MathJax (bao gồm \ce{}) trong phần Admin để xem trước
             if (window.MathJax) {
                 MathJax.typesetPromise([document.getElementById('questions-editor-container')]).catch(err => console.error(err));
             }
@@ -1545,6 +1574,7 @@
 
             try {
                 const arrayBuffer = await file.arrayBuffer(); 
+                // Sử dụng convertToHtml để giữ lại nguyên vẹn các công thức MathJax hoặc định dạng HTML
                 const result = await mammoth.convertToHtml({arrayBuffer: arrayBuffer});
                 const htmlContent = result.value;
 
@@ -1553,6 +1583,7 @@
                     loader.classList.add('hidden'); return; 
                 }
 
+                // Parser tự viết bằng Regex
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = htmlContent;
                 
@@ -1581,12 +1612,12 @@
                     if (/^CÂU\s+\d+[\.\:]/i.test(p.text)) {
                         if (currentQuestion) { parsedQuestions.push(currentQuestion); }
                         
-                        let cleanHtml = p.html.replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '');
-                        cleanHtml = cleanHtml.replace(/^Câu\s+\d+[\.\:]\s*/i, '');
+                        let cleanText = p.html.replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, ''); 
+                        cleanText = cleanText.replace(/^Câu\s+\d+[\.\:]\s*/i, ''); 
                         
                         currentQuestion = {
                             section: currentSection,
-                            text: cleanHtml,
+                            text: cleanText,
                             options: [],
                             rawOptionsText: [],
                             correctIndex: 0,
@@ -1604,6 +1635,7 @@
                     if (currentQuestion) {
                         if (currentSection === 'Phần I' && /^[A-D][\.\:\)]/i.test(p.text)) {
                             let isCorrect = /<strong>|<b>/i.test(p.html) || /<u>/i.test(p.html); 
+                            // Lấy nguyên HTML cho option, nhưng phải xóa chữ A.
                             let optHtml = p.html.replace(/^<[^>]+>/, '').replace(/<\/[^>]+>$/, '').replace(/^[A-D][\.\:\)]\s*/i, ''); 
                             currentQuestion.options.push(optHtml);
                             if (isCorrect) currentQuestion.correctIndex = currentQuestion.options.length - 1;
@@ -1930,6 +1962,8 @@
                 await cloud_delete('commands', currentDetailSbd);
                 showToast('Override: Đã clear trạng thái Phạt.', 'success');
             } else if(type === 'ban') {
+                // Thay alert/confirm bằng popup tự thiết kế để đẹp hơn nếu muốn, 
+                // nhưng với action admin thì confirm() tiêu chuẩn là đủ an toàn.
                 if(confirm('☢️ CẢNH BÁO: Buộc thoát phiên (Kick) user này và gán 0 điểm?')) {
                     await cloud_set('commands', currentDetailSbd, { type: 'ban', timestamp: Date.now() });
                     showToast('Đã đóng kết nối Client (Kicked).', 'success');
@@ -2081,7 +2115,7 @@
             
             let ansHtml = '';
             if (q.section === 'Phần I') {
-                ansHtml = q.options.map((opt, i) => `<div class="mb-4 question-option"><input type="radio" id="q${q.id}_o${i}" name="q${q.id}" class="hidden" ${q.selected === i ? 'checked' : ''} onchange="ansMC(${index}, ${i})"><label for="q${q.id}_o${i}"><span class="opt-letter font-black text-slate-500 w-10 text-lg flex-shrink-0 transition-colors">${String.fromCharCode(65+i)}.</span> <p class="text-slate-200 font-medium leading-relaxed">${opt}</p></label></div>`).join('');
+                ansHtml = q.options.map((opt, i) => `<div class="mb-4 question-option"><input type="radio" id="q${q.id}_o${i}" name="q${q.id}" class="hidden" ${q.selected === i ? 'checked' : ''} onchange="ansMC(${index}, ${i})"><label for="q${q.id}_o${i}"><span class="opt-letter font-black text-slate-500 w-10 text-lg flex-shrink-0 transition-colors">${String.fromCharCode(65+i)}.</span> <span class="text-slate-200 font-medium leading-relaxed">${opt}</span></label></div>`).join('');
             } else if (q.section === 'Phần II') {
                 ansHtml = `<div class="flex flex-col gap-4">` + [0,1,2,3].map(i => {
                     let subOpt = q.correctDetails.subOptions?.[i] || `Mệnh đề ${String.fromCharCode(97+i)}`;
@@ -2111,7 +2145,11 @@
             const imgHtml = q.image ? `<div class="w-full text-center mb-8 bg-slate-950 p-2 rounded-2xl border border-slate-800 shadow-inner"><img src="${q.image}" class="exam-question-image mx-auto"></div>` : '';
 
             container.innerHTML = `<div class="bg-cyan-950/50 text-cyan-400 font-bold font-mono text-[10px] px-3 py-1 rounded-md inline-block mb-5 border border-cyan-900/50 tracking-widest shadow-[0_0_10px_rgba(6,182,212,0.2)]"><i class="fa-solid fa-code-branch mr-1"></i> ${q.section.toUpperCase()} • POINT: ${q.pointValue}</div><h2 class="text-2xl font-black mb-6 text-white border-b border-slate-700/50 pb-4 flex items-center tracking-tight"><span class="bg-gradient-to-br from-cyan-500 to-blue-600 text-white w-12 h-12 flex items-center justify-center rounded-xl mr-4 shadow-[0_0_15px_rgba(6,182,212,0.5)]">Q${index + 1}</span></h2><div class="mb-8 text-base font-medium text-slate-200 leading-relaxed whitespace-pre-wrap">${q.text}</div>${imgHtml}<div>${ansHtml}</div>`;
-            if (window.MathJax) MathJax.typesetPromise([container]).catch(err => console.error(err));
+            
+            // Render MathJax (Toán, Hóa mhchem) cho phần câu hỏi học sinh
+            if (window.MathJax) {
+                MathJax.typesetPromise([container]).catch(err => console.error(err));
+            }
         }
 
         function ansMC(qIdx, optIdx) { activeExamConfig.questions[qIdx].selected = optIdx; updateQuestionNavigation(); }
@@ -2211,6 +2249,7 @@
             }, 5000); 
         }
 
+        // Logic Đổi Theme (Sáng / Tối)
         function toggleTheme() {
             const body = document.body;
             const icon = document.getElementById('theme-icon');
